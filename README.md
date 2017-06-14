@@ -1,7 +1,7 @@
 # apex-core
 Various Java utilities
 
-https://travis-ci.org/blasd/apex-core.svg?branch=master
+[![Build Status](https://travis-ci.org/blasd/apex-core.svg?branch=master)](https://travis-ci.org/blasd/apex-core)
 
 Enable finer reporting of GCs
 
