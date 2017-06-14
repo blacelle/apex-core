@@ -46,6 +46,11 @@ public class TestApexLogHelper {
 	}
 
 	@Test
+	public void getPercentageDivideBy0() {
+		Assert.assertEquals("-%", ApexLogHelper.getNicePercentage(100, 0).toString());
+	}
+
+	@Test
 	public void getSmallPercentage() {
 		Assert.assertEquals("0.3%", ApexLogHelper.getNicePercentage(3, 1000).toString());
 	}

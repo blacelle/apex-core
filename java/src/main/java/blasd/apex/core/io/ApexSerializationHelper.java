@@ -385,11 +385,6 @@ public class ApexSerializationHelper {
 	// http://stackoverflow.com/questions/134492/how-to-serialize-an-object-into-a-string
 	public static <T extends Serializable> T fromString(String s) throws IOException, ClassNotFoundException {
 		byte[] data = Base64.getDecoder().decode(s);
-
-		return fromBytes(data);
-	}
-
-	public static <T extends Serializable> T fromBytes(byte[] data) throws IOException, ClassNotFoundException {
 		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
 		Object o = ois.readObject();
 		ois.close();
@@ -401,15 +396,11 @@ public class ApexSerializationHelper {
 	 */
 	// http://stackoverflow.com/questions/134492/how-to-serialize-an-object-into-a-string
 	public static String toString(Serializable o) throws IOException {
-		return Base64.getEncoder().encodeToString(toBytes(o));
-	}
-
-	public static byte[] toBytes(Serializable o) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(baos);
 		oos.writeObject(o);
 		oos.close();
-		return baos.toByteArray();
+		return Base64.getEncoder().encodeToString(baos.toByteArray());
 	}
 
 }

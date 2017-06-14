@@ -72,7 +72,7 @@ public class ApexLogHelper {
 
 	public static Object getNicePercentage(long progress, long max) {
 		return lazyToString(() -> {
-			if (progress < 0L || max < 0L) {
+			if (progress < 0L || max <= 0L) {
 				return "-%";
 			} else {
 				long ratio = progress * HUNDRED / max;
