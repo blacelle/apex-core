@@ -50,7 +50,7 @@ public class VirtualMachineWithoutToolsJar {
 	}
 
 	/**
-	 * @return true si heapHisto supporté.
+	 * @return true if heap histogram is supported
 	 */
 	static boolean isJmapSupported() {
 		// pour nodes Hudson/Jenkins, on réévalue sans utiliser de constante
@@ -61,16 +61,17 @@ public class VirtualMachineWithoutToolsJar {
 	}
 
 	/**
-	 * @return true si JVM JRockit
+	 * @return true if JRockit
+	 * @see http://www.oracle.com/technetwork/middleware/jrockit/overview/index.html
 	 */
 	public static boolean isJRockit() {
-		// pour nodes Hudson/Jenkins, on réévalue sans utiliser de constante
+		// for Hudson/Jenkins
 		return getJavaVendor().contains("BEA");
 	}
 
 	/**
-	 * @return false si non supporté ou si un attachement ou un histogramme a échoué, true si supporté et pas essayé ou
-	 *         si réussi
+	 * @return false if not supported or if an attach failed or an histogram failed, true if supported but not tried, or
+	 *         tried successfully
 	 */
 	static synchronized boolean isEnabled() {
 		return heapHistogramEnabled;

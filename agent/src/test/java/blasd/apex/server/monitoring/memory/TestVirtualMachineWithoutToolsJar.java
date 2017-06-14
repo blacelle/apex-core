@@ -50,4 +50,9 @@ public class TestVirtualMachineWithoutToolsJar {
 		Assert.assertNotNull(jvm);
 		VirtualMachineWithoutToolsJar.detach();
 	}
+
+	@Test
+	public void testIsVirtualMachineWithoutToolsJar() {
+		VirtualMachineWithoutToolsJar.isVirtualMachineAvailable();
+	}
 }

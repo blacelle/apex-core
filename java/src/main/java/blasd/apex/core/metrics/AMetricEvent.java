@@ -41,7 +41,7 @@ import com.google.common.eventbus.EventBus;
 public class AMetricEvent {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AMetricEvent.class);
 
-	// This UUID is constant through the whole applciation lifecycle. It can be
+	// This UUID is constant through the whole application lifecycle. It can be
 	// used to seggregate events from different application runs
 	public static final String INSTANCE_UUID = UUID.randomUUID().toString();
 
@@ -50,6 +50,9 @@ public class AMetricEvent {
 	// This id is unique amongst a given INSTANCE_UUID
 	public final long eventId = EVENT_INCREMENTER.getAndIncrement();
 
+	/**
+	 * Ability to retrieve all encountered source classes, and then monitor available events
+	 */
 	public static final Set<Class<?>> SOURCE_CLASSES = Sets.newConcurrentHashSet();
 
 	public final Object source;
