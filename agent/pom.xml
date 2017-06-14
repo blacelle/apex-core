@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.github.blasd.apex</groupId>
 		<artifactId>apex-core</artifactId>
-		<version>3.11-SNAPSHOT</version>
+		<version>1.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>apex-core-agent</artifactId>
@@ -60,12 +60,6 @@
 						</manifestEntries>
 					</archive>
 				</configuration>
-			</plugin>
-
-			<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
-			<plugin>
-				<groupId>org.eclipse.m2e</groupId>
-				<artifactId>lifecycle-mapping</artifactId>
 			</plugin>
 		</plugins>
 	</build>
