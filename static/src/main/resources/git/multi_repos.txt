@@ -1,0 +1,4 @@
+git remote update
+
+git remote set-url origin --push --add https://blasd@github.com/blasd/apex.git
+git remote set-url origin --push --add https://blacelle112212@sgithub.fr.world.socgen/blacelle112212/apex.git

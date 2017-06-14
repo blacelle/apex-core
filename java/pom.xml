@@ -27,20 +27,6 @@
 			<artifactId>joda-time</artifactId>
 		</dependency>
 
-		<!-- <dependency> -->
-		<!-- <groupId>io.dropwizard.metrics</groupId> -->
-		<!-- <artifactId>metrics-logback</artifactId> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>com.ryantenney.metrics</groupId> -->
-		<!-- <artifactId>metrics-spring</artifactId> -->
-		<!-- </dependency> -->
-
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.commons</groupId> -->
-		<!-- <artifactId>commons-lang3</artifactId> -->
-		<!-- </dependency> -->
-
 		<dependency>
 			<!-- Provides an EventBus to diffuse Events to MetricsTowerControl -->
 			<groupId>com.google.guava</groupId>
@@ -49,7 +35,7 @@
 
 		<dependency>
 			<groupId>com.github.blasd.apex</groupId>
-			<artifactId>apex-shared-agent</artifactId>
+			<artifactId>apex-core-agent</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

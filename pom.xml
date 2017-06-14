@@ -12,6 +12,12 @@
 
 	<packaging>pom</packaging>
 
+	<!-- Format source code -->
+	<!-- mvn net.revelc.code.formatter:formatter-maven-plugin:2.0.1:format -->
+
+	<!-- Add missing licenses -->
+	<!-- mvn com.mycila:license-maven-plugin:format -->
+
 	<properties>
 		<guava.version>21.0</guava.version>
 
@@ -25,8 +31,16 @@
 	</properties>
 
 	<modules>
+		<!-- static resources like the Checkstyle sheet -->
+		<module>static</module>
+
+		<!-- The java-core code -->
 		<module>java</module>
+
+		<!-- Holds the java-agent enabling Instrumentation -->
 		<module>agent</module>
+
+		<!-- This project metadata, holding for instance deployement resources -->
 		<module>metadata</module>
 	</modules>
 
@@ -274,7 +288,7 @@
 					<artifactId>license-maven-plugin</artifactId>
 					<version>2.6</version>
 					<configuration>
-						<header>com/mycila/maven/plugin/license/templates/APACHE-2.txt</header>
+						<header>com/mycila/maven/plugin/license/templates/MIT.txt</header>
 						<properties>
 							<owner>Benoit Lacelle</owner>
 							<year>2017</year>
@@ -339,7 +353,7 @@
 				<dependencies>
 					<dependency>
 						<groupId>com.github.blasd.apex</groupId>
-						<artifactId>apex-maven</artifactId>
+						<artifactId>apex-static</artifactId>
 						<version>${project.version}</version>
 						<scope>runtime</scope>
 					</dependency>
