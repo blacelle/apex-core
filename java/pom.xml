@@ -1,0 +1,84 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.github.blasd.apex</groupId>
+		<artifactId>apex-core</artifactId>
+		<version>3.11-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>apex-core-java</artifactId>
+
+	<packaging>jar</packaging>
+
+	<properties>
+		<!--Jacoco crashes the JVM on this module -->
+		<jacoco.skip>true</jacoco.skip>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+		</dependency>
+
+		<!-- <dependency> -->
+		<!-- <groupId>io.dropwizard.metrics</groupId> -->
+		<!-- <artifactId>metrics-logback</artifactId> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.ryantenney.metrics</groupId> -->
+		<!-- <artifactId>metrics-spring</artifactId> -->
+		<!-- </dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.commons</groupId> -->
+		<!-- <artifactId>commons-lang3</artifactId> -->
+		<!-- </dependency> -->
+
+		<dependency>
+			<!-- Provides an EventBus to diffuse Events to MetricsTowerControl -->
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.blasd.apex</groupId>
+			<artifactId>apex-shared-agent</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- https://github.com/mkouba/muojo -->
+		<!-- <dependency> -->
+		<!-- <groupId>java-sizeof</groupId> -->
+		<!-- <artifactId>java-sizeof</artifactId> -->
+		<!-- <version>0.0.5</version> -->
+		<!-- </dependency> -->
+
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<!-- –Djacoco.skip=true -->
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<!-- LoggingMethodCallAnnotationMBeanExporter is a bunch of exception catching. Add * to hold anonymous classes -->
+						<exclude>blasd/apex/server/monitoring/spring/LoggingMethodCallAnnotationMBeanExporter*</exclude>
+
+						<!-- ApexCSVReader is just an incubator project -->
+						<exclude>blasd/apex/shared/csv/reader/*</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

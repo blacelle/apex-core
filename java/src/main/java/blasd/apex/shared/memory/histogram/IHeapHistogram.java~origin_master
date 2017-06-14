@@ -1,0 +1,19 @@
+package blasd.apex.shared.memory.histogram;
+
+import java.nio.charset.Charset;
+
+import com.google.common.base.Charsets;
+
+/**
+ * Provides heap histogram, including the number of instance per class and the memory associated to each instance
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+public interface IHeapHistogram {
+	// TODO: Provide a source confirming this is a guarantee
+	Charset JMAP_CHARSET = Charsets.UTF_8;
+
+	long getTotalHeapBytes();
+
+}
