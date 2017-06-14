@@ -13,27 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package blasd.apex.shared.file;
+package blasd.apex.core.util;
 
-import java.io.IOException;
-import java.nio.file.Path;
+import java.util.Date;
+import java.util.Properties;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import blasd.apex.core.io.ApexFileHelper;
-
-public class TestApexFileHelper {
-	@Test
-	public void testCreateTempPath() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
-
-		// Check the path does not exist
-		Assert.assertFalse(tmpFile.toFile().exists());
-	}
+public class TestApexPropertiesHelper {
 
 	@Test
-	public void testNoNewLine() {
-		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
+	public void testCheck() {
+		Properties defaultproperties = new Properties();
+		defaultproperties.put("a", 1);
+		Properties otherproperties = new Properties(defaultproperties);
+		otherproperties.put("c", new Date());
+
+		// A small test to check default properties are handlded
+
+		ApexPropertiesHelper.checkProperties(otherproperties);
 	}
 }

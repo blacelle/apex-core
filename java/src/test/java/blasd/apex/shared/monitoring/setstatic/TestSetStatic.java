@@ -20,6 +20,8 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import blasd.apex.core.jmx.SetStaticMBean;
+
 public class TestSetStatic {
 	public static String STRING_STATIC = "-";
 	public static LocalDate LOCALDATE_STATIC = new LocalDate();

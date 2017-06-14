@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package blasd.apex.shared.file;
-
-import java.io.IOException;
-import java.nio.file.Path;
+package blasd.apex.core.collection;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import blasd.apex.core.io.ApexFileHelper;
+import blasd.apex.core.collection.ArrayWithHashcodeEquals;
 
-public class TestApexFileHelper {
+public class TestArrayWithHashcodeEquals {
 	@Test
-	public void testCreateTempPath() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
+	public void testHashCodeEquals() {
+		ArrayWithHashcodeEquals first = new ArrayWithHashcodeEquals(new Object[] { "a", "b" });
+		ArrayWithHashcodeEquals second = new ArrayWithHashcodeEquals(new Object[] { new String("a"), "b" });
 
-		// Check the path does not exist
-		Assert.assertFalse(tmpFile.toFile().exists());
+		// NotSame
+		Assert.assertNotSame(first, second);
+		Assert.assertNotSame(first.array, second.array);
+		Assert.assertNotSame(first.array[0], second.array[0]);
+
+		// But equals
+		Assert.assertEquals(first.hashCode(), second.hashCode());
+		Assert.assertEquals(first, second);
 	}
 
-	@Test
-	public void testNoNewLine() {
-		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
-	}
 }

@@ -13,27 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package blasd.apex.shared.file;
+package blasd.apex.core.eventbus;
 
-import java.io.IOException;
-import java.nio.file.Path;
+import java.util.Optional;
+import java.util.function.Consumer;
 
-import org.junit.Assert;
-import org.junit.Test;
+import com.google.common.eventbus.EventBus;
 
-import blasd.apex.core.io.ApexFileHelper;
-
-public class TestApexFileHelper {
-	@Test
-	public void testCreateTempPath() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
-
-		// Check the path does not exist
-		Assert.assertFalse(tmpFile.toFile().exists());
+/**
+ * Helps working with an EventBus
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+public class ApexEventBusHelper {
+	protected ApexEventBusHelper() {
+		// hidden
 	}
 
-	@Test
-	public void testNoNewLine() {
-		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
+	public static Optional<Consumer<Object>> asConsumer(EventBus eventBus) {
+		return Optional.ofNullable(eventBus).<Consumer<Object>>map(eb -> eb::post);
 	}
+
 }

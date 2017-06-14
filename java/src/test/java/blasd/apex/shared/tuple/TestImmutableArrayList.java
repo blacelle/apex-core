@@ -21,6 +21,8 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+import blasd.apex.core.collection.ImmutableArrayList;
+
 public class TestImmutableArrayList {
 	@Test
 	public void testSubSet() {

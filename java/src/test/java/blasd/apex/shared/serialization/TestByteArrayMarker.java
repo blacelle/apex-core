@@ -20,7 +20,8 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import blasd.apex.shared.util.ApexSerializationHelper;
+import blasd.apex.core.io.ApexSerializationHelper;
+import blasd.apex.core.io.ByteArrayMarker;
 
 public class TestByteArrayMarker {
 	@Test

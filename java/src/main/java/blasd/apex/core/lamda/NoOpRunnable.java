@@ -13,27 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package blasd.apex.shared.file;
+package blasd.apex.core.lamda;
 
-import java.io.IOException;
-import java.nio.file.Path;
+import java.io.Serializable;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import blasd.apex.core.io.ApexFileHelper;
+/**
+ * This is used to transmit a dummy object over the wire, typically to maintain an open connection
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+public class NoOpRunnable implements Runnable, Serializable {
+	private static final long serialVersionUID = -3819509508567957192L;
 
-public class TestApexFileHelper {
-	@Test
-	public void testCreateTempPath() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
+	protected static final Logger LOGGER = LoggerFactory.getLogger(NoOpRunnable.class);
 
-		// Check the path does not exist
-		Assert.assertFalse(tmpFile.toFile().exists());
-	}
-
-	@Test
-	public void testNoNewLine() {
-		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
+	@Override
+	public void run() {
+		LOGGER.trace("Doing nothing");
 	}
 }

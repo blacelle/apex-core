@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package blasd.apex.shared.file;
+package blasd.apex.core.metrics;
 
-import java.io.IOException;
-import java.nio.file.Path;
-
-import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import blasd.apex.core.io.ApexFileHelper;
+import com.google.common.eventbus.EventBus;
 
-public class TestApexFileHelper {
+import blasd.apex.core.metrics.EndMetricEvent;
+import blasd.apex.core.metrics.StartMetricEvent;
+
+public class TestNullEventBus {
 	@Test
-	public void testCreateTempPath() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
+	public void testNull() {
+		EventBus eventBus = Mockito.mock(EventBus.class);
+		StartMetricEvent.post(eventBus::post, this, "name");
+		StartMetricEvent.post(null, this, "name");
+		StartMetricEvent.post(null, this, "name");
 
-		// Check the path does not exist
-		Assert.assertFalse(tmpFile.toFile().exists());
-	}
+		StartMetricEvent.post(eventBus::post, this, "name");
+		StartMetricEvent.post(null, this, "name");
 
-	@Test
-	public void testNoNewLine() {
-		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
+		EndMetricEvent.postEndEvent(eventBus::post, null);
 	}
 }

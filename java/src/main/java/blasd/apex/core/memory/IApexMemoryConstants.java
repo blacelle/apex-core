@@ -13,27 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package blasd.apex.shared.file;
+package blasd.apex.core.memory;
 
-import java.io.IOException;
-import java.nio.file.Path;
+import com.google.common.primitives.Ints;
 
-import org.junit.Assert;
-import org.junit.Test;
+/**
+ * Provides some constants relatively to memory footprint in a JVM
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+public interface IApexMemoryConstants {
 
-import blasd.apex.core.io.ApexFileHelper;
+	long KB = 1024L;
+	// Useful when allocating an array where an int is expected
+	int KB_INT = Ints.saturatedCast(KB);
 
-public class TestApexFileHelper {
-	@Test
-	public void testCreateTempPath() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
+	/** One megabyte */
+	long MB = KB * KB;
+	int MB_INT = Ints.saturatedCast(MB);
 
-		// Check the path does not exist
-		Assert.assertFalse(tmpFile.toFile().exists());
-	}
+	/** One gigabyte */
+	long GB = KB * KB * KB;
+	/** One terabyte */
+	long TB = KB * KB * KB * KB;
 
-	@Test
-	public void testNoNewLine() {
-		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
-	}
+	long CHAR = 4;
+	long INT = 4;
+	long LONG = 8;
+	long OBJECT = 8;
+
+	long FLOAT = 4;
+	long DOUBLE = 8;
 }

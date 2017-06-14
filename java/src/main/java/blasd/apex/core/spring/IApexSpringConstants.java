@@ -13,27 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package blasd.apex.shared.file;
+package blasd.apex.core.spring;
 
-import java.io.IOException;
-import java.nio.file.Path;
+/**
+ * Some constants to helps using Spring profiles
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+public interface IApexSpringConstants {
 
-import org.junit.Assert;
-import org.junit.Test;
+	/**
+	 * -Dspring.profiles.active=apex.offline
+	 */
+	String SPRING_PROFILE_DISCONNECTED = "apex.offline";
 
-import blasd.apex.core.io.ApexFileHelper;
-
-public class TestApexFileHelper {
-	@Test
-	public void testCreateTempPath() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
-
-		// Check the path does not exist
-		Assert.assertFalse(tmpFile.toFile().exists());
-	}
-
-	@Test
-	public void testNoNewLine() {
-		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
-	}
+	/**
+	 * -Dspring.profiles.active=apex.offline
+	 */
+	String SPRING_PROFILE_NOT_DISCONNECTED = "!" + SPRING_PROFILE_DISCONNECTED;
 }

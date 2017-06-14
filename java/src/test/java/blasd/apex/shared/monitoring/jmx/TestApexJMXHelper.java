@@ -36,6 +36,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import blasd.apex.core.jmx.ApexJMXHelper;
+
 public class TestApexJMXHelper {
 
 	/**

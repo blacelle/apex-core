@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 
+import blasd.apex.core.memory.ApexMemoryHelper;
+
 public class TestApexMemoryHelper {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(TestApexMemoryHelper.class);

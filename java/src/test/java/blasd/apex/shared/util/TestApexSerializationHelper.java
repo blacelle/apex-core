@@ -29,7 +29,8 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
-import blasd.apex.shared.file.ApexFileHelper;
+import blasd.apex.core.io.ApexFileHelper;
+import blasd.apex.core.io.ApexSerializationHelper;
 
 public class TestApexSerializationHelper {
 	@Test

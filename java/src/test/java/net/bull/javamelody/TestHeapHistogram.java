@@ -18,8 +18,8 @@ package net.bull.javamelody;
 import org.junit.Assert;
 import org.junit.Test;
 
-import blasd.apex.shared.memory.histogram.HeapHistogram;
-import blasd.apex.shared.memory.histogram.IHeapHistogram;
+import blasd.apex.core.memory.histogram.HeapHistogram;
+import blasd.apex.core.memory.histogram.IHeapHistogram;
 
 public class TestHeapHistogram {
 	@Test

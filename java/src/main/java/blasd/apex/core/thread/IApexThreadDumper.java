@@ -13,27 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package blasd.apex.shared.file;
+package blasd.apex.core.thread;
 
-import java.io.IOException;
-import java.nio.file.Path;
+/**
+ * Interface for classes knowing how to dump threads
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+public interface IApexThreadDumper {
 
-import org.junit.Assert;
-import org.junit.Test;
+	String getThreadDumpAsString(boolean withMonitorsAndSynchronizers);
 
-import blasd.apex.core.io.ApexFileHelper;
+	String getSmartThreadDumpAsString(boolean withMonitorsAndSynchronizers);
 
-public class TestApexFileHelper {
-	@Test
-	public void testCreateTempPath() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
-
-		// Check the path does not exist
-		Assert.assertFalse(tmpFile.toFile().exists());
-	}
-
-	@Test
-	public void testNoNewLine() {
-		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
-	}
 }

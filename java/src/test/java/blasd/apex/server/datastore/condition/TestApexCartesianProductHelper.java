@@ -32,6 +32,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
+import blasd.apex.core.cartesian.ApexCartesianProductHelper;
+
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class TestApexCartesianProductHelper {
 	public static final String A = "keyA";

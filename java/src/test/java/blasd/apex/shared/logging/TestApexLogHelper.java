@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 
+import blasd.apex.core.logging.ApexLogHelper;
+
 public class TestApexLogHelper {
 	@Test
 	public void lazyToString() {

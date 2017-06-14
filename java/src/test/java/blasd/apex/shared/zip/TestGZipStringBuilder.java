@@ -18,6 +18,8 @@ package blasd.apex.shared.zip;
 import org.junit.Assert;
 import org.junit.Test;
 
+import blasd.apex.core.io.GZipStringBuilder;
+
 public class TestGZipStringBuilder {
 	@Test
 	public void testAppend() {

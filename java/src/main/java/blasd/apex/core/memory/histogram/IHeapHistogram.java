@@ -13,27 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package blasd.apex.shared.file;
+package blasd.apex.core.memory.histogram;
 
-import java.io.IOException;
-import java.nio.file.Path;
+import java.nio.charset.Charset;
 
-import org.junit.Assert;
-import org.junit.Test;
+import com.google.common.base.Charsets;
 
-import blasd.apex.core.io.ApexFileHelper;
+/**
+ * Provides heap histogram, including the number of instance per class and the memory associated to each instance
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+public interface IHeapHistogram {
+	// TODO: Provide a source confirming this is a guarantee
+	Charset JMAP_CHARSET = Charsets.UTF_8;
 
-public class TestApexFileHelper {
-	@Test
-	public void testCreateTempPath() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
+	long getTotalHeapBytes();
 
-		// Check the path does not exist
-		Assert.assertFalse(tmpFile.toFile().exists());
-	}
-
-	@Test
-	public void testNoNewLine() {
-		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
-	}
 }

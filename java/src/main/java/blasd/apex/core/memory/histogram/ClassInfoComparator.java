@@ -13,27 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package blasd.apex.shared.file;
+package blasd.apex.core.memory.histogram;
 
-import java.io.IOException;
-import java.nio.file.Path;
+import java.io.Serializable;
+import java.util.Comparator;
 
-import org.junit.Assert;
-import org.junit.Test;
+/**
+ * Histogramme mémoire.
+ * 
+ * @author Emeric Vernat
+ */
+public class ClassInfoComparator implements Comparator<ClassInfo>, Serializable {
+	private static final long serialVersionUID = 1L;
 
-import blasd.apex.core.io.ApexFileHelper;
-
-public class TestApexFileHelper {
-	@Test
-	public void testCreateTempPath() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
-
-		// Check the path does not exist
-		Assert.assertFalse(tmpFile.toFile().exists());
-	}
-
-	@Test
-	public void testNoNewLine() {
-		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
+	/** {@inheritDoc} */
+	@Override
+	public int compare(ClassInfo classInfo1, ClassInfo classInfo2) {
+		if (classInfo1.getBytes() > classInfo2.getBytes()) {
+			return 1;
+		} else if (classInfo1.getBytes() < classInfo2.getBytes()) {
+			return -1;
+		} else {
+			return 0;
+		}
 	}
 }

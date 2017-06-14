@@ -13,27 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package blasd.apex.shared.file;
+package blasd.apex.core.metrics;
 
-import java.io.IOException;
-import java.nio.file.Path;
+import java.util.Date;
+import java.util.NavigableMap;
 
-import org.junit.Assert;
-import org.junit.Test;
+/**
+ * Interface for technical metrics
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+public interface IApexMetricsTowerControl {
 
-import blasd.apex.core.io.ApexFileHelper;
+	int getLongRunningCheckSeconds();
 
-public class TestApexFileHelper {
-	@Test
-	public void testCreateTempPath() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
+	void setLongRunningCheckSeconds(int longRunningCheckSeconds);
 
-		// Check the path does not exist
-		Assert.assertFalse(tmpFile.toFile().exists());
-	}
+	long getActiveTasksSize();
 
-	@Test
-	public void testNoNewLine() {
-		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
-	}
+	long getRootActiveTasksSize();
+
+	NavigableMap<Date, String> getActiveTasks();
 }

@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package blasd.apex.shared.file;
+package blasd.apex.core.io;
 
-import java.io.IOException;
-import java.nio.file.Path;
+import java.io.Serializable;
 
-import org.junit.Assert;
-import org.junit.Test;
+/**
+ * Enable to mark an ObjectOutputStream than what is following is a byte[]. This way, it would be streamed, instead of
+ * materialize in memory
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+public class ByteArrayMarker implements Serializable {
+	private static final long serialVersionUID = -3032117473402808084L;
 
-import blasd.apex.core.io.ApexFileHelper;
+	protected final long nbBytes;
 
-public class TestApexFileHelper {
-	@Test
-	public void testCreateTempPath() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
-
-		// Check the path does not exist
-		Assert.assertFalse(tmpFile.toFile().exists());
+	public ByteArrayMarker(long nbBytes) {
+		this.nbBytes = nbBytes;
 	}
 
-	@Test
-	public void testNoNewLine() {
-		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
+	public long getNbBytes() {
+		return nbBytes;
 	}
 }
