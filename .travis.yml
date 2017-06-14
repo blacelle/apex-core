@@ -23,3 +23,6 @@ install: "mvn clean install -DskipTests"
 #script: "mvn deploy -DskipTests --settings travis-maven-settings.xml"
 script: "mvn install"
 #deploy: "mvn deploy --settings travis-maven-settings.xml"
+
+notifications:
+  webhooks: https://coveralls.io/webhook?repo_token=jDBhichjx0dczfgRHEuKVHD3ULFv6absA
