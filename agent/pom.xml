@@ -7,7 +7,7 @@
 		<version>3.11-SNAPSHOT</version>
 	</parent>
 
-		<artifactId>apex-core-agent</artifactId>
+	<artifactId>apex-core-agent</artifactId>
 
 	<packaging>jar</packaging>
 
@@ -60,6 +60,12 @@
 						</manifestEntries>
 					</archive>
 				</configuration>
+			</plugin>
+
+			<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
+			<plugin>
+				<groupId>org.eclipse.m2e</groupId>
+				<artifactId>lifecycle-mapping</artifactId>
 			</plugin>
 		</plugins>
 	</build>

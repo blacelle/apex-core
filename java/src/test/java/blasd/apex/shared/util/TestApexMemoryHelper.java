@@ -171,7 +171,7 @@ public class TestApexMemoryHelper {
 		for (long i = 0; i < Integer.MAX_VALUE * 1024L; i += Integer.MAX_VALUE / 10) {
 			// We want to ensure the integers are positive: false as unpack2 will cover the whole integer range:
 			// MIN_VALUE -> MAX_VALUE
-			LOGGER.info("Testing bit-packing for {}", i);
+			LOGGER.trace("Testing bit-packing for {}", i);
 			Assert.assertEquals(i,
 					ApexMemoryHelper.positivePack(ApexMemoryHelper.positiveUnpack1(i),
 							ApexMemoryHelper.positiveUnpack2(i)));
