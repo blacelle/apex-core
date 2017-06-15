@@ -23,7 +23,6 @@
 
 		<compiler.targetVersion>1.8</compiler.targetVersion>
 
-
 		<scm.developerConnection>scm:git:ssh://git@github.com/blasd/apex-core.git</scm.developerConnection>
 		<scm.connection>scm:git:ssh://github.com/blasd/apex-core.git</scm.connection>
 		<scm.url>https://github.com/blasd/apex-core</scm.url>
@@ -233,7 +232,7 @@
 
 	<scm>
 		<!-- SCM is in properties as we can't configure it directly in profile -->
-		<developerConnection>${scm.developerConnection}</developerConnection>
+		<!-- Do not add developperConnection as parent is not a SNAPSHOT -->
 		<connection>${scm.connection}</connection>
 		<url>${scm.url}</url>
 		<tag>HEAD</tag>

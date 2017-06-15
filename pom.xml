@@ -437,4 +437,11 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<scm>
+		<!-- Only developerConnection was not set in parent po;m as its own parent 
+			was not a SNAPSHOT -->
+		<developerConnection>${scm.developerConnection}</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
 </project>
