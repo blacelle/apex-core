@@ -25,6 +25,9 @@
 	<!-- mvn release:perform -Darguments="-DskipTests" -->
 	<!-- mvn release:rollback -->
 
+	<!-- Deployement -->
+	<!-- mvn deploy -PDeploySonataype -DskipTests -->
+
 	<properties>
 		<guava.version>21.0</guava.version>
 
