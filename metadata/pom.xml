@@ -22,6 +22,11 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<compiler.targetVersion>1.8</compiler.targetVersion>
+
+
+		<scm.developerConnection>scm:git:ssh://git@github.com/blasd/apex-core.git</scm.developerConnection>
+		<scm.connection>scm:git:ssh://github.com/blasd/apex-core.git</scm.connection>
+		<scm.url>https://github.com/blasd/apex-core</scm.url>
 	</properties>
 
 	<profiles>
@@ -225,4 +230,12 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<scm>
+		<!-- SCM is in properties as we can't configure it directly in profile -->
+		<developerConnection>${scm.developerConnection}</developerConnection>
+		<connection>${scm.connection}</connection>
+		<url>${scm.url}</url>
+		<tag>HEAD</tag>
+	</scm>
 </project>
