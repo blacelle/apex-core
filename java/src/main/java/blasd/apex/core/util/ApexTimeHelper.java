@@ -74,14 +74,9 @@ public class ApexTimeHelper {
 	}
 
 	/**
-	 * This class enables logging of outlyer detection, typically when a small operation takes more time than usual, or
+	 * This class enables logging of outlier detection, typically when a small operation takes more time than usual, or
 	 * a result size is bigger
 	 * 
-	 * @param clazz
-	 * @param methodName
-	 * @param nb
-	 * @param max
-	 * @param newValue
 	 * @return true if maxTiming has been updated
 	 */
 	public static boolean updateOutlierDetectorStatistics(AtomicLong nb,

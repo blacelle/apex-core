@@ -42,7 +42,7 @@ public interface IGCInspector extends IApexMemoryConstants {
 	 * 
 	 * @param withoutMonitors
 	 *            by default withoutMonitors=true in JConsole MBean for faster access to fasfter method
-	 * @return
+	 * @return a formatted thread-dump
 	 */
 	String getAllThreads(boolean withoutMonitors);
 

@@ -62,7 +62,7 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ApexMetricsTowerControl.class);
 
 	/**
-	 * {@link MetricRegistry} uses a String as Key. PATH_JOINER is used to Convert from {@link List} to {@link String}
+	 * MetricRegistry uses a String as Key. PATH_JOINER is used to Convert from {@link List} to {@link String}
 	 */
 	public static final String PATH_JOINER = ".";
 
@@ -247,10 +247,8 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	}
 
 	/**
-	 * A StartEvent is immediately associated to a {@link CounterMetricEvent} with value -1, to count the number of
-	 * active tasks
-	 * 
-	 * @param startEvent
+	 * @param endEvent
+	 *            mark the task associated to this event as completed
 	 */
 	@Subscribe
 	@AllowConcurrentEvents
@@ -368,7 +366,7 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	 * @param withoutMonitors
 	 *            if true (default JConsole behavior),it skips monitors and synchronizers which is much faster and
 	 *            prevent freezing the JVM
-	 * @return
+	 * @return a formatted thread-dump
 	 */
 	@ManagedOperation
 	public String getAllThreads(boolean withoutMonitors) {

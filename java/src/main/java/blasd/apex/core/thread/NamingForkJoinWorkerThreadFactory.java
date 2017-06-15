@@ -20,11 +20,12 @@ import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
 
 /**
- * Enable naming of FOrkJoinPool threads
+ * Enable naming of ForkJoinPool threads
  * 
  * @author Benoit Lacelle
  *
- * @see http://stackoverflow.com/questions/34303094/is-it-not-possible-to-supply-a-thread-facory-or-name-pattern-to-forkjoinpool
+ * @see <a
+ *      href="http://stackoverflow.com/questions/34303094/is-it-not-possible-to-supply-a-thread-facory-or-name-pattern-to-forkjoinpool>StackOverFlow</a>
  */
 public class NamingForkJoinWorkerThreadFactory implements ForkJoinWorkerThreadFactory {
 

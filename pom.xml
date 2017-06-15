@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -17,6 +18,12 @@
 
 	<!-- Add missing licenses -->
 	<!-- mvn com.mycila:license-maven-plugin:format -->
+
+
+	<!-- Make a release -->
+	<!-- mvn release:clean release:prepare -Darguments="-DskipTests" -->
+	<!-- mvn release:perform -Darguments="-DskipTests" -->
+	<!-- mvn release:rollback -->
 
 	<properties>
 		<guava.version>21.0</guava.version>
@@ -60,7 +67,8 @@
 				<scope>test</scope>
 			</dependency>
 
-			<!-- annotations from the Checker Framework: nullness, interning, locking, ... -->
+			<!-- annotations from the Checker Framework: nullness, interning, locking, 
+				... -->
 			<dependency>
 				<groupId>org.checkerframework</groupId>
 				<artifactId>checker-qual</artifactId>
@@ -144,7 +152,8 @@
 							<artifactId>plexus-compiler-javac-errorprone</artifactId>
 							<version>2.5</version>
 						</dependency>
-						<!-- override plexus-compiler-javac-errorprone's dependency on Error Prone with the latest version -->
+						<!-- override plexus-compiler-javac-errorprone's dependency on Error 
+							Prone with the latest version -->
 						<dependency>
 							<groupId>com.google.errorprone</groupId>
 							<artifactId>error_prone_core</artifactId>
@@ -154,7 +163,8 @@
 				</plugin>
 
 				<!-- -Dtest=TestClassToFileMapped selects a single test class -->
-				<!-- -Dmaven.surefire.debug enables debug on Surefire plugin on port 5005 -->
+				<!-- -Dmaven.surefire.debug enables debug on Surefire plugin on port 
+					5005 -->
 				<!-- mvn -Dtest=TestClassToFileMapped -Dmaven.surefire.debug test -->
 
 				<plugin>
@@ -168,7 +178,8 @@
 						<!-- -XX:+StartAttachListener is for http://comments.gmane.org/gmane.comp.java.openjdk.macosx-port.devel/6094 -->
 						<!-- -Xmx because of http://support.quartetfs.com/jira/browse/APS-7075 -->
 						<!-- Slab allocator does not work under MacOS -->
-						<!-- -XX:-HeapDumpOnOutOfMemoryError because TestGCInspector will force an OOM -->
+						<!-- -XX:-HeapDumpOnOutOfMemoryError because TestGCInspector will force 
+							an OOM -->
 						<!-- -Djava.util.logging.config.file so that tests fallback on logback -->
 						<!-- -Xmx512M is OK but not for apex-server-postprocessor -->
 						<argLine>-Xmx512M -XX:+StartAttachListener
@@ -411,7 +422,8 @@
 				</configuration>
 				<executions>
 					<execution>
-						<!-- default phase is verify, which is after tests. We prefer to run static analysis before tests not to wait -->
+						<!-- default phase is verify, which is after tests. We prefer to run 
+							static analysis before tests not to wait -->
 						<phase>compile</phase>
 						<goals>
 							<goal>check</goal>

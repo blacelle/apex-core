@@ -23,8 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is useful when one want to consider a generic List of Object as key, for instance in the
- * {@link IQueryCache}, or as contribution in a field used as level.
+ * This class is useful when one want to consider a generic List of Object as key in a hashed structure.
  * 
  * @author Benoit Lacelle
  *

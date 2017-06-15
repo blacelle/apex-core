@@ -42,10 +42,9 @@ import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
 /**
- * A convenience class for getting a thread dump.
+ * A convenience class for getting a thread dump. See com.codahale.metrics.jvm.ThreadDump
  * 
  * @author Benoit Lacelle
- * @see com.codahale.metrics.jvm.ThreadDump
  */
 @ManagedResource
 public class ApexThreadDump implements IApexThreadDumper {

@@ -58,7 +58,7 @@ public class BloomFilterSpy {
 	 * https://en.wikipedia.org/wiki/Bloom_filter# Approximating_the_number_of_items_in_a_Bloom_filter
 	 * 
 	 * @param bloomFilter
-	 * @return
+	 * @return an estimation of the number of entries inserted in this BloomFilter
 	 */
 	public static long estimateCardinality(BloomFilter<?> bloomFilter) {
 		if (bloomFilter == null) {

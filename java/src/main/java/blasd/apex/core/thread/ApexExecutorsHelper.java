@@ -91,7 +91,7 @@ public class ApexExecutorsHelper {
 	/**
 	 * The number of seconds a Thread is kept alive before being closed if not used
 	 * 
-	 * @See ThreadPoolExecutor
+	 * @see ThreadPoolExecutor
 	 */
 	public static final int CORE_KEEP_ALIVE_IN_SECONDS = 60;
 

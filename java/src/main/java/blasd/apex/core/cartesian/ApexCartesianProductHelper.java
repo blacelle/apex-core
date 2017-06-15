@@ -452,7 +452,8 @@ public class ApexCartesianProductHelper {
 	 *            the List of templates which has to be multiplied together (e.g. the first set would express (FR, USA)
 	 *            and the second Set (Today, Yesterday). We want all combinations, leading at the end to
 	 *            (FR,USA)*(Today, Yesterday))
-	 * @return
+	 * @return a Set of covering Map, each map having keys associated to either a single value, or a Collection of
+	 *         coordinates
 	 */
 	public static <T> Set<? extends Map<T, ?>> mergeCartesianProducts(
 			Iterable<? extends Set<? extends Map<? extends T, ?>>> templates) {

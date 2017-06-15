@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -46,6 +47,13 @@
 		<!-- <version>0.0.5</version> -->
 		<!-- </dependency> -->
 
+		<dependency>
+			<!-- Prevent javadoc complaining. Kept as optional, just like Guava -->
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+			<version>3.0.2</version>
+			<optional>true</optional>
+		</dependency>
 
 	</dependencies>
 
@@ -57,7 +65,8 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
 					<excludes>
-						<!-- LoggingMethodCallAnnotationMBeanExporter is a bunch of exception catching. Add * to hold anonymous classes -->
+						<!-- LoggingMethodCallAnnotationMBeanExporter is a bunch of exception 
+							catching. Add * to hold anonymous classes -->
 						<exclude>blasd/apex/server/monitoring/spring/LoggingMethodCallAnnotationMBeanExporter*</exclude>
 
 						<!-- ApexCSVReader is just an incubator project -->

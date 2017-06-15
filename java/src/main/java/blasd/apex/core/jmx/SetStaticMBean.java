@@ -154,7 +154,7 @@ public class SetStaticMBean {
 	 * @param fieldType
 	 * @param constructorClass
 	 * @param argument
-	 * @return
+	 * @return an instance of the default contructor
 	 */
 	public static Object safeTrySingleArgConstructor(Class<?> fieldType, Class<?> constructorClass, Object argument) {
 		// Unknown field: we will try to call the constructor taking a single String
