@@ -80,6 +80,7 @@ import blasd.apex.core.jmx.ApexJMXHelper;
 import blasd.apex.core.logging.ApexLogHelper;
 import blasd.apex.core.memory.histogram.HeapHistogram;
 import blasd.apex.core.memory.histogram.IHeapHistogram;
+import blasd.apex.core.thread.ApexThreadDump;
 import blasd.apex.core.thread.IApexThreadDumper;
 import blasd.apex.server.monitoring.memory.VirtualMachineWithoutToolsJar;
 import sun.misc.VM;
@@ -152,6 +153,13 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 
 	public GCInspector(IApexThreadDumper apexThreadDumper) {
 		this.apexThreadDumper = apexThreadDumper;
+	}
+
+	/**
+	 * Default constructor with nice default
+	 */
+	public GCInspector() {
+		this(new ApexThreadDump(ManagementFactory.getThreadMXBean()));
 	}
 
 	@Override
