@@ -44,16 +44,19 @@ public class ApexMapHelper {
 	}
 
 	public static <K1, V, K2 extends K1> Map<K1, V> transcodeColumns(BiMap<?, ? extends K2> mapping, Map<K1, V> map) {
-		return map.entrySet().stream().collect(Collectors.toMap(e -> {
+		// https://stackoverflow.com/questions/24630963/java-8-nullpointerexception-in-collectors-tomap
+		return map.entrySet().stream().collect(HashMap::new, (m, e) -> {
 			K1 newKey;
+			{
 
-			if (mapping.containsKey(e.getKey())) {
-				newKey = mapping.get(e.getKey());
-			} else {
-				newKey = e.getKey();
+				if (mapping.containsKey(e.getKey())) {
+					newKey = mapping.get(e.getKey());
+				} else {
+					newKey = e.getKey();
+				}
 			}
-			return newKey;
-		}, Entry::getValue));
+			m.put(newKey, e.getValue());
+		}, HashMap::putAll);
 	}
 
 	public static <K, V> Map<K, V> fromLists(List<? extends K> keys, List<? extends V> values) {
