@@ -20,27 +20,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.shared.file;
-
-import java.io.IOException;
-import java.nio.file.Path;
+package blasd.apex.core.io;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import blasd.apex.core.io.ApexFileHelper;
+import blasd.apex.core.io.GZipStringBuilder;
 
-public class TestApexFileHelper {
+public class TestGZipStringBuilder {
 	@Test
-	public void testCreateTempPath() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
+	public void testAppend() {
+		GZipStringBuilder sb = new GZipStringBuilder();
 
-		// Check the path does not exist
-		Assert.assertFalse(tmpFile.toFile().exists());
+		sb.append("Azaz");
+		sb.append(new StringBuilder("Zeze"));
+
+		Assert.assertEquals("AzazZeze", sb.toString());
+
+		sb.clear();
+		Assert.assertEquals("", sb.toString());
 	}
 
 	@Test
-	public void testNoNewLine() {
-		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
+	public void testAppendSub() {
+		GZipStringBuilder sb = new GZipStringBuilder();
+
+		sb.append("Azaz", 1, 3);
+
+		Assert.assertEquals("za", sb.toString());
+	}
+
+	@Test
+	public void testNull() {
+		GZipStringBuilder sb = new GZipStringBuilder();
+
+		sb.append(null);
+
+		Assert.assertEquals("null", sb.toString());
+	}
+
+	@Test
+	public void testCopyInflated() {
+		GZipStringBuilder sb = new GZipStringBuilder();
+
+		sb.append("Azaz");
+
+		Assert.assertTrue(sb.copyInflatedByteArray().length > 0);
 	}
 }

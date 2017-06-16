@@ -20,51 +20,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.shared.zip;
+package blasd.apex.core.collection;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import blasd.apex.core.io.GZipStringBuilder;
+import blasd.apex.core.collection.ImmutableArrayList;
 
-public class TestGZipStringBuilder {
+public class TestImmutableArrayList {
 	@Test
-	public void testAppend() {
-		GZipStringBuilder sb = new GZipStringBuilder();
+	public void testSubSet() {
+		List<?> subset = new ImmutableArrayList<>(new Object[] { 13, 27 }, new int[1]);
 
-		sb.append("Azaz");
-		sb.append(new StringBuilder("Zeze"));
+		Assert.assertEquals(1, subset.size());
+		Assert.assertEquals(13, subset.get(0));
+		Assert.assertEquals(Arrays.asList(13).hashCode(), subset.hashCode());
 
-		Assert.assertEquals("AzazZeze", sb.toString());
-
-		sb.clear();
-		Assert.assertEquals("", sb.toString());
+		// Check both equals
+		Assert.assertEquals(Arrays.asList(13), subset);
+		Assert.assertEquals(subset, Arrays.asList(13));
 	}
 
 	@Test
-	public void testAppendSub() {
-		GZipStringBuilder sb = new GZipStringBuilder();
+	public void testPlain() {
+		List<?> subset = new ImmutableArrayList<>(new Object[] { 13, 27 });
 
-		sb.append("Azaz", 1, 3);
+		Assert.assertEquals(2, subset.size());
+		Assert.assertEquals(13, subset.get(0));
+		Assert.assertEquals(27, subset.get(1));
+		Assert.assertEquals(Arrays.asList(13, 27).hashCode(), subset.hashCode());
 
-		Assert.assertEquals("za", sb.toString());
-	}
-
-	@Test
-	public void testNull() {
-		GZipStringBuilder sb = new GZipStringBuilder();
-
-		sb.append(null);
-
-		Assert.assertEquals("null", sb.toString());
-	}
-
-	@Test
-	public void testCopyInflated() {
-		GZipStringBuilder sb = new GZipStringBuilder();
-
-		sb.append("Azaz");
-
-		Assert.assertTrue(sb.copyInflatedByteArray().length > 0);
+		// Check both equals
+		Assert.assertEquals(Arrays.asList(13, 27), subset);
+		Assert.assertEquals(subset, Arrays.asList(13, 27));
 	}
 }

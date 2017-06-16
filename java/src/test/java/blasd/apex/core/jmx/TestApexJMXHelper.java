@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.shared.monitoring.jmx;
+package blasd.apex.core.jmx;
 
 import java.util.ArrayList;
 import java.util.Arrays;

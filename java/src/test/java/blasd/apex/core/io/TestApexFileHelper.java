@@ -20,41 +20,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.shared.tuple;
+package blasd.apex.core.io;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.Path;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import blasd.apex.core.collection.ImmutableArrayList;
+import blasd.apex.core.io.ApexFileHelper;
 
-public class TestImmutableArrayList {
+public class TestApexFileHelper {
 	@Test
-	public void testSubSet() {
-		List<?> subset = new ImmutableArrayList<>(new Object[] { 13, 27 }, new int[1]);
+	public void testCreateTempPath() throws IOException {
+		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
 
-		Assert.assertEquals(1, subset.size());
-		Assert.assertEquals(13, subset.get(0));
-		Assert.assertEquals(Arrays.asList(13).hashCode(), subset.hashCode());
-
-		// Check both equals
-		Assert.assertEquals(Arrays.asList(13), subset);
-		Assert.assertEquals(subset, Arrays.asList(13));
+		// Check the path does not exist
+		Assert.assertFalse(tmpFile.toFile().exists());
 	}
 
 	@Test
-	public void testPlain() {
-		List<?> subset = new ImmutableArrayList<>(new Object[] { 13, 27 });
-
-		Assert.assertEquals(2, subset.size());
-		Assert.assertEquals(13, subset.get(0));
-		Assert.assertEquals(27, subset.get(1));
-		Assert.assertEquals(Arrays.asList(13, 27).hashCode(), subset.hashCode());
-
-		// Check both equals
-		Assert.assertEquals(Arrays.asList(13, 27), subset);
-		Assert.assertEquals(subset, Arrays.asList(13, 27));
+	public void testNoNewLine() {
+		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
 	}
 }

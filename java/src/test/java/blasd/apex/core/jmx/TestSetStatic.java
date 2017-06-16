@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.shared.monitoring.setstatic;
+package blasd.apex.core.jmx;
 
 import org.joda.time.LocalDate;
 import org.junit.Assert;

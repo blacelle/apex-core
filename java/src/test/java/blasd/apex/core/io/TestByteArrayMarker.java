@@ -20,24 +20,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.shared.util;
+package blasd.apex.core.io;
 
-import java.util.Date;
-import java.util.Properties;
+import java.io.IOException;
 
+import org.junit.Assert;
 import org.junit.Test;
 
-public class TestApexPropertiesHelper {
+import blasd.apex.core.io.ApexSerializationHelper;
+import blasd.apex.core.io.ByteArrayMarker;
 
+public class TestByteArrayMarker {
 	@Test
-	public void testCheck() {
-		Properties defaultproperties = new Properties();
-		defaultproperties.put("a", 1);
-		Properties otherproperties = new Properties(defaultproperties);
-		otherproperties.put("c", new Date());
+	public void testSerialization() throws IOException, ClassNotFoundException {
+		ByteArrayMarker marker = new ByteArrayMarker(123);
 
-		// A small test to check default properties are handlded
-
-		ApexPropertiesHelper.checkProperties(otherproperties);
+		String asString = ApexSerializationHelper.toString(marker);
+		Assert.assertEquals(123L, ((ByteArrayMarker) ApexSerializationHelper.fromString(asString)).getNbBytes());
 	}
 }
