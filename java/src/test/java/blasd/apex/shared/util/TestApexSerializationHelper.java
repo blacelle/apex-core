@@ -51,8 +51,14 @@ public class TestApexSerializationHelper {
 	public void testConvertToMap() {
 		String asString = "a=b,c=d";
 
-		Assert.assertEquals(ImmutableMap.<String, String>of("a", "b", "c", "d"),
-				ApexSerializationHelper.convertToMap(asString));
+		Assert.assertEquals(ImmutableMap.of("a", "b", "c", "d"), ApexSerializationHelper.convertToMap(asString));
+	}
+
+	@Test
+	public void testConvertToMapInvalidSeparator() {
+		String asString = "a=b;c=d";
+
+		Assert.assertEquals(ImmutableMap.of("a", "b", "c", "d"), ApexSerializationHelper.convertToMap(asString));
 	}
 
 	@Test

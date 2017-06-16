@@ -22,6 +22,9 @@
  */
 package blasd.apex.core.jmx;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -253,6 +256,15 @@ public class ApexJMXHelper {
 			return ApexJMXHelper.DEFAULT_LIMIT;
 		} else {
 			return limit;
+		}
+	}
+
+	public static URL convertToURL(String url) throws MalformedURLException {
+		if (new File(url).exists()) {
+			return new File(url).toURI().toURL();
+		} else {
+			// https://stackoverflow.com/questions/5442658/spaces-in-urls
+			return new URL(url.replaceAll(" ", "%20"));
 		}
 	}
 }

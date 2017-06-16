@@ -293,6 +293,7 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 			// http://stackoverflow.com/questions/4930781/how-do-hashcode-and-identityhashcode-work-at-the-back-end
 			// see FastHashCode in
 			// http://hg.openjdk.java.net/jdk6/jdk6/hotspot/file/tip/src/share/vm/runtime/synchronizer.cpp
+			// -> Random value unrelated to memory address
 			if (identities.test(System.identityHashCode(object))) {
 				long currentSize = instrumentation.getObjectSize(object);
 				totalSize.add(currentSize);

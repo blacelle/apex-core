@@ -79,12 +79,22 @@ public class ApexSerializationHelper {
 	// This should be the same as IPostProcessor.SEPARATOR
 	public static final char MAP_ENTRY_SEPARATOR = ',';
 
+	// Human often use ';' as entry separator
+	public static final char MAP_ENTRY_SEPARATOR_SEMICOLUMN = ';';
+
+	// Handle 'a=b,c=d'
 	public static final MapSplitter MAP_TO_STRING_SPLITTER =
 			Splitter.on(MAP_ENTRY_SEPARATOR).trimResults().withKeyValueSeparator(MAP_KEY_VALUE_SEPARATOR);
 
+	// Handle 'a=b;c=d'
+	public static final MapSplitter MAP_TO_STRING_SPLITTER_SEMICOLUMN =
+			Splitter.on(MAP_ENTRY_SEPARATOR_SEMICOLUMN).trimResults().withKeyValueSeparator(MAP_KEY_VALUE_SEPARATOR);
+
+	public static final char PIPE = '|';
+
 	// TODO
 	// This should be the same as IPostProcessor.SEPARATOR
-	public static final char COLLECTION_SEPARATOR = '|';
+	public static final char COLLECTION_SEPARATOR = PIPE;
 
 	public static final char FORCE_SEPARATOR = '#';
 
@@ -140,7 +150,14 @@ public class ApexSerializationHelper {
 		if (asString == null || asString.length() == 0) {
 			return Collections.emptyMap();
 		} else {
-			Map<String, String> notFullyTrimmed = MAP_TO_STRING_SPLITTER.split(asString);
+			Map<String, String> notFullyTrimmed;
+			try {
+				notFullyTrimmed = MAP_TO_STRING_SPLITTER.split(asString);
+			} catch (IllegalArgumentException e) {
+				// Try to parse as "a=b;c=d"
+				LOGGER.trace("Can not parse " + asString + " with " + MAP_TO_STRING_SPLITTER);
+				notFullyTrimmed = MAP_TO_STRING_SPLITTER_SEMICOLUMN.split(asString);
+			}
 
 			// Linked to maintain the order of the String
 			Map<String, String> fullyTrimmed = new LinkedHashMap<>();

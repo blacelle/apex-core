@@ -209,26 +209,27 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 		// By default: log in warn if above 1min30
 		LocalDateTime muchtooOldBarrier = now.minusSeconds(FACTOR_FOR_TOO_OLD * longRunningCheckSeconds);
 
-		String logMessage = "Task active since ({} seconds) {}: {}";
+		String logMessage = "Task active since ({}) {}: {}";
 		for (Entry<StartMetricEvent, LocalDateTime> active : activeTasks.asMap().entrySet()) {
 			LocalDateTime activeSince = active.getValue();
 			int seconds = Seconds.secondsBetween(activeSince, now).getSeconds();
+			Object time = ApexLogHelper.getNiceTime(seconds, TimeUnit.SECONDS);
 
 			StartMetricEvent startEvent = active.getKey();
 			Object cleanKey = noNewLine(startEvent);
 			if (activeSince.isBefore(muchtooOldBarrier)) {
 				// This task is active since more than XXX seconds
-				LOGGER.warn(logMessage, seconds, activeSince, cleanKey);
+				LOGGER.warn(logMessage, time, activeSince, cleanKey);
 
 				// If this is the first encounter as verySLow, we may have additional operations
 				verySlowTasks.refresh(startEvent);
 
 			} else if (activeSince.isBefore(tooOldBarrier)) {
-				LOGGER.info(logMessage, seconds, activeSince, cleanKey);
+				LOGGER.info(logMessage, time, activeSince, cleanKey);
 			} else if (activeSince.isBefore(oldBarrier)) {
-				LOGGER.debug(logMessage, seconds, activeSince, cleanKey);
+				LOGGER.debug(logMessage, time, activeSince, cleanKey);
 			} else {
-				LOGGER.trace(logMessage, seconds, activeSince, cleanKey);
+				LOGGER.trace(logMessage, time, activeSince, cleanKey);
 			}
 		}
 	}
