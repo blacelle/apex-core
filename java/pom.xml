@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -8,12 +9,11 @@
 	</parent>
 
 	<artifactId>apex-core-java</artifactId>
-
 	<packaging>jar</packaging>
 
 	<properties>
-		<!--Jacoco crashes the JVM on this module -->
-		<jacoco.skip>true</jacoco.skip>
+		<jacoco.instruction.ratio>0.65</jacoco.instruction.ratio>
+		<jacoco.branch.ratio>0.50</jacoco.branch.ratio>
 	</properties>
 
 	<dependencies>
