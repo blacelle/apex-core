@@ -163,7 +163,7 @@ public class TestApexMemoryHelper {
 		long sizeFull = ApexMemoryHelper.recursiveSize(array);
 
 		// We have different memory consumptions depending on the env/jdk/run
-		Assertions.assertThat(sizeFull).isIn(9136L, 9112L, 9088L);
+		Assertions.assertThat(sizeFull).isBetween(900L, 9200L);
 
 		Assert.assertTrue(sizeFull > sizeEmpty);
 	}
