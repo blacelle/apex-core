@@ -360,7 +360,7 @@
 				<artifactId>formatter-maven-plugin</artifactId>
 				<version>2.0.1</version>
 				<configuration>
-					<configFile>eclipse_java_code_formatter.xml</configFile>
+					<configFile>style/eclipse_java_code_formatter.xml</configFile>
 				</configuration>
 				<dependencies>
 					<dependency>

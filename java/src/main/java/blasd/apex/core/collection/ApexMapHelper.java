@@ -22,12 +22,15 @@
  */
 package blasd.apex.core.collection;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Various helpers for Map
@@ -54,6 +57,37 @@ public class ApexMapHelper {
 	}
 
 	public static <K, V> Map<K, V> fromLists(List<? extends K> keys, List<? extends V> values) {
-		throw new UnsupportedOperationException("TODO");
+		Objects.requireNonNull(keys);
+		Objects.requireNonNull(values);
+
+		if (keys.size() != values.size()) {
+			throw new RuntimeException(keys.size() + " keys but " + values.size() + " values");
+		}
+
+		ImmutableMap.Builder<K, V> builder = ImmutableMap.<K, V>builder();
+
+		for (int i = 0; i < keys.size(); i++) {
+			builder.put(keys.get(i), values.get(i));
+		}
+
+		return builder.build();
+	}
+
+	/**
+	 * 
+	 * @param first
+	 *            the first Map to resolve
+	 * @param second
+	 *            the second Map to resolve
+	 * @return an Immutable Map where each .get is resolved by the first Map holding a non-null value for given key
+	 */
+	public static <K, V> Map<K, V> decoratePutAll(Map<? extends K, ? extends V> first,
+			Map<? extends K, ? extends V> second) {
+		Map<K, V> clone = new HashMap<>(second);
+
+		// Give priority to first
+		clone.putAll(first);
+
+		return ImmutableMap.copyOf(clone);
 	}
 }
