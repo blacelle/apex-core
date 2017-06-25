@@ -25,12 +25,16 @@ package blasd.apex.core.stream;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -114,5 +118,20 @@ public class ApexStreamHelper {
 	 */
 	public static <T> Stream<T> emptyStream() {
 		return Collections.<T>emptyList().stream();
+	}
+
+	/**
+	 * 
+	 * http://stackoverflow.com/questions/31004899/java-8-collectors-tomap-sortedmap
+	 * 
+	 * @param keyMapper
+	 * @param valueMapper
+	 * @param mapSupplier
+	 * @return
+	 */
+	public static <T, K, U, M extends Map<K, U>> Collector<T, ?, M> toMap(Function<? super T, ? extends K> keyMapper,
+			Function<? super T, ? extends U> valueMapper,
+			Supplier<M> mapSupplier) {
+		return Collectors.toMap(keyMapper, valueMapper, throwingMerger(), mapSupplier);
 	}
 }
