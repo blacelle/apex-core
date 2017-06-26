@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -74,7 +75,6 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.AtomicLongMap;
-import com.sun.management.GarbageCollectionNotificationInfo;
 
 import blasd.apex.core.jmx.ApexJMXHelper;
 import blasd.apex.core.logging.ApexLogHelper;
@@ -85,7 +85,6 @@ import blasd.apex.core.memory.histogram.IHeapHistogram;
 import blasd.apex.core.thread.ApexThreadDump;
 import blasd.apex.core.thread.IApexThreadDumper;
 import blasd.apex.server.monitoring.memory.VirtualMachineWithoutToolsJar;
-import sun.misc.VM;
 
 /**
  * 
@@ -252,21 +251,21 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 	}
 
 	@Override
-	@SuppressWarnings("restriction")
+
 	public void handleNotification(Notification notification, Object handback) {
 		String type = notification.getType();
-		if (type.equals(GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION)) {
+		if (type.equals(ApexForOracleJVM.GARBAGE_COLLECTION_NOTIFICATION)) {
 			// retrieve the garbage collection notification information
 			CompositeData cd = (CompositeData) notification.getUserData();
-			GarbageCollectionNotificationInfo info = GarbageCollectionNotificationInfo.from(cd);
+			ApexGarbageCollectionNotificationInfo info = ApexGarbageCollectionNotificationInfo.from(cd);
 
 			doLog(info);
 		}
 	}
 
-	protected long computeDurationMs(@SuppressWarnings("restriction") GarbageCollectionNotificationInfo info) {
-		@SuppressWarnings("restriction")
-		long rawDuration = info.getGcInfo().getDuration();
+	protected long computeDurationMs(IApexGarbageCollectionNotificationInfo info) {
+
+		long rawDuration = info.getGcDuration();
 
 		if (rawDuration == 0) {
 			return 0;
@@ -294,8 +293,7 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 		}
 	}
 
-	@SuppressWarnings("restriction")
-	protected String makeGCMessage(GarbageCollectionNotificationInfo info) {
+	protected String makeGCMessage(IApexGarbageCollectionNotificationInfo info) {
 		long duration = computeDurationMs(info);
 
 		String gctype = info.getGcAction();
@@ -318,8 +316,8 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 		long totalHeapUsedBefore = 0L;
 		long totalHeapUsedAfter = 0L;
 		for (String key : keys) {
-			MemoryUsage before = info.getGcInfo().getMemoryUsageBeforeGc().get(key);
-			MemoryUsage after = info.getGcInfo().getMemoryUsageAfterGc().get(key);
+			MemoryUsage before = info.getMemoryUsageBeforeGc().get(key);
+			MemoryUsage after = info.getMemoryUsageAfterGc().get(key);
 			if (after == null) {
 				LOGGER.debug("No .getMemoryUsageAfterGc for {}", key);
 			} else {
@@ -384,12 +382,14 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 		}
 	}
 
-	protected NavigableSet<String> getSortedGCKeys(GarbageCollectionNotificationInfo info) {
+	protected NavigableSet<String> getSortedGCKeys(IApexGarbageCollectionNotificationInfo info) {
 		// Sort by lexicographical order
-		return new TreeSet<>(info.getGcInfo().getMemoryUsageBeforeGc().keySet());
+		return new TreeSet<>(info.getMemoryUsageBeforeGc().keySet());
 	}
 
-	protected void appendCurrentGCDuration(StringBuilder sb, GarbageCollectionNotificationInfo info, long duration) {
+	protected void appendCurrentGCDuration(StringBuilder sb,
+			IApexGarbageCollectionNotificationInfo info,
+			long duration) {
 		sb.append(info.getGcName()).append(" lasted ").append(ApexLogHelper.getNiceTime(duration)).append(". ");
 	}
 
@@ -494,27 +494,37 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 		sb.append(" - Heap:");
 		appendSize(sb, totalHeapUsedAfter);
 
-		appendDirectMemoryAndThreads(sb);
+		long directAndThreadBytes = appendDirectMemoryAndThreads(sb);
+
+		long totalMemoryFootprint = totalHeapUsedAfter + directAndThreadBytes;
+
+		sb.append(" - GrandTotal:");
+		appendSize(sb, totalMemoryFootprint);
 
 		return sb.toString();
 	}
 
-	@SuppressWarnings("restriction")
 	protected void appendCPU(StringBuilder sb) {
 		// Add information about CPU consumption
-		if (OS_MBEAN instanceof com.sun.management.OperatingSystemMXBean) {
-			double cpu = ((com.sun.management.OperatingSystemMXBean) OS_MBEAN).getProcessCpuLoad();
+		OptionalDouble optCpu = ApexForOracleJVM.getCpu(OS_MBEAN);
 
+		optCpu.ifPresent(cpu -> {
 			// -1 == No CPU info
 			if (cpu >= BETWEEN_MINUS_ONE_AND_ZERO) {
 				sb.append("CPU=");
 				appendPercentage(sb, (long) (cpu * ApexLogHelper.THOUSAND), ApexLogHelper.THOUSAND);
 				sb.append(" - ");
 			}
+		});
+		if (OS_MBEAN instanceof com.sun.management.OperatingSystemMXBean) {
+			double cpu = ((com.sun.management.OperatingSystemMXBean) OS_MBEAN).getProcessCpuLoad();
+
 		}
 	}
 
-	protected void appendDirectMemoryAndThreads(StringBuilder sb) {
+	protected long appendDirectMemoryAndThreads(StringBuilder sb) {
+		long additionalMemory = 0L;
+
 		// Add information about DirectMemory
 		{
 			BufferPoolMXBean directMemoryBean = directMemoryStatus();
@@ -522,7 +532,9 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 			if (directMemoryBean != null) {
 				sb.append("; ");
 				sb.append("DirectMemory").append(": ");
-				appendSize(sb, directMemoryBean.getMemoryUsed());
+				long directMemoryUsed = directMemoryBean.getMemoryUsed();
+				additionalMemory += directMemoryUsed;
+				appendSize(sb, directMemoryUsed);
 				sb.append("(allocationCount=").append(directMemoryBean.getCount()).append(')');
 				sb.append(" over max=");
 				appendSize(sb, getMaxDirectMemorySize());
@@ -535,7 +547,15 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 			long nbLiveThreads = THREAD_MBEAN.getThreadCount();
 			sb.append(" LiveThreadCount=");
 			sb.append(nbLiveThreads);
+
+			long threadMemory = nbLiveThreads * getMemoryPerThread();
+			additionalMemory += threadMemory;
+			sb.append(" (");
+			appendSize(sb, threadMemory);
+			sb.append(")");
 		}
+
+		return additionalMemory;
 	}
 
 	protected void appendPercentage(StringBuilder sb, long numerator, long denominator) {
@@ -554,8 +574,7 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 		return sw.toString();
 	}
 
-	@SuppressWarnings("restriction")
-	protected void doLog(GarbageCollectionNotificationInfo info) {
+	protected void doLog(IApexGarbageCollectionNotificationInfo info) {
 		// Javadoc tells duration is in millis while it seems to be in micros
 		long duration = computeDurationMs(info);
 
@@ -576,7 +595,7 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 		logIfMemoryOverCap();
 	}
 
-	protected void onFullGC(@SuppressWarnings("restriction") GarbageCollectionNotificationInfo info) {
+	protected void onFullGC(IApexGarbageCollectionNotificationInfo info) {
 		long duration = computeDurationMs(info);
 
 		if (duration > marksweepDurationMillisForThreadDump) {
@@ -654,8 +673,7 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 	 */
 	private static final int HEAP_HISTO_LIMIT_NB_ROWS = 20;
 
-	@SuppressWarnings("restriction")
-	protected boolean isFullGC(GarbageCollectionNotificationInfo info) {
+	protected boolean isFullGC(IApexGarbageCollectionNotificationInfo info) {
 		return FULL_GC_NAMES.contains(info.getGcName());
 	}
 
@@ -746,10 +764,12 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 		}
 	}
 
-	/** @return the maximum direct memory size */
-	@SuppressWarnings("restriction")
+	/**
+	 * @deprecated rely on {@link ApexForOracleJVM}
+	 */
+	@Deprecated
 	protected static long getMaxDirectMemorySize() {
-		return VM.maxDirectMemory();
+		return ApexForOracleJVM.maxDirectMemory();
 	}
 
 	// https://stackoverflow.com/questions/6020619/where-to-find-default-xss-value-for-sun-oracle-jvm
