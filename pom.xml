@@ -55,6 +55,9 @@
 
 		<!-- This project metadata, holding for instance deployement resources -->
 		<module>metadata</module>
+
+		<!-- a JConsole plugin to facilitate tracking of off-heap -->
+		<module>buffermonitor</module>
 	</modules>
 
 	<dependencyManagement>

@@ -30,6 +30,7 @@ import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -118,6 +119,12 @@ public class ApexStreamHelper {
 	 */
 	public static <T> Stream<T> emptyStream() {
 		return Collections.<T>emptyList().stream();
+	}
+
+	private static <T> BinaryOperator<T> throwingMerger() {
+		return (u, v) -> {
+			throw new IllegalStateException(String.format("Duplicate key %s", u));
+		};
 	}
 
 	/**

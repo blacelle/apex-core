@@ -44,6 +44,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import blasd.apex.core.io.ApexSerializationHelper;
+import blasd.apex.core.stream.ApexStreamHelper;
 
 /**
  * Various utility methods specific to JMX
@@ -222,7 +223,7 @@ public class ApexJMXHelper {
 
 		// http://stackoverflow.com/questions/29567575/sort-map-by-value-using-java-8
 
-		return entries.collect(StackOverflowExampleCollectors.toMap(e -> {
+		return entries.collect(ApexStreamHelper.toMap(e -> {
 			if (e.getKey() instanceof List<?>) {
 				return (S) convertToJMXList((List) e.getKey());
 			} else {

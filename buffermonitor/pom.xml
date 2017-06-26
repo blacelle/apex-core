@@ -1,0 +1,38 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.github.blasd.apex</groupId>
+        <artifactId>apex-shared</artifactId>
+        <version>3.13-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>apex-buffermonitor</artifactId>
+
+    <packaging>jar</packaging>
+
+    <build>
+        <sourceDirectory>src</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>resources</directory>
+            </resource>
+        </resources>
+        <testSourceDirectory>DOESNOTEXIST</testSourceDirectory>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <!-- Needed to load the Agent -->
+            <!-- It may require to force Eclipse to start from a JDK: add in eclipse.ini something like "-vm C:\...\jdk1.7.0_01-windows-x64\bin\javaw.exe" -->
+            <!-- http://wiki.eclipse.org/Equinox_Launcher#Finding_a_VM.2C_Using_JNI_Invocation_or_Executing_Java -->
+            <groupId>com.sun</groupId>
+            <artifactId>jconsole</artifactId>
+            <version>1.7</version>
+            <!-- http://maven.apache.org/general.html#tools-jar-dependency -->
+            <scope>system</scope>
+            <!-- ${java.home} can be checked in Eclipse in Help/About Eclipse/Installation Details/Configuration -->
+            <systemPath>${java.home}/../lib/jconsole.jar</systemPath>
+        </dependency>
+    </dependencies>
+</project>
