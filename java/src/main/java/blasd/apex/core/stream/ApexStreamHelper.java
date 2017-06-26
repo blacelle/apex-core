@@ -72,6 +72,18 @@ public class ApexStreamHelper {
 		return Streams.stream(iterable);
 	}
 
+	public static <T> Stream<T> singleton(T item) {
+		return Collections.singleton(item).stream();
+	}
+
+	/**
+	 * Justfor the sake of the example
+	 * 
+	 * @param list
+	 * @param predicate
+	 * @return
+	 */
+	@Beta
 	public static <T> OptionalInt indexOf(List<T> list, Predicate<T> predicate) {
 		// http://stackoverflow.com/questions/38963338/stream-way-to-get-index-of-first-element-matching-boolean
 		return IntStream.range(0, list.size()).filter(i -> predicate.apply(list.get(i))).findFirst();

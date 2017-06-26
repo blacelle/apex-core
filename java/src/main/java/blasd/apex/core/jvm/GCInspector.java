@@ -78,6 +78,8 @@ import com.sun.management.GarbageCollectionNotificationInfo;
 
 import blasd.apex.core.jmx.ApexJMXHelper;
 import blasd.apex.core.logging.ApexLogHelper;
+import blasd.apex.core.memory.ApexMemoryHelper;
+import blasd.apex.core.memory.IApexMemoryConstants;
 import blasd.apex.core.memory.histogram.HeapHistogram;
 import blasd.apex.core.memory.histogram.IHeapHistogram;
 import blasd.apex.core.thread.ApexThreadDump;
@@ -151,6 +153,8 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 
 	protected final IApexThreadDumper apexThreadDumper;
 
+	protected final AtomicLong targetMaxTotalMemory = new AtomicLong(Long.MAX_VALUE);
+
 	public GCInspector(IApexThreadDumper apexThreadDumper) {
 		this.apexThreadDumper = apexThreadDumper;
 	}
@@ -160,6 +164,18 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 	 */
 	public GCInspector() {
 		this(new ApexThreadDump(ManagementFactory.getThreadMXBean()));
+	}
+
+	@ManagedAttribute
+	public void setTargetMaxTotalMemory(String targetMax) {
+		long asLong = ApexMemoryHelper.memoryAsLong(targetMax);
+
+		targetMaxTotalMemory.set(asLong);
+	}
+
+	@ManagedAttribute
+	public long getTargetMaxTotalMemory() {
+		return targetMaxTotalMemory.get();
 	}
 
 	@Override
@@ -734,6 +750,13 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 	@SuppressWarnings("restriction")
 	protected static long getMaxDirectMemorySize() {
 		return VM.maxDirectMemory();
+	}
+
+	// https://stackoverflow.com/questions/6020619/where-to-find-default-xss-value-for-sun-oracle-jvm
+	protected static long getMemoryPerThread() {
+		// '-XX:ThreadStackSize' or '-Xss'
+		// TODO: for now, we return the default: 1MB
+		return IApexMemoryConstants.MB;
 	}
 
 	protected BufferPoolMXBean directMemoryStatus() {

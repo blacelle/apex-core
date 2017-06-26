@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 
 import blasd.apex.core.memory.ApexMemoryHelper;
+import blasd.apex.core.memory.IApexMemoryConstants;
 
 public class TestApexMemoryHelper {
 
@@ -185,5 +186,23 @@ public class TestApexMemoryHelper {
 					ApexMemoryHelper.positivePack(ApexMemoryHelper.positiveUnpack1(i),
 							ApexMemoryHelper.positiveUnpack2(i)));
 		}
+	}
+
+	@Test
+	public void testParseMemory() {
+		Assert.assertEquals(123, ApexMemoryHelper.memoryAsLong("123"));
+		Assert.assertEquals(123 * IApexMemoryConstants.KB, ApexMemoryHelper.memoryAsLong("123k"));
+		Assert.assertEquals(123 * IApexMemoryConstants.MB, ApexMemoryHelper.memoryAsLong("123M"));
+		Assert.assertEquals(123 * IApexMemoryConstants.GB, ApexMemoryHelper.memoryAsLong("123g"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testParseMemoryFailsOnUnknownEndChars() {
+		ApexMemoryHelper.memoryAsLong("123A");
+	}
+
+	@Test(expected = NumberFormatException.class)
+	public void testParseMemoryFailsOnNotDigitsFirst() {
+		ApexMemoryHelper.memoryAsLong("12a3m");
 	}
 }

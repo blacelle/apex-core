@@ -36,6 +36,7 @@ import java.util.function.IntPredicate;
 
 import org.springframework.util.ReflectionUtils;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
 import com.google.common.util.concurrent.AtomicLongMap;
@@ -394,5 +395,37 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 		// Move the higher bit as lower bit: if packed >= 0, we then are sure to have a 0 as first bit
 		// Then, this 0 bit it put back as last bit: the integer is guaranteed to be positive
 		return Integer.rotateRight((int) (Long.rotateLeft(packed, 1) & MASK), 1);
+	}
+
+	public static long memoryAsLong(String targetMax) {
+		// https://stackoverflow.com/questions/1098488/jvm-heap-parameters
+
+		if (targetMax.isEmpty()) {
+			throw new UnsupportedOperationException("Can not be empty");
+		}
+
+		String digits;
+		long multiplier;
+
+		char lastChar = targetMax.charAt(targetMax.length() - 1);
+		if (CharMatcher.javaDigit().matches(lastChar)) {
+			multiplier = 1L;
+			digits = targetMax;
+		} else {
+			if (lastChar == 'k' || lastChar == 'K') {
+				multiplier = IApexMemoryConstants.KB;
+			} else if (lastChar == 'm' || lastChar == 'M') {
+				multiplier = IApexMemoryConstants.MB;
+			} else if (lastChar == 'g' || lastChar == 'G') {
+				multiplier = IApexMemoryConstants.GB;
+			} else {
+				throw new IllegalArgumentException(
+						"Can not parse " + targetMax + ". It should end by a digit or one of 'k', 'm','g'");
+			}
+
+			digits = targetMax.substring(0, targetMax.length() - 1);
+		}
+
+		return Long.parseLong(digits) * multiplier;
 	}
 }
