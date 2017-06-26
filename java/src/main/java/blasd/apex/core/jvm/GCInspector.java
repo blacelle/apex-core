@@ -31,6 +31,7 @@ import java.io.OutputStreamWriter;
 import java.lang.management.BufferPoolMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.MemoryType;
 import java.lang.management.MemoryUsage;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.ThreadInfo;
@@ -341,6 +342,7 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 			}
 		}
 
+		// TODO: Some of this is actually non-heap
 		appendHeap(sb, totalHeapUsedAfter);
 
 		if (totalAfterMinusbefore != 0) {
@@ -363,6 +365,9 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 		if (after.getUsed() == before.getUsed()) {
 			sb.append(key).append(" ==");
 			appendPercentage(sb, afterUsed, afterCommited);
+			sb.append(" (");
+			appendSize(sb, afterCommited);
+			sb.append(")");
 		} else {
 			sb.append(key).append(" ");
 			appendPercentage(sb, beforeUsed, beforeCommited);
@@ -370,6 +375,9 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 			appendPercentage(sb, afterUsed, afterCommited);
 
 			sb.append(" (");
+
+			appendSize(sb, beforeUsed);
+
 			if (after.getUsed() > before.getUsed()) {
 				sb.append('+');
 			} else {
@@ -378,6 +386,10 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 
 			long afterMinusBefore = afterUsed - beforeUsed;
 			appendSize(sb, afterMinusBefore);
+
+			sb.append("->");
+			appendSize(sb, afterUsed);
+
 			sb.append(")");
 		}
 	}
@@ -396,6 +408,11 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 	protected void appendHeap(StringBuilder sb, long totalHeapUsedAfter) {
 		sb.append(" - Heap:");
 		appendSize(sb, totalHeapUsedAfter);
+	}
+
+	protected void appendNonHeap(StringBuilder sb, long nonHeapUsedAfter) {
+		sb.append(" - Non-Heap:");
+		appendSize(sb, nonHeapUsedAfter);
 	}
 
 	protected void appendDetailsAboutMove(StringBuilder sb, long totalAfterMinusbefore, long totalHeapUsedBefore) {
@@ -473,6 +490,7 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 		appendCPU(sb);
 
 		long totalHeapUsedAfter = 0L;
+		long totalNonHeapUsedAfter = 0L;
 		for (MemoryPoolMXBean key : MEMORY_POOLS_MBEAN) {
 			MemoryUsage after = key.getUsage();
 
@@ -480,7 +498,11 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 				long afterUsed = after.getUsed();
 				long afterCommited = after.getCommitted();
 
-				totalHeapUsedAfter += afterUsed;
+				if (key.getType() == MemoryType.HEAP) {
+					totalHeapUsedAfter += afterUsed;
+				} else {
+					totalNonHeapUsedAfter += afterUsed;
+				}
 
 				sb.append(key.getName()).append(" ==");
 				appendSize(sb, afterUsed);
@@ -491,8 +513,8 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 			}
 		}
 
-		sb.append(" - Heap:");
-		appendSize(sb, totalHeapUsedAfter);
+		appendHeap(sb, totalHeapUsedAfter);
+		appendNonHeap(sb, totalNonHeapUsedAfter);
 
 		long directAndThreadBytes = appendDirectMemoryAndThreads(sb);
 
@@ -516,10 +538,6 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 				sb.append(" - ");
 			}
 		});
-		if (OS_MBEAN instanceof com.sun.management.OperatingSystemMXBean) {
-			double cpu = ((com.sun.management.OperatingSystemMXBean) OS_MBEAN).getProcessCpuLoad();
-
-		}
 	}
 
 	protected long appendDirectMemoryAndThreads(StringBuilder sb) {
@@ -537,7 +555,7 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 				appendSize(sb, directMemoryUsed);
 				sb.append("(allocationCount=").append(directMemoryBean.getCount()).append(')');
 				sb.append(" over max=");
-				appendSize(sb, getMaxDirectMemorySize());
+				appendSize(sb, ApexForOracleJVM.maxDirectMemory());
 			}
 		}
 
