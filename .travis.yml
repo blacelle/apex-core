@@ -19,7 +19,7 @@ addons:
 #https://docs.travis-ci.com/user/customizing-the-build/#Customizing-the-Build-Step
 # quite not to consumes more than the 4MB of authorized logs
 # https://github.com/travis-ci/travis-ci/issues/1382
-install: "mvn clean install -DskipTests"
+install: "mvn clean install -DskipTests -PskipStyle"
 #script: "mvn deploy -DskipTests --settings travis-maven-settings.xml"
 script: "mvn install coveralls:report"
 #deploy: "mvn deploy --settings travis-maven-settings.xml"
