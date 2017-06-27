@@ -15,14 +15,27 @@ addons:
   apt:
     packages:
       - oracle-java8-installer
+  sonarcloud:
+    organization: "blasd-github"
+    token:
+      secure: ""
   
 #https://docs.travis-ci.com/user/customizing-the-build/#Customizing-the-Build-Step
 # quite not to consumes more than the 4MB of authorized logs
 # https://github.com/travis-ci/travis-ci/issues/1382
 install: "mvn clean install -DskipTests -PskipStyle"
 #script: "mvn deploy -DskipTests --settings travis-maven-settings.xml"
-script: "mvn install coveralls:report"
+script:
+  - "mvn install coveralls:report"
+  - "mvn org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar"
 #deploy: "mvn deploy --settings travis-maven-settings.xml"
 
 notifications:
   webhooks: https://coveralls.io/webhook?repo_token=jDBhichjx0dczfgRHEuKVHD3ULFv6absA
+
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'
+
