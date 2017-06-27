@@ -25,9 +25,7 @@ package blasd.apex.core.collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableMap;

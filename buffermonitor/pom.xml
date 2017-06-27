@@ -3,8 +3,8 @@
 
     <parent>
         <groupId>com.github.blasd.apex</groupId>
-        <artifactId>apex-shared</artifactId>
-        <version>3.13-SNAPSHOT</version>
+		<artifactId>apex-core</artifactId>
+		<version>1.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>apex-buffermonitor</artifactId>
