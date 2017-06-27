@@ -5,8 +5,6 @@ import java.util.OptionalDouble;
 
 import com.google.common.annotations.Beta;
 
-import blasd.apex.core.logging.ApexLogHelper;
-
 /**
  * Holds all call to methods/fields not in the Java spec but present in the Oracle jvm
  * 

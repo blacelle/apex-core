@@ -19,4 +19,20 @@ public class TestApexMapHelper {
 
 		Assert.assertEquals(Collections.singletonMap("newKey", null), newMap);
 	}
+
+	@Test
+	public void testDecoratePutAllOnNullValue() {
+		Map<String, Object> first = new HashMap<>();
+		first.put("key", null);
+
+		Map<String, Object> second = new HashMap<>();
+		second.put("key2", null);
+
+		Map<String, Object> newMap = ApexMapHelper.decoratePutAll(first, second);
+
+		Map<String, Object> merged = new HashMap<>();
+		merged.put("key", null);
+		merged.put("key2", null);
+		Assert.assertEquals(merged, newMap);
+	}
 }

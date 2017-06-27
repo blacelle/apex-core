@@ -22,6 +22,7 @@
  */
 package blasd.apex.core.collection;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,6 @@ public class ApexMapHelper {
 		// Give priority to first
 		clone.putAll(first);
 
-		return ImmutableMap.copyOf(clone);
+		return Collections.unmodifiableMap(clone);
 	}
 }

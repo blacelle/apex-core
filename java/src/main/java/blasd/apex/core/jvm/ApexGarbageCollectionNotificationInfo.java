@@ -2,14 +2,13 @@ package blasd.apex.core.jvm;
 
 import java.lang.management.MemoryUsage;
 import java.util.Map;
-import java.util.function.Function;
 
 import javax.management.openmbean.CompositeData;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
 
 public class ApexGarbageCollectionNotificationInfo implements IApexGarbageCollectionNotificationInfo {
-	protected final com.sun.management.GarbageCollectionNotificationInfo info;
+	protected final GarbageCollectionNotificationInfo info;
 
 	public ApexGarbageCollectionNotificationInfo(GarbageCollectionNotificationInfo info) {
 		this.info = info;
