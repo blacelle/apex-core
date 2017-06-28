@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${project.inceptionYear} Benoit Lacelle
+ * Copyright (c) 2014 Benoit Lacelle
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,14 +27,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import com.google.common.primitives.Ints;
-
-import blasd.apex.core.memory.IApexMemoryConstants;
+import com.google.common.io.CharStreams;
 
 /**
  * Various utilities for GZip
@@ -49,11 +46,24 @@ public class ApexGzipHelper {
 		// hidden
 	}
 
+	/**
+	 * 
+	 * @param bytes
+	 * @return true if this byte array seems to hold a gzip compressed message
+	 */
 	public static boolean isGZIPStream(byte[] bytes) {
-		return bytes[0] == (byte) GZIPInputStream.GZIP_MAGIC
+		return bytes != null && bytes.length >= 2
+				&& bytes[0] == (byte) GZIPInputStream.GZIP_MAGIC
 				&& bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >>> GZIP_MAGIC_SHIFT);
 	}
 
+	/**
+	 * This is able to handle byte arrays, would it hold the compressed String, or just plain data
+	 * 
+	 * @param bytes
+	 * @return the deflated String
+	 * @throws IOException
+	 */
 	public static String toStringOptCompressed(byte[] bytes) throws IOException {
 		if (isGZIPStream(bytes)) {
 			return toStringCompressed(bytes);
@@ -63,28 +73,32 @@ public class ApexGzipHelper {
 	}
 
 	public static String toStringCompressed(byte[] bytes) throws IOException {
-		InputStreamReader isr =
-				new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(bytes)), StandardCharsets.UTF_8);
-		StringWriter sw = new StringWriter();
-		char[] chars = new char[Ints.saturatedCast(IApexMemoryConstants.KB)];
-		int len = -1;
-		while (true) {
-			len = isr.read(chars);
-			if (len <= 0) {
-				break;
-			}
-			sw.write(chars, 0, len);
-		}
-		return sw.toString();
+		return inflate(bytes);
 	}
 
-	public static byte[] compress(String html) throws IOException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		OutputStreamWriter osw = new OutputStreamWriter(new GZIPOutputStream(baos), StandardCharsets.UTF_8);
+	/**
+	 * @deprecated Prefer .deflate
+	 */
+	@Deprecated
+	public static byte[] compress(String someString) throws IOException {
+		return deflate(someString);
+	}
 
-		osw.write(html);
+	public static byte[] deflate(String someString) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+		try (OutputStreamWriter osw = new OutputStreamWriter(new GZIPOutputStream(baos), StandardCharsets.UTF_8)) {
+			osw.write(someString);
+		}
 
 		return baos.toByteArray();
+	}
+
+	public static String inflate(byte[] inflated) throws IOException {
+		GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(inflated));
+		InputStreamReader osw = new InputStreamReader(gzipInputStream, StandardCharsets.UTF_8);
+
+		return CharStreams.toString(osw);
 	}
 
 }

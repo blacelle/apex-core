@@ -20,27 +20,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.core.jvm;
+package blasd.apex.core.io;
 
-import java.lang.management.MemoryUsage;
-import java.util.Map;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
-/**
- * Wraps the not-specified but much useful information in com.sun.management.GarbageCollectionNotificationInfo
- * 
- * @author Benoit Lacelle
- *
- */
-public interface IApexGarbageCollectionNotificationInfo {
+import org.junit.Assert;
+import org.junit.Test;
 
-	String getGcAction();
+public class TestApexGzipHelper {
+	@Test
+	public void testCompressedBackAndForth() throws IOException {
+		String string = "someString";
 
-	long getGcDuration();
+		byte[] compressed = ApexGzipHelper.deflate(string);
+		byte[] notCompressed = string.getBytes(StandardCharsets.UTF_8);
 
-	String getGcName();
+		Assert.assertTrue(ApexGzipHelper.isGZIPStream(compressed));
+		Assert.assertFalse(ApexGzipHelper.isGZIPStream(notCompressed));
 
-	Map<String, MemoryUsage> getMemoryUsageBeforeGc();
+		Assert.assertEquals(string, ApexGzipHelper.inflate(compressed));
 
-	Map<String, MemoryUsage> getMemoryUsageAfterGc();
+		// optCompressed handles both compressed and not-compressed data
+		Assert.assertEquals(string, ApexGzipHelper.toStringOptCompressed(compressed));
+		Assert.assertEquals(string, ApexGzipHelper.toStringOptCompressed(notCompressed));
+	}
+
+	@Test
+	public void testIsGzipButTooSmall() throws IOException {
+		Assert.assertFalse(ApexGzipHelper.isGZIPStream(new byte[0]));
+		Assert.assertFalse(ApexGzipHelper.isGZIPStream(new byte[1]));
+	}
 
 }

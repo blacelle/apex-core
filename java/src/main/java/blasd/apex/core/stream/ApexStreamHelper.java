@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${project.inceptionYear} Benoit Lacelle
+ * Copyright (c) 2014 Benoit Lacelle
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BinaryOperator;
@@ -89,13 +90,61 @@ public class ApexStreamHelper {
 		return IntStream.range(0, list.size()).filter(i -> predicate.apply(list.get(i))).findFirst();
 	}
 
+	/**
+	 * Enable consuming a stream by blocks of size controlled by the Queue
+	 * 
+	 * @param queueSupplier
+	 *            we may need multiple queues if the stream is parallel
+	 * @param stream
+	 *            the stream to process
+	 * @param consumer
+	 *            the operation to apply on each partition, which size is controlled by the capacity of the queue
+	 * @return how many entries have been processed
+	 */
 	@Beta
+	public static <T> long consumeByPartition(Stream<T> stream, Consumer<Queue<T>> consumer, int partitionSize) {
+		AtomicLong nbConsumed = new AtomicLong();
+
+		Queue<T> leftOvers = stream.collect(() -> new ArrayBlockingQueue<>(partitionSize), (queue, tuple) -> {
+			queue.add(tuple);
+			if (queue.remainingCapacity() == 0) {
+				consumer.accept(queue);
+				nbConsumed.addAndGet(queue.size());
+				queue.clear();
+			}
+		}, (l, r) -> {
+			// r has to be drained to l
+			r.drainTo(l, l.remainingCapacity());
+			if (!r.isEmpty()) {
+				// We need to submit a batch
+				consumer.accept(l);
+				nbConsumed.addAndGet(l.size());
+				l.clear();
+
+				// We can fully drain as r is supposed to have same capacity than l
+				r.drainTo(l);
+			}
+
+		});
+
+		// The last transaction
+		consumer.accept(leftOvers);
+		nbConsumed.addAndGet(leftOvers.size());
+
+		return nbConsumed.get();
+	}
+
+	/**
+	 * @deprecated as one may provide a queueSupplier with queues without no bounded capacity
+	 */
+	@Beta
+	@Deprecated
 	public static <T> long consumeByPartition(Supplier<? extends BlockingQueue<T>> queueSupplier,
-			Stream<T> parallelTuplized,
+			Stream<T> stream,
 			Consumer<Queue<T>> consumer) {
 		AtomicLong nbConsumed = new AtomicLong();
 
-		Queue<T> leftOvers = parallelTuplized.collect(queueSupplier, (queue, tuple) -> {
+		Queue<T> leftOvers = stream.collect(queueSupplier, (queue, tuple) -> {
 			queue.add(tuple);
 			if (queue.remainingCapacity() == 0) {
 				consumer.accept(queue);

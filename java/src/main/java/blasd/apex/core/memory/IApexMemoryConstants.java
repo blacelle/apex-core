@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${project.inceptionYear} Benoit Lacelle
+ * Copyright (c) 2014 Benoit Lacelle
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,8 +42,11 @@ public interface IApexMemoryConstants {
 
 	/** One gigabyte */
 	long GB = KB * KB * KB;
+	int GB_INT = Ints.saturatedCast(GB);
+
 	/** One terabyte */
 	long TB = KB * KB * KB * KB;
+	int TB_INT = Ints.saturatedCast(TB);
 
 	long CHAR = 4;
 	long INT = 4;
