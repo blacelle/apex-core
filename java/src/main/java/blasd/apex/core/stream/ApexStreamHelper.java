@@ -103,35 +103,7 @@ public class ApexStreamHelper {
 	 */
 	@Beta
 	public static <T> long consumeByPartition(Stream<T> stream, Consumer<Queue<T>> consumer, int partitionSize) {
-		AtomicLong nbConsumed = new AtomicLong();
-
-		Queue<T> leftOvers = stream.collect(() -> new ArrayBlockingQueue<>(partitionSize), (queue, tuple) -> {
-			queue.add(tuple);
-			if (queue.remainingCapacity() == 0) {
-				consumer.accept(queue);
-				nbConsumed.addAndGet(queue.size());
-				queue.clear();
-			}
-		}, (l, r) -> {
-			// r has to be drained to l
-			r.drainTo(l, l.remainingCapacity());
-			if (!r.isEmpty()) {
-				// We need to submit a batch
-				consumer.accept(l);
-				nbConsumed.addAndGet(l.size());
-				l.clear();
-
-				// We can fully drain as r is supposed to have same capacity than l
-				r.drainTo(l);
-			}
-
-		});
-
-		// The last transaction
-		consumer.accept(leftOvers);
-		nbConsumed.addAndGet(leftOvers.size());
-
-		return nbConsumed.get();
+		return consumeByPartition(() -> new ArrayBlockingQueue<>(partitionSize), stream, consumer);
 	}
 
 	/**
