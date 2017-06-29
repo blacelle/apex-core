@@ -150,16 +150,42 @@ public class ApexLogHelper {
 		return getNiceTime(timeInMs, TimeUnit.MILLISECONDS);
 	}
 
+	private static final String HOURS_PREFIX = "hours";
+	private static final String MINUTES_PREFIX = "min";
+	private static final String SECONDS_PREFIX = "sec";
+	private static final String MILLIS_PREFIX = "ms";
+
 	public static Object getNiceTime(long time, TimeUnit timeUnit) {
 		return ApexLogHelper.lazyToString(() -> {
 			long timeInMs = timeUnit.toMillis(time);
 
-			if (timeInMs > LIMIT_MINUTES_IN_MS) {
-				return TimeUnit.MILLISECONDS.toMinutes(timeInMs) + "minutes";
-			} else if (timeInMs > LIMIT_SECONDS_IN_MS) {
-				return TimeUnit.MILLISECONDS.toSeconds(timeInMs) + "seconds";
+			if (timeInMs >= TimeUnit.HOURS.toMillis(1)) {
+				String minString = TimeUnit.MILLISECONDS.toHours(timeInMs) + HOURS_PREFIX;
+
+				long minutes = timeInMs - TimeUnit.HOURS.toMillis(1) * TimeUnit.MILLISECONDS.toHours(timeInMs);
+
+				if (minutes > 0) {
+					return minString + " " + TimeUnit.MILLISECONDS.toMinutes(minutes) + MINUTES_PREFIX;
+				} else {
+					return minString;
+				}
 			} else {
-				return timeInMs + "millis";
+				if (timeInMs >= TimeUnit.MINUTES.toMillis(1)) {
+					String minString = TimeUnit.MILLISECONDS.toMinutes(timeInMs) + MINUTES_PREFIX;
+
+					long seconds = timeInMs - TimeUnit.MINUTES.toMillis(1) * TimeUnit.MILLISECONDS.toMinutes(timeInMs);
+
+					if (seconds > 0) {
+						return minString + " " + TimeUnit.MILLISECONDS.toSeconds(seconds) + SECONDS_PREFIX;
+					} else {
+						return minString;
+					}
+
+				} else if (timeInMs > LIMIT_SECONDS_IN_MS) {
+					return TimeUnit.MILLISECONDS.toSeconds(timeInMs) + SECONDS_PREFIX;
+				} else {
+					return timeInMs + MILLIS_PREFIX;
+				}
 			}
 		});
 	}

@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
@@ -261,6 +262,8 @@ public class ApexJMXHelper {
 	}
 
 	public static URL convertToURL(String url) throws MalformedURLException {
+		Objects.requireNonNull(url);
+
 		if (new File(url).exists()) {
 			return new File(url).toURI().toURL();
 		} else {

@@ -121,4 +121,24 @@ public class TestApexLogHelper {
 		Assert.assertEquals("9.8%", ApexLogHelper.getNicePercentage(98, 1000).toString());
 	}
 
+	@Test
+	public void testGetNiceTimeSecondsAndMillis() {
+		Assert.assertEquals("1200ms", ApexLogHelper.getNiceTime(1200).toString());
+	}
+
+	@Test
+	public void testGetNiceTimeMinAndSeconds() {
+		Assert.assertEquals("2min 11sec", ApexLogHelper.getNiceTime(131, TimeUnit.SECONDS).toString());
+	}
+
+	@Test
+	public void testGetNiceTimeRoundMinutes() {
+		Assert.assertEquals("2min", ApexLogHelper.getNiceTime(120, TimeUnit.SECONDS).toString());
+	}
+
+	@Test
+	public void testGetNiceTimeHoursAndMinutes() {
+		Assert.assertEquals("2hours 11min", ApexLogHelper.getNiceTime(131, TimeUnit.MINUTES).toString());
+	}
+
 }
