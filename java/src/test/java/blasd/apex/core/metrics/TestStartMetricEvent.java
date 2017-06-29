@@ -38,12 +38,12 @@ public class TestStartMetricEvent {
 
 	@After
 	public void resetDoRememberStack() {
-		StartMetricEvent.doRememberStack = false;
+		StartMetricEvent.setDoRememberStack(false);
 	}
 
 	@Test
 	public void testStackGeneration() {
-		StartMetricEvent.doRememberStack = true;
+		StartMetricEvent.setDoRememberStack(true);
 
 		StartMetricEvent startEvent = new StartMetricEvent("detailName", "source", "names");
 
@@ -53,7 +53,7 @@ public class TestStartMetricEvent {
 
 	@Test
 	public void testStackNoGeneration() {
-		StartMetricEvent.doRememberStack = false;
+		StartMetricEvent.setDoRememberStack(false);
 
 		StartMetricEvent startEvent = new StartMetricEvent("detailName", "source", "names");
 
@@ -62,7 +62,7 @@ public class TestStartMetricEvent {
 
 	@Test
 	public void testToStringWithUser() {
-		StartMetricEvent.doRememberStack = false;
+		StartMetricEvent.setDoRememberStack(false);
 
 		StartMetricEvent startEvent = new StartMetricEvent("sourceObject",
 				ImmutableMap.of(StartMetricEvent.KEY_USERNAME, "Benoit"),
@@ -77,7 +77,7 @@ public class TestStartMetricEvent {
 
 	@Test
 	public void testToStringWithEndDetails() {
-		StartMetricEvent.doRememberStack = false;
+		StartMetricEvent.setDoRememberStack(false);
 
 		StartMetricEvent startEvent = new StartMetricEvent("sourceObject", "Test");
 
