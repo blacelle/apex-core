@@ -122,8 +122,18 @@ public class TestApexLogHelper {
 	}
 
 	@Test
+	public void testGetNiceTimeMillis() {
+		Assert.assertEquals("912ms", ApexLogHelper.getNiceTime(912).toString());
+	}
+
+	@Test
 	public void testGetNiceTimeSecondsAndMillis() {
-		Assert.assertEquals("1200ms", ApexLogHelper.getNiceTime(1200).toString());
+		Assert.assertEquals("9sec 600ms", ApexLogHelper.getNiceTime(9600).toString());
+	}
+
+	@Test
+	public void testGetNiceTimeSecondsAndMillis_NoHundredsInMillis() {
+		Assert.assertEquals("9sec 60ms", ApexLogHelper.getNiceTime(9060).toString());
 	}
 
 	@Test

@@ -45,16 +45,6 @@ public class ApexLogHelper {
 	public static final int THOUSAND = 1000;
 	public static final int TEN_F = 10;
 
-	/**
-	 * We show millis until 5 seconds
-	 */
-	private static final long LIMIT_SECONDS_IN_MS = TimeUnit.MILLISECONDS.convert(5, TimeUnit.SECONDS);
-
-	/**
-	 * We show seconds until 3 minutes
-	 */
-	private static final long LIMIT_MINUTES_IN_MS = TimeUnit.MILLISECONDS.convert(3, TimeUnit.MINUTES);
-
 	private static final long LIMIT_ENTRY_PER_XXX = 10;
 
 	protected ApexLogHelper() {
@@ -169,23 +159,29 @@ public class ApexLogHelper {
 				} else {
 					return minString;
 				}
-			} else {
-				if (timeInMs >= TimeUnit.MINUTES.toMillis(1)) {
-					String minString = TimeUnit.MILLISECONDS.toMinutes(timeInMs) + MINUTES_PREFIX;
+			} else if (timeInMs >= TimeUnit.MINUTES.toMillis(1)) {
+				String minString = TimeUnit.MILLISECONDS.toMinutes(timeInMs) + MINUTES_PREFIX;
 
-					long seconds = timeInMs - TimeUnit.MINUTES.toMillis(1) * TimeUnit.MILLISECONDS.toMinutes(timeInMs);
+				long seconds = timeInMs - TimeUnit.MINUTES.toMillis(1) * TimeUnit.MILLISECONDS.toMinutes(timeInMs);
 
-					if (seconds > 0) {
-						return minString + " " + TimeUnit.MILLISECONDS.toSeconds(seconds) + SECONDS_PREFIX;
-					} else {
-						return minString;
-					}
-
-				} else if (timeInMs > LIMIT_SECONDS_IN_MS) {
-					return TimeUnit.MILLISECONDS.toSeconds(timeInMs) + SECONDS_PREFIX;
+				if (seconds > 0) {
+					return minString + " " + TimeUnit.MILLISECONDS.toSeconds(seconds) + SECONDS_PREFIX;
 				} else {
-					return timeInMs + MILLIS_PREFIX;
+					return minString;
 				}
+
+			} else if (timeInMs >= TimeUnit.SECONDS.toMillis(1)) {
+				String minString = TimeUnit.MILLISECONDS.toSeconds(timeInMs) + SECONDS_PREFIX;
+
+				long millis = timeInMs - TimeUnit.SECONDS.toMillis(1) * TimeUnit.MILLISECONDS.toSeconds(timeInMs);
+
+				if (millis > 0) {
+					return minString + " " + millis + MILLIS_PREFIX;
+				} else {
+					return minString;
+				}
+			} else {
+				return timeInMs + MILLIS_PREFIX;
 			}
 		});
 	}
