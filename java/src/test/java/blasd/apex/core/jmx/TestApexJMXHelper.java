@@ -170,7 +170,7 @@ public class TestApexJMXHelper {
 		// Check the URL maps actually to the file
 		Assert.assertNotNull(asURL.openStream());
 
-		Assert.assertEquals(new URL("file:/" + testPath), asURL);
+		Assert.assertEquals(testPath.toUri().toURL(), asURL);
 	}
 
 	@Test
@@ -183,8 +183,7 @@ public class TestApexJMXHelper {
 		Assert.assertNotNull(asURL.openStream());
 
 		// https://stackoverflow.com/questions/60160/how-to-escape-text-for-regular-expression-in-java
-		URL expectedUrl = new URL("file:/"
-				+ testPath.toString().replaceFirst(Pattern.quote("ap ex"), Matcher.quoteReplacement("ap%20ex")));
+		URL expectedUrl = testPath.toUri().toURL();
 		Assert.assertEquals(expectedUrl, asURL);
 	}
 
