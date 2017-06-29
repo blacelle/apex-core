@@ -22,6 +22,9 @@
  */
 package blasd.apex.core.jmx;
 
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +35,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -43,7 +49,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import blasd.apex.core.jmx.ApexJMXHelper;
+import blasd.apex.core.io.ApexFileHelper;
 
 public class TestApexJMXHelper {
 
@@ -125,7 +131,61 @@ public class TestApexJMXHelper {
 		Assert.assertEquals(Arrays.asList(Arrays.asList("B"), Arrays.asList("A")),
 				Lists.newArrayList(decreasing.keySet()));
 
-		// CHeckthe key has been makde JMX compatible
+		// Check the key has been made JMX compatible
 		Assert.assertTrue(decreasing.keySet().iterator().next() instanceof ArrayList);
 	}
+
+	@Test
+	public void testConvertToMapList() {
+		Map<String, List<String>> asMapOfList = ApexJMXHelper.convertToMapList("a=b|c;d=e|f");
+
+		Assert.assertEquals(ImmutableMap.of("a", ImmutableList.of("b", "c"), "d", ImmutableList.of("e", "f")),
+				asMapOfList);
+	}
+
+	@Test
+	public void testConvertToJMXListMapString() {
+		LocalDateTime nowAsObject = LocalDateTime.now();
+		List<? extends Map<String, String>> asMapOfList =
+				ApexJMXHelper.convertToJMXListMapString(ImmutableList.of(ImmutableMap.of("key", nowAsObject)));
+
+		Assert.assertEquals(ImmutableList.of(ImmutableMap.of("key", nowAsObject.toString())), asMapOfList);
+
+		// JMX compatible classes
+		Assert.assertTrue(asMapOfList instanceof ArrayList);
+		Assert.assertTrue(asMapOfList.get(0) instanceof TreeMap);
+	}
+
+	@Test
+	public void testConvertURL_DefaultJMX() throws IOException {
+		Assert.assertNull(ApexJMXHelper.convertToURL("String"));
+	}
+
+	@Test
+	public void testConvertURL() throws IOException {
+		Path testPath = ApexFileHelper.createTempFile("apex", "tmp");
+
+		URL asURL = ApexJMXHelper.convertToURL(testPath.toString());
+
+		// Check the URL maps actually to the file
+		Assert.assertNotNull(asURL.openStream());
+
+		Assert.assertEquals(new URL("file:/" + testPath), asURL);
+	}
+
+	@Test
+	public void testConvertURL_withspace() throws IOException {
+		Path testPath = ApexFileHelper.createTempFile("ap ex", "tmp");
+
+		URL asURL = ApexJMXHelper.convertToURL(testPath.toString());
+
+		// Check the URL maps actually to the file
+		Assert.assertNotNull(asURL.openStream());
+
+		// https://stackoverflow.com/questions/60160/how-to-escape-text-for-regular-expression-in-java
+		URL expectedUrl = new URL("file:/"
+				+ testPath.toString().replaceFirst(Pattern.quote("ap ex"), Matcher.quoteReplacement("ap%20ex")));
+		Assert.assertEquals(expectedUrl, asURL);
+	}
+
 }

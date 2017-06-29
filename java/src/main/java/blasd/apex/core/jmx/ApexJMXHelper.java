@@ -39,6 +39,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.google.common.base.Functions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -110,13 +111,13 @@ public class ApexJMXHelper {
 	public static List<? extends Map<String, String>> convertToJMXListMapString(
 			Iterable<? extends Map<String, ?>> iterator) {
 		// Convert to brand HashMap of String for JMX compatibility
-		Iterable<? extends Map<String, String>> asString = Iterables.transform(iterator, input -> {
-			// Lexicographical order over String
-			return new TreeMap<>(Maps.transformValues(input, String::valueOf));
-		});
+		// Lexicographical order over String
+		Iterable<? extends Map<String, String>> asString =
+				Iterables.transform(iterator, input -> new TreeMap<>(Maps.transformValues(input, String::valueOf)));
 
 		// Convert to brand ArrayList for JMX compatibility
 		return Lists.newArrayList(asString);
+
 	}
 
 	public static List<String> convertToList(String asString) {
@@ -262,6 +263,12 @@ public class ApexJMXHelper {
 	}
 
 	public static URL convertToURL(String url) throws MalformedURLException {
+		url = ApexJMXHelper.convertToString(url);
+
+		if (Strings.isNullOrEmpty(url)) {
+			return null;
+		}
+
 		Objects.requireNonNull(url);
 
 		if (new File(url).exists()) {
