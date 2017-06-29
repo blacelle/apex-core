@@ -71,8 +71,6 @@ public class ApexCartesianProductHelper {
 
 	private static final int CARTESIAN_CARDINALITY_LOG = 1000000;
 
-	public static int cartesianSizeLimit = CARTESIAN_CARDINALITY_LOG;
-
 	protected ApexCartesianProductHelper() {
 		// hidden
 	}
@@ -80,9 +78,7 @@ public class ApexCartesianProductHelper {
 	@Beta
 	public static <T, V> Set<? extends Map<T, ? extends Set<V>>> groupByKeyAndInValues(
 			Iterable<? extends Map<? extends T, ? extends V>> input) {
-		return groupByKeyAndInValues(input, any -> {
-			LOGGER.trace("Working");
-		});
+		return groupByKeyAndInValues(input, any -> LOGGER.trace("Working"));
 	}
 
 	public static <T, V> Set<? extends Map<T, ? extends Set<V>>> groupByKeyAndInValues(

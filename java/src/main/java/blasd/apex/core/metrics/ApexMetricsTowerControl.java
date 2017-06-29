@@ -365,7 +365,7 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 
 	@ManagedOperation
 	public void setDoRememberStack(boolean doRememberStack) {
-		StartMetricEvent.doRememberStack = doRememberStack;
+		StartMetricEvent.setDoRememberStack(doRememberStack);
 	}
 
 	/**

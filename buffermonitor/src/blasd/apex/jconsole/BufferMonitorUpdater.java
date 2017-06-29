@@ -22,6 +22,9 @@
  */
 package blasd.apex.jconsole;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.swing.SwingWorker;
 
 /**
@@ -31,6 +34,10 @@ import javax.swing.SwingWorker;
  *
  */
 public class BufferMonitorUpdater extends SwingWorker<Object, Object> {
+
+	// SLF4J in not available in the JConsole
+	protected static final Logger LOGGER = Logger.getLogger(BufferMonitorJPanel.class.getName());
+
 	protected final BufferMonitorJPanel jconsolePlugin;
 
 	public BufferMonitorUpdater(BufferMonitorJPanel jconsolePlugin) {
@@ -49,7 +56,7 @@ public class BufferMonitorUpdater extends SwingWorker<Object, Object> {
 		try {
 			jconsolePlugin.repaint();
 		} catch (RuntimeException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Ouch", e);
 		}
 	}
 }

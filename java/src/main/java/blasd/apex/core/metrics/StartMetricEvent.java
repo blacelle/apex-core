@@ -44,9 +44,6 @@ import blasd.apex.core.thread.CurrentThreadStack;
  * 
  */
 public class StartMetricEvent extends AMetricEvent {
-	// As retrieving the stack could be expensive, this boolean has to be set to
-	// true manually or with SetStaticMBean
-	public static boolean doRememberStack = false;
 
 	public static final String KEY_USERNAME = "UserName";
 	public static final String KEY_PIVOT_ID = "ActivePivot";
@@ -62,6 +59,14 @@ public class StartMetricEvent extends AMetricEvent {
 
 	// Streaming is typically used by Live
 	public static final String VALUE_CLIENT_STREAMING = "Streaming";
+
+	// As retrieving the stack could be expensive, this boolean has to be set to
+	// true manually or with SetStaticMBean
+	private static boolean doRememberStack = false;
+
+	public static void setDoRememberStack(boolean doRememberStack) {
+		StartMetricEvent.doRememberStack = doRememberStack;
+	}
 
 	// Remember the stack could be much helpful
 	public final Optional<StackTraceElement[]> stack;

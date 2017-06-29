@@ -99,9 +99,9 @@ public class BufferMonitorJPanel extends JPanel {
 				LOGGER.log(Level.FINE, DIRECT_BUFFER_NAME + " is registered");
 			}
 		} catch (MalformedObjectNameException ex) {
-			ex.printStackTrace();
+			LOGGER.log(Level.WARNING, "Ouch", ex);
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			LOGGER.log(Level.WARNING, "Ouch", ex);
 		}
 	}
 
@@ -292,8 +292,7 @@ public class BufferMonitorJPanel extends JPanel {
 				try {
 					Thread.sleep(KB);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.log(Level.WARNING, "Ouch", e);
 				}
 				refreshLaterIndefinitely(panel);
 			}

@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
@@ -60,10 +61,14 @@ public class AMetricEvent {
 	/**
 	 * Ability to retrieve all encountered source classes, and then monitor available events
 	 */
-	public static final Set<Class<?>> SOURCE_CLASSES = Sets.newConcurrentHashSet();
+	protected static final Set<Class<?>> SOURCE_CLASSES = Sets.newConcurrentHashSet();
 
 	public final Object source;
 	public final List<? extends String> names;
+
+	public static Set<Class<?>> getEncounteredSourceClasses() {
+		return ImmutableSet.copyOf(SOURCE_CLASSES);
+	}
 
 	public AMetricEvent(Object source, List<? extends String> names) {
 		this.source = Objects.requireNonNull(source);

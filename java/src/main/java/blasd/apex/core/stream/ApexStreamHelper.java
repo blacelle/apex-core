@@ -40,6 +40,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Streams;
@@ -51,6 +54,9 @@ import com.google.common.collect.Streams;
  *
  */
 public class ApexStreamHelper {
+
+	protected static final Logger LOGGER = LoggerFactory.getLogger(ApexStreamHelper.class);
+
 	protected ApexStreamHelper() {
 		// hidden
 	}
@@ -125,17 +131,23 @@ public class ApexStreamHelper {
 			}
 		}, (l, r) -> {
 			// r has to be drained to l
-			r.drainTo(l, l.remainingCapacity());
-			if (!r.isEmpty()) {
+			int nbDrained = r.drainTo(l, l.remainingCapacity());
+
+			// Loop until r is drained
+			while (!r.isEmpty()) {
 				// We need to submit a batch
 				consumer.accept(l);
 				nbConsumed.addAndGet(l.size());
 				l.clear();
 
 				// We can fully drain as r is supposed to have same capacity than l
-				r.drainTo(l);
+				nbDrained += r.drainTo(l);
 			}
-
+			if (nbDrained < 0) {
+				// Just for the sake of sonar warning about .drainTo result not used
+				// TODO: is there something to do with this information?
+				LOGGER.trace("nbDrained: {}", nbDrained);
+			}
 		});
 
 		// The last transaction

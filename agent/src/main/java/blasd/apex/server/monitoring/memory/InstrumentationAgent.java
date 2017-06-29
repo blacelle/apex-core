@@ -29,6 +29,8 @@ import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.CodeSource;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
@@ -45,6 +47,10 @@ import com.sun.tools.attach.VirtualMachine;
  * 
  */
 public class InstrumentationAgent {
+
+	// SLF4J in not available in the Agents
+	protected static final Logger LOGGER = Logger.getLogger(InstrumentationAgent.class.getName());
+
 	private static volatile Instrumentation instrumentation;
 
 	protected InstrumentationAgent() {
@@ -85,6 +91,7 @@ public class InstrumentationAgent {
 			} catch (RuntimeException e) {
 				// makes sure the exception gets printed at
 				// least once
+				LOGGER.log(Level.SEVERE, "Ouch", e);
 				e.printStackTrace();
 				throw e;
 			}

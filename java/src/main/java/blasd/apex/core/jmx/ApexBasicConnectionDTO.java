@@ -33,6 +33,9 @@ import com.google.common.base.MoreObjects;
  *
  */
 public final class ApexBasicConnectionDTO {
+	// Same as in UsernamePasswordAuthenticationToken
+	public static final Object PASSWORD_IN_TOSTRING = "[PROTECTED]";
+
 	public final String host;
 	public final int port;
 	public final String userName;
@@ -52,7 +55,7 @@ public final class ApexBasicConnectionDTO {
 				.add("port", port)
 				.add("userName", userName)
 				// Hidden for safety
-				.add("password", "XXXX")
+				.add("password", PASSWORD_IN_TOSTRING)
 				.toString();
 	}
 

@@ -51,7 +51,7 @@ public class ApexFileHelper {
 		try {
 			initParentTmpFolder();
 		} catch (IOException e) {
-			LOGGER.error("Failure while creating a top tmp folder");
+			LOGGER.error("Failure while creating a top tmp folder", e);
 			// Keep printStackTrace as we are in a static block: SLF4J may not be initialized yet
 			e.printStackTrace();
 			applicationTemporaryFolder = null;
