@@ -584,12 +584,9 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 		sb.append(ApexLogHelper.getNiceMemory(size));
 	}
 
+	@Deprecated
 	public static String getNiceBytes(long size) {
-		StringBuilder sw = new StringBuilder();
-
-		appendSize(sw, size);
-
-		return sw.toString();
+		return ApexLogHelper.getNiceMemory(size).toString();
 	}
 
 	protected void doLog(IApexGarbageCollectionNotificationInfo info) {

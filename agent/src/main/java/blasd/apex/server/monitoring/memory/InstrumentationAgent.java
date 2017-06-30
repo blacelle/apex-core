@@ -166,12 +166,25 @@ public class InstrumentationAgent {
 
 	/**
 	 * 
-	 * @return an {@link Instrumentation} instance as instanciated by the JVM itself
+	 * @return an {@link Instrumentation} instance as instantiated by the JVM itself
 	 */
 	public static Instrumentation getInstrumentation() {
 		if (instrumentation == null) {
 			InstrumentationAgent.initializeIfNeeded();
 		}
 		return instrumentation;
+	}
+
+	/**
+	 * 
+	 * @return an {@link Instrumentation} instance as instantiated by the JVM itself, or null if anything bad happened
+	 */
+	public static Instrumentation safeGetInstrumentation() {
+		try {
+			return getInstrumentation();
+		} catch (RuntimeException e) {
+			LOGGER.log(Level.FINE, "Issue while getting instrumentation", e);
+			return null;
+		}
 	}
 }

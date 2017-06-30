@@ -118,20 +118,20 @@ public class TestApexMemoryHelper {
 
 	@Test
 	public void testStringWeight() {
-		Assert.assertEquals(56, ApexMemoryHelper.recursiveSize("Youpi"));
+		Assert.assertEquals(56, ApexMemoryHelper.deepSize("Youpi"));
 
 		if (false) {
 			// Adding a single char add 2 bytes. As the JVM packes by block of 8 bytes, it may not be enough to grow the
 			// estimated size
-			Assert.assertTrue(ApexMemoryHelper.recursiveSize("Youpi") < ApexMemoryHelper.recursiveSize("Youpi+"));
+			Assert.assertTrue(ApexMemoryHelper.deepSize("Youpi") < ApexMemoryHelper.deepSize("Youpi+"));
 		}
 		// Adding 4 chars leads to adding 8 bytes: the actual JVM size is increased
-		Assert.assertTrue(ApexMemoryHelper.recursiveSize("Youpi") < ApexMemoryHelper.recursiveSize("Youpi1234"));
+		Assert.assertTrue(ApexMemoryHelper.deepSize("Youpi") < ApexMemoryHelper.deepSize("Youpi1234"));
 	}
 
 	@Test
 	public void testImmutableMapWeight() {
-		Assert.assertEquals(144, ApexMemoryHelper.recursiveSize(ImmutableMap.of("key", "Value")));
+		Assertions.assertThat(ApexMemoryHelper.deepSize(ImmutableMap.of("key", "Value"))).isBetween(100L, 250L);
 	}
 
 	@Test
@@ -140,28 +140,28 @@ public class TestApexMemoryHelper {
 		Map<String, Object> recursiveMap = new HashMap<>();
 		recursiveMap.put("myself", recursiveMap);
 
-		long recursiveSize = ApexMemoryHelper.recursiveSize(recursiveMap);
-		Assert.assertEquals(216, recursiveSize);
+		long deepSize = ApexMemoryHelper.deepSize(recursiveMap);
+		Assert.assertEquals(216, deepSize);
 
 		// Change the Map so it does not reference itself: the object graph should have the same size
 		Map<String, Object> withoutRecursivity = new HashMap<>();
 		withoutRecursivity.put("myself", null);
 
-		long notRecursiveSize = ApexMemoryHelper.recursiveSize(withoutRecursivity);
-		Assert.assertEquals(notRecursiveSize, recursiveSize);
+		long notdeepSize = ApexMemoryHelper.deepSize(withoutRecursivity);
+		Assert.assertEquals(notdeepSize, deepSize);
 	}
 
 	@Test
 	public void testArrayWeight() {
 		Object[] array = new Object[2];
 
-		long sizeEmpty = ApexMemoryHelper.recursiveSize(array);
+		long sizeEmpty = ApexMemoryHelper.deepSize(array);
 		Assert.assertEquals(24, sizeEmpty);
 
 		array[0] = new LocalDate();
 		array[1] = new LocalDate();
 
-		long sizeFull = ApexMemoryHelper.recursiveSize(array);
+		long sizeFull = ApexMemoryHelper.deepSize(array);
 
 		// We have different memory consumptions depending on the env/jdk/run
 		Assertions.assertThat(sizeFull).isBetween(900L, 9200L);
@@ -171,7 +171,7 @@ public class TestApexMemoryHelper {
 
 	@Test
 	public void testIntArrayWeight() {
-		Assert.assertEquals(44, ApexMemoryHelper.getObjectArrayMemory(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
+		Assert.assertEquals(44, ApexMemoryHelper.getObjectArrayMemory(new int[9]));
 	}
 
 	@Test

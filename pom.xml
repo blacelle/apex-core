@@ -33,7 +33,7 @@
 	<!-- Needs 2 hours to appear in http://search.maven.org/ -->
 
 	<properties>
-		<guava.version>21.0</guava.version>
+		<guava.version>22.0</guava.version>
 
 		<awaitility.version>2.0.0</awaitility.version>
 		<findbugs.version>3.0.4</findbugs.version>

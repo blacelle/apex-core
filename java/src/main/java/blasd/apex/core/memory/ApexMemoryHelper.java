@@ -34,6 +34,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.IntPredicate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 
 import com.google.common.base.CharMatcher;
@@ -50,6 +52,9 @@ import blasd.apex.server.monitoring.memory.InstrumentationAgent;
  *
  */
 public class ApexMemoryHelper implements IApexMemoryConstants {
+
+	protected static final Logger LOGGER = LoggerFactory.getLogger(ApexMemoryHelper.class);
+
 	// TODO: we should compute the actual memory of all Strings, in order to reject very long Strings
 	public static final int NB_STRING_BEFORE_CLEAR = 10000;
 
@@ -241,34 +246,64 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 	}
 
 	/**
+	 * @deprecated renamed to deepSize
+	 */
+	@Deprecated
+	public static long recursiveSize(Object object) {
+		return deepSize(object);
+	}
+
+	/**
 	 * 
 	 * @param object
-	 *            the object to analyse
+	 *            the object to analyze
 	 * @return the number of bytes consumed by given objects, taking in account the references objects
 	 */
-	public static long recursiveSize(Object object) {
+	public static long deepSize(Object object) {
 		// http://stackoverflow.com/questions/1063068/how-does-the-jvm-ensure-that-system-identityhashcode-will-never-change
-		return recursiveSizeWithBloomFilter(object, Integer.MAX_VALUE / 1024);
+		return deepSizeWithBloomFilter(object, Integer.MAX_VALUE / 1024);
 	}
 
 	public static long recursiveSize(Object object, IntPredicate identityPredicate) {
+		return deepSize(object, identityPredicate);
+	}
+
+	public static long deepSize(Object object, IntPredicate identityPredicate) {
 		if (object == null) {
 			return 0L;
 		} else {
-			Instrumentation instrumentation = InstrumentationAgent.getInstrumentation();
+			Instrumentation instrumentation = InstrumentationAgent.safeGetInstrumentation();
+
+			if (instrumentation == null) {
+				LOGGER.debug("Instrumentation is not available");
+				return 0L;
+			}
 
 			LongAdder totalSize = new LongAdder();
 
-			recursiveSize(instrumentation, identityPredicate, totalSize, object);
+			deepSize(instrumentation, identityPredicate, totalSize, object);
 
 			return totalSize.sum();
 		}
 	}
 
+	@Deprecated
 	public static long recursiveSizeWithBloomFilter(Object object, long expectedObjectCardinality) {
+		return deepSizeWithBloomFilter(object, expectedObjectCardinality);
+	}
+
+	public static long deepSizeWithBloomFilter(Object object, long expectedObjectCardinality) {
 		BloomFilter<Integer> identities = BloomFilter.create(Funnels.integerFunnel(), expectedObjectCardinality);
 
 		return recursiveSize(object, identities::put);
+	}
+
+	@Deprecated
+	public static void recursiveSize(Instrumentation instrumentation,
+			IntPredicate identities,
+			LongAdder totalSize,
+			Object object) {
+		deepSize(instrumentation, identities, totalSize, object);
 	}
 
 	/**
@@ -284,7 +319,7 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 	 */
 	// see https://github.com/jbellis/jamm
 	//
-	public static void recursiveSize(Instrumentation instrumentation,
+	public static void deepSize(Instrumentation instrumentation,
 			IntPredicate identities,
 			LongAdder totalSize,
 			Object object) {
