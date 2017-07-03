@@ -25,6 +25,10 @@ package blasd.apex.core.logging;
 import java.text.DecimalFormat;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Streams;
 
 import blasd.apex.core.memory.IApexMemoryConstants;
 
@@ -118,6 +122,25 @@ public class ApexLogHelper {
 				return null + "(null)";
 			} else {
 				return o.toString() + "(" + o.getClass().getName() + ")";
+			}
+		});
+	}
+
+	public static Object getToStringWithLimit(Iterable<?> iterable, int limitSize) {
+		return lazyToString(() -> {
+			if (iterable == null) {
+				return null + "(null)";
+			} else {
+				int size = Iterables.size(iterable);
+
+				if (size <= limitSize) {
+					return iterable.toString();
+				} else {
+					// Iterable<?> limited = Iterables.limit(iterable, limitSize);
+
+					return "[" + Streams.stream(iterable).limit(limitSize).map(Object::toString).collect(
+							Collectors.joining(", ")) + ", (" + (size - limitSize) + " more elements)]";
+				}
 			}
 		});
 	}

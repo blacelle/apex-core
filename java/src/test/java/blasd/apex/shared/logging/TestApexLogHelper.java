@@ -22,6 +22,7 @@
  */
 package blasd.apex.shared.logging;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
@@ -151,4 +152,19 @@ public class TestApexLogHelper {
 		Assert.assertEquals("2hours 11min", ApexLogHelper.getNiceTime(131, TimeUnit.MINUTES).toString());
 	}
 
+	@Test
+	public void testCollectionLimit_under() {
+		Assert.assertEquals("[0, 1]", ApexLogHelper.getToStringWithLimit(Arrays.asList(0, 1), 3).toString());
+	}
+
+	@Test
+	public void testCollectionLimit_same() {
+		Assert.assertEquals("[0, 1, 2]", ApexLogHelper.getToStringWithLimit(Arrays.asList(0, 1, 2), 3).toString());
+	}
+
+	@Test
+	public void testCollectionLimit_above() {
+		Assert.assertEquals("[0, 1, (3 more elements)]",
+				ApexLogHelper.getToStringWithLimit(Arrays.asList(0, 1, 2, 3, 4), 2).toString());
+	}
 }
