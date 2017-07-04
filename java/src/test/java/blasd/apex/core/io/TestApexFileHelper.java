@@ -22,7 +22,9 @@
  */
 package blasd.apex.core.io;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 
 import org.junit.Assert;
@@ -42,5 +44,19 @@ public class TestApexFileHelper {
 	@Test
 	public void testNoNewLine() {
 		Assert.assertEquals("A B C D", ApexFileHelper.cleanWhitespaces("A\tB  C\rD"));
+	}
+
+	@Test
+	public void testExpandJarToDisk() throws IOException {
+		// Choose a class in a small jar so the test remains fast
+		String pathToResourceInJar = "/org/slf4j/Logger.class";
+		URL resource = ApexFileHelper.getResourceURL(pathToResourceInJar);
+
+		Path jarPath = ApexFileHelper.getHoldingJarPath(resource).get();
+
+		Path tmpPath = ApexFileHelper.createTempPath("apex", "testExpandJarToDisk");
+		ApexFileHelper.expandJarToDisk(jarPath, tmpPath);
+
+		Assert.assertTrue(new File(tmpPath.toFile(), pathToResourceInJar).exists());
 	}
 }

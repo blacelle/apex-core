@@ -22,6 +22,8 @@
  */
 package blasd.apex.core.spring;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import javax.management.MBeanException;
 import javax.management.ReflectionException;
 import javax.management.modelmbean.ModelMBean;
@@ -43,6 +45,12 @@ import org.springframework.jmx.export.annotation.AnnotationMBeanExporter;
 public class LoggingMethodCallAnnotationMBeanExporter extends AnnotationMBeanExporter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LoggingMethodCallAnnotationMBeanExporter.class);
 
+	protected final AtomicLong nbErrors = new AtomicLong();
+
+	public long getNbErrors() {
+		return nbErrors.get();
+	}
+
 	// http://stackoverflow.com/questions/5767747/pmd-cpd-ignore-bits-of-code-using-comments
 	@SuppressWarnings("CPD-START")
 	@Override
@@ -57,6 +65,7 @@ public class LoggingMethodCallAnnotationMBeanExporter extends AnnotationMBeanExp
 					try {
 						return super.invoke(opName, opArgs, sig);
 					} catch (MBeanException | ReflectionException | RuntimeException | Error e) {
+						nbErrors.incrementAndGet();
 						onErrorInRemoteCall(e);
 						throw e;
 					}
@@ -70,6 +79,7 @@ public class LoggingMethodCallAnnotationMBeanExporter extends AnnotationMBeanExp
 					try {
 						return super.invoke(opName, opArgs, sig);
 					} catch (MBeanException | ReflectionException | RuntimeException | Error e) {
+						nbErrors.incrementAndGet();
 						onErrorInRemoteCall(e);
 						throw e;
 					}

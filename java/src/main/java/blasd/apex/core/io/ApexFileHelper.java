@@ -27,12 +27,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.jar.JarEntry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.DefaultResourceLoader;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Strings;
@@ -52,8 +54,6 @@ public class ApexFileHelper {
 			initParentTmpFolder();
 		} catch (IOException e) {
 			LOGGER.error("Failure while creating a top tmp folder", e);
-			// Keep printStackTrace as we are in a static block: SLF4J may not be initialized yet
-			e.printStackTrace();
 			applicationTemporaryFolder = null;
 		}
 	}
@@ -167,14 +167,37 @@ public class ApexFileHelper {
 				Path diskPath = targetPath.resolve(file.getName());
 				if (file.isDirectory()) {
 					// if its a directory, create it
-					diskPath.toFile().mkdir();
+					if (!diskPath.toFile().mkdir()) {
+						throw new IllegalStateException("Failed creating " + file);
+					}
 				} else {
+					// We may receive files without their parent directories
+					diskPath.getParent().toFile().mkdirs();
+
 					// Copy the file content to disk
 					try (java.io.InputStream is = jar.getInputStream(file)) {
 						Files.copy(is, diskPath);
 					}
 				}
 			}
+		}
+	}
+
+	public static Optional<Path> getHoldingJarPath(URL resource) throws IOException {
+		// "jar:file:/C:/HOMEWARE/ITEC-Toolbox/apps/jdk/sunjdk180_112_x64/jre/lib/rt.jar!/java/lang/String.class";
+		if (resource.getProtocol().equals("jar")) {
+			String path = resource.getPath();
+
+			int indexOfInsideJar = path.indexOf("!/");
+			DefaultResourceLoader defaultResourceLoader = new DefaultResourceLoader();
+			if (indexOfInsideJar == -1) {
+				return Optional.of(defaultResourceLoader.getResource(resource.toString()).getFile().toPath());
+			} else {
+				String jarOnly = path.substring(0, indexOfInsideJar);
+				return Optional.of(defaultResourceLoader.getResource(jarOnly).getFile().toPath());
+			}
+		} else {
+			return Optional.empty();
 		}
 	}
 }

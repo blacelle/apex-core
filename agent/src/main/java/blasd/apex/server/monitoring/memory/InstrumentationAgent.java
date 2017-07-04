@@ -92,7 +92,6 @@ public class InstrumentationAgent {
 				// makes sure the exception gets printed at
 				// least once
 				LOGGER.log(Level.SEVERE, "Ouch", e);
-				e.printStackTrace();
 				throw e;
 			}
 		}
