@@ -47,8 +47,8 @@
 				<configuration>
 					<archive>
 						<manifestEntries>
-							<Premain-Class>blasd.apex.server.monitoring.memory.InstrumentationAgent</Premain-Class>
-							<Agent-Class>blasd.apex.server.monitoring.memory.InstrumentationAgent</Agent-Class>
+							<Premain-Class>blasd.apex.core.agent.InstrumentationAgent</Premain-Class>
+							<Agent-Class>blasd.apex.core.agent.InstrumentationAgent</Agent-Class>
 						</manifestEntries>
 					</archive>
 				</configuration>

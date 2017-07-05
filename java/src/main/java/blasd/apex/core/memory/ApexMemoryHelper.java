@@ -506,6 +506,8 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 		if (unitsDone < 2) {
 			if (bytes > 0) {
 				string += bytes + "B";
+			} else {
+				LOGGER.trace("No more bytes");
 			}
 		}
 
