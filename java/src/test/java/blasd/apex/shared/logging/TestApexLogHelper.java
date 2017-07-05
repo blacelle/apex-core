@@ -167,4 +167,14 @@ public class TestApexLogHelper {
 		Assert.assertEquals("[0, 1, (3 more elements)]",
 				ApexLogHelper.getToStringWithLimit(Arrays.asList(0, 1, 2, 3, 4), 2).toString());
 	}
+
+	@Test
+	public void testLimitChars() {
+		Assert.assertEquals("'12345...(4 more chars)'", ApexLogHelper.getFirstChars("123456789", 5).toString());
+	}
+
+	@Test
+	public void testLimitChars_underlimit() {
+		Assert.assertEquals("123456789", ApexLogHelper.getFirstChars("123456789", 15).toString());
+	}
 }

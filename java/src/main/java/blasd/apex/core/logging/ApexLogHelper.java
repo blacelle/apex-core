@@ -126,6 +126,10 @@ public class ApexLogHelper {
 		});
 	}
 
+	/**
+	 * @deprecated prefer .getFirstChars
+	 */
+	@Deprecated
 	public static Object getToStringWithLimit(Iterable<?> iterable, int limitSize) {
 		return lazyToString(() -> {
 			if (iterable == null) {
@@ -261,6 +265,20 @@ public class ApexLogHelper {
 				// } else {
 				//
 				// }
+			}
+		});
+	}
+
+	public static Object getFirstChars(Object toString, int limitChars) {
+		return lazyToString(() -> {
+			String asString = toString.toString();
+			if (asString.length() <= limitChars) {
+				return asString;
+			} else {
+				return "'" + asString.substring(0, limitChars)
+						+ "...("
+						+ (asString.length() - limitChars)
+						+ " more chars)'";
 			}
 		});
 	}

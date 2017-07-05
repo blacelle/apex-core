@@ -166,7 +166,8 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 		this(new ApexThreadDump(ManagementFactory.getThreadMXBean()));
 	}
 
-	@ManagedAttribute
+	// This is not a ManagedAttribute as the type (String) is not compatible with the getter
+	@ManagedOperation
 	public void setTargetMaxTotalMemory(String targetMax) {
 		long asLong = ApexMemoryHelper.memoryAsLong(targetMax);
 
@@ -174,8 +175,8 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 	}
 
 	@ManagedAttribute
-	public long getTargetMaxTotalMemory() {
-		return targetMaxTotalMemory.get();
+	public String getTargetMaxTotalMemory() {
+		return ApexMemoryHelper.memoryAsString(targetMaxTotalMemory.get());
 	}
 
 	@Override

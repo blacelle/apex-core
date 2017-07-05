@@ -205,4 +205,12 @@ public class TestApexMemoryHelper {
 	public void testParseMemoryFailsOnNotDigitsFirst() {
 		ApexMemoryHelper.memoryAsLong("12a3m");
 	}
+
+	@Test
+	public void testMemoryToString() {
+		Assert.assertEquals("123B", ApexMemoryHelper.memoryAsString(123));
+		Assert.assertEquals("1K206B", ApexMemoryHelper.memoryAsString(1230));
+		Assert.assertEquals("1M177K", ApexMemoryHelper.memoryAsString(1230000));
+		Assert.assertEquals("1G149M", ApexMemoryHelper.memoryAsString(1230000000));
+	}
 }

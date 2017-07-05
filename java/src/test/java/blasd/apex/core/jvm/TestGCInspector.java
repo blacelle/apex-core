@@ -22,6 +22,7 @@
  */
 package blasd.apex.core.jvm;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,16 +31,27 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.management.JMException;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource;
+import org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler;
+import org.springframework.jmx.export.metadata.InvalidMetadataException;
+import org.springframework.jmx.export.metadata.JmxAttributeSource;
+import org.springframework.jmx.export.metadata.ManagedAttribute;
+import org.springframework.jmx.export.metadata.ManagedMetric;
+import org.springframework.jmx.export.metadata.ManagedNotification;
+import org.springframework.jmx.export.metadata.ManagedOperation;
+import org.springframework.jmx.export.metadata.ManagedOperationParameter;
+import org.springframework.jmx.export.metadata.ManagedResource;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 
-import blasd.apex.core.jvm.GCInspector;
 import blasd.apex.core.memory.IApexMemoryConstants;
 import blasd.apex.core.thread.IApexThreadDumper;
 
@@ -205,5 +217,17 @@ public class TestGCInspector implements IApexMemoryConstants {
 
 		// The last row looks like: Total 1819064 141338008
 		Assert.assertTrue(firstRows.split(System.lineSeparator())[5].startsWith("Total "));
+	}
+
+	// We check the getters and setters are valid according to Spring
+	@Test
+	public void testGetterSetters() throws JMException {
+		MetadataMBeanInfoAssembler assembler = new MetadataMBeanInfoAssembler();
+
+		assembler.setAttributeSource(new AnnotationJmxAttributeSource());
+
+		assembler.afterPropertiesSet();
+
+		assembler.getMBeanInfo(new GCInspector(), "beanKey");
 	}
 }

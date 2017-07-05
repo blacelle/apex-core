@@ -472,4 +472,43 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 
 		return Long.parseLong(digits) * multiplier;
 	}
+
+	public static String memoryAsString(long bytes) {
+		String string = "";
+
+		int unitsDone = 0;
+		if (unitsDone < 2) {
+			long gb = bytes / IApexMemoryConstants.GB;
+			if (gb > 0) {
+				unitsDone++;
+				string += gb + "G";
+				bytes -= gb * IApexMemoryConstants.GB;
+			}
+		}
+
+		if (unitsDone < 2) {
+			long mb = bytes / IApexMemoryConstants.MB;
+			if (mb > 0) {
+				unitsDone++;
+				string += mb + "M";
+				bytes -= mb * IApexMemoryConstants.MB;
+			}
+		}
+		if (unitsDone < 2) {
+			long kb = bytes / IApexMemoryConstants.KB;
+			if (kb > 0) {
+				unitsDone++;
+				string += kb + "K";
+				bytes -= kb * IApexMemoryConstants.KB;
+			}
+		}
+
+		if (unitsDone < 2) {
+			if (bytes > 0) {
+				string += bytes + "B";
+			}
+		}
+
+		return string;
+	}
 }
