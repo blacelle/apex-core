@@ -43,7 +43,7 @@ import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
 import com.google.common.util.concurrent.AtomicLongMap;
 
-import blasd.apex.server.monitoring.memory.InstrumentationAgent;
+import blasd.apex.core.agent.InstrumentationAgent;
 
 /**
  * This class helps reference-sharing
@@ -268,6 +268,15 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 		return deepSize(object, identityPredicate);
 	}
 
+	/**
+	 * 
+	 * @param object
+	 * @param identityPredicate
+	 *            a predicate returning true if it is the first encounter of given object. It may return false even if
+	 *            an object has not been considered before, woult it be because the identity policy is not guaranteed
+	 *            (e.g. we rely on a BloomFilter) or if we want to exclude some objects
+	 * @return 0 if the Instrumentation agent is not available. Else an estimation of the memory consumption.
+	 */
 	public static long deepSize(Object object, IntPredicate identityPredicate) {
 		if (object == null) {
 			return 0L;

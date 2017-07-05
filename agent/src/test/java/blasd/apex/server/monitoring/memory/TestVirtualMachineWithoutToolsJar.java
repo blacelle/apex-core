@@ -32,6 +32,8 @@ import org.junit.Test;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 
+import blasd.apex.core.agent.VirtualMachineWithoutToolsJar;
+
 public class TestVirtualMachineWithoutToolsJar {
 	@Test
 	public void testFindVirtualMachineClass() throws ClassNotFoundException, MalformedURLException {

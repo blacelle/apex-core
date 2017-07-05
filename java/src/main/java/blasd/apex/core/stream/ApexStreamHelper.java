@@ -93,7 +93,13 @@ public class ApexStreamHelper {
 	@Beta
 	public static <T> OptionalInt indexOf(List<T> list, Predicate<T> predicate) {
 		// http://stackoverflow.com/questions/38963338/stream-way-to-get-index-of-first-element-matching-boolean
-		return IntStream.range(0, list.size()).filter(i -> predicate.apply(list.get(i))).findFirst();
+		return indexesOf(list, predicate).findFirst();
+	}
+
+	@Beta
+	public static <T> IntStream indexesOf(List<T> list, Predicate<T> predicate) {
+		// http://stackoverflow.com/questions/38963338/stream-way-to-get-index-of-first-element-matching-boolean
+		return IntStream.range(0, list.size()).filter(i -> predicate.apply(list.get(i)));
 	}
 
 	/**

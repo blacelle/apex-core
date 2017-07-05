@@ -225,10 +225,10 @@ public class ApexLogHelper {
 
 				if (entryPerMinute > LIMIT_ENTRY_PER_XXX) {
 					// Rate per minute is high enough: stick to it
-					return entryPerMinute + "#/minute";
+					return entryPerMinute + "#/" + MINUTES_PREFIX;
 				} else {
 					// Rate per second is nice
-					return entryPerSecond + "#/second";
+					return entryPerSecond + "#/" + SECONDS_PREFIX;
 				}
 			} else {
 				long nbSeconds = TimeUnit.SECONDS.convert(time, timeUnit);
@@ -237,7 +237,7 @@ public class ApexLogHelper {
 					// The window is 1 second wide
 					long entryPerSecond2 = nbEntries / nbSeconds;
 
-					return entryPerSecond2 + "#/second";
+					return entryPerSecond2 + "#/" + SECONDS_PREFIX;
 				} else {
 					// The window is not 1 second wide: it can safely be turned to nanos
 					long entryPerNano = TimeUnit.NANOSECONDS.convert(nbEntries, timeUnit) / time;
@@ -246,10 +246,10 @@ public class ApexLogHelper {
 
 					if (entryPerSecond2 > 0) {
 						// Rate per second is nice
-						return entryPerSecond2 + "#/second";
+						return entryPerSecond2 + "#/" + SECONDS_PREFIX;
 					} else {
 						long entryPerMillis = TimeUnit.MILLISECONDS.convert(entryPerNano, TimeUnit.NANOSECONDS);
-						return entryPerMillis + "#/ms";
+						return entryPerMillis + "#/" + MILLIS_PREFIX;
 					}
 				}
 				//

@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.server.monitoring.memory;
+package blasd.apex.core.agent;
 
 import java.io.File;
 import java.io.InputStream;
@@ -109,7 +109,7 @@ public class VirtualMachineWithoutToolsJar {
 			// jdk à la compilation
 			final Class<?> virtualMachineClass = findVirtualMachineClass();
 			final Method attachMethod = virtualMachineClass.getMethod("attach", String.class);
-			final String pid = InstrumentationAgent.discoverProcessIdForRunningVM();
+			final String pid = ApexAgentHelper.getPIDForAgent();
 			try {
 				JVM_VIRTUAL_MACHINE.set(attachMethod.invoke(null, pid));
 			} finally {

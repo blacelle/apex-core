@@ -20,22 +20,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.server.monitoring.memory;
+package blasd.apex.core.agent;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.lang.management.ManagementFactory;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.CodeSource;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sun.tools.attach.AgentInitializationException;
-import com.sun.tools.attach.AgentLoadException;
-import com.sun.tools.attach.AttachNotSupportedException;
-import com.sun.tools.attach.VirtualMachine;
+import org.springframework.boot.loader.tools.AgentAttacher;
 
 /**
  * The entry point for the instrumentation agent.
@@ -78,88 +70,18 @@ public class InstrumentationAgent {
 	public static void initializeIfNeeded() {
 		if (instrumentation == null) {
 			try {
-				String pid = discoverProcessIdForRunningVM();
-
-				final VirtualMachine vm = attachToThisVM(pid);
-
-				loadAgentAndDetachFromThisVM(vm, getPathToJarFileContainingThisClass(InstrumentationAgent.class));
-
-				if (instrumentation == null) {
-					throw new RuntimeException("The loading of the agent failed");
+				File holdingJarPath = ApexAgentHelper.getHoldingJarPath(InstrumentationAgent.class);
+				if (holdingJarPath != null) {
+					AgentAttacher.attach(holdingJarPath);
+				} else {
+					LOGGER.log(Level.SEVERE, "Can not find a jar holding the class " + InstrumentationAgent.class);
 				}
-
 			} catch (RuntimeException e) {
 				// makes sure the exception gets printed at
 				// least once
 				LOGGER.log(Level.SEVERE, "Ouch", e);
 				throw e;
 			}
-		}
-	}
-
-	public static String getPathToJarFileContainingThisClass(Class<?> clazz) {
-		CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
-
-		if (codeSource == null) {
-			return null;
-		}
-
-		// URI is needed to deal with spaces and non-ASCII
-		// characters
-		URI jarFileURI;
-
-		try {
-			jarFileURI = codeSource.getLocation().toURI();
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
-
-		String path = new File(jarFileURI).getPath();
-
-		if (!path.toLowerCase().endsWith(".jar")) {
-			throw new IllegalStateException(
-					InstrumentationAgent.class + " should be in a jar file. It has been found in: " + path);
-		}
-
-		return path;
-	}
-
-	private static void loadAgentAndDetachFromThisVM(VirtualMachine vm, String jarFilePath) {
-		try {
-			System.out.println("Loading Agent: " + vm + " from " + jarFilePath);
-			// noinspection ConstantConditions
-			vm.loadAgent(jarFilePath);
-			vm.detach();
-		} catch (AgentLoadException e) {
-			throw new RuntimeException(e);
-		} catch (AgentInitializationException e) {
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public static String discoverProcessIdForRunningVM() {
-		String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
-		// first, reliable with sun jdk
-		// (http://golesny.de/wiki/code:javahowtogetpid)
-		/* tested on: */
-		/* - windows xp sp 2, java 1.5.0_13 */
-		/* - mac os x 10.4.10, java 1.5.0 */
-		/* - debian linux, java 1.5.0_13 */
-		/* all return pid@host, e.g 2204@antonius */
-		int p = nameOfRunningVM.indexOf('@');
-
-		return nameOfRunningVM.substring(0, p);
-	}
-
-	private static VirtualMachine attachToThisVM(String pid) {
-		try {
-			return VirtualMachine.attach(pid);
-		} catch (AttachNotSupportedException e) {
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
 	}
 

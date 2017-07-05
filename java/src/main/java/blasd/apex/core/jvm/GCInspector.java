@@ -77,6 +77,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.AtomicLongMap;
 
+import blasd.apex.core.agent.VirtualMachineWithoutToolsJar;
 import blasd.apex.core.jmx.ApexJMXHelper;
 import blasd.apex.core.logging.ApexLogHelper;
 import blasd.apex.core.memory.ApexMemoryHelper;
@@ -85,7 +86,6 @@ import blasd.apex.core.memory.histogram.HeapHistogram;
 import blasd.apex.core.memory.histogram.IHeapHistogram;
 import blasd.apex.core.thread.ApexThreadDump;
 import blasd.apex.core.thread.IApexThreadDumper;
-import blasd.apex.server.monitoring.memory.VirtualMachineWithoutToolsJar;
 
 /**
  * 

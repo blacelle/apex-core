@@ -28,19 +28,21 @@ import java.util.logging.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
+import blasd.apex.core.agent.ApexAgentHelper;
+import blasd.apex.core.agent.InstrumentationAgent;
+
 public class TestInstrumentAgent {
 	protected static final Logger LOGGER = Logger.getLogger(TestInstrumentAgent.class.getName());
 
 	@Test
 	public void testPID() {
-		Assert.assertTrue(Integer.parseInt(InstrumentationAgent.discoverProcessIdForRunningVM()) > 0);
+		Assert.assertTrue(Integer.parseInt(ApexAgentHelper.getPIDForAgent()) > 0);
 	}
 
 	@Test
 	public void testGetPathToJarFileContainingThisClass() {
 		try {
-			Assert.assertEquals("",
-					InstrumentationAgent.getPathToJarFileContainingThisClass(TestInstrumentAgent.class));
+			Assert.assertEquals("", ApexAgentHelper.getHoldingJarPath(TestInstrumentAgent.class));
 		} catch (IllegalStateException e) {
 			// OK, it happens since the test classes are not compiled in a jar
 			LOGGER.log(Level.FINE, "Expected exception", e);

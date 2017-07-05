@@ -185,7 +185,7 @@ public class ApexFileHelper {
 
 	public static Optional<Path> getHoldingJarPath(URL resource) throws IOException {
 		// "jar:file:/C:/HOMEWARE/ITEC-Toolbox/apps/jdk/sunjdk180_112_x64/jre/lib/rt.jar!/java/lang/String.class";
-		if (resource.getProtocol().equals("jar")) {
+		if (resource.getProtocol().toLowerCase().equals("jar")) {
 			String path = resource.getPath();
 
 			int indexOfInsideJar = path.indexOf("!/");

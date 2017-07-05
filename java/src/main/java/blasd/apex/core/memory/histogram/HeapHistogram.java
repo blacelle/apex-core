@@ -38,7 +38,7 @@ import java.util.zip.GZIPInputStream;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 
-import blasd.apex.server.monitoring.memory.VirtualMachineWithoutToolsJar;
+import blasd.apex.core.agent.VirtualMachineWithoutToolsJar;
 
 /**
  * Histogramme mémoire.

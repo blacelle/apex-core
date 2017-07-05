@@ -95,7 +95,8 @@
 		<module>metadata</module>
 
 		<!-- a JConsole plugin to facilitate tracking of off-heap -->
-		<module>buffermonitor</module>
+		<!-- Excluded as it is an experimental project -->
+		<!-- <module>buffermonitor</module> -->
 	</modules>
 
 	<dependencyManagement>

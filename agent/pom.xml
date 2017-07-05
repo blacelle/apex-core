@@ -12,8 +12,7 @@
 	<packaging>jar</packaging>
 
 	<properties>
-		<!-- There is barely no code, leading most branches to be rare edge cases, 
-			which are tough to be unit-tested -->
+		<!-- There is barely no code, leading most branches to be rare edge cases, which are tough to be unit-tested -->
 		<jacoco.instruction.ratio>0.40</jacoco.instruction.ratio>
 		<jacoco.branch.ratio>0.25</jacoco.branch.ratio>
 
@@ -23,18 +22,8 @@
 
 	<dependencies>
 		<dependency>
-			<!-- Needed to load the Agent -->
-			<!-- It may require to force Eclipse to start from a JDK: add in eclipse.ini 
-				something like "-vm C:\...\jdk1.7.0_01-windows-x64\bin\javaw.exe" -->
-			<!-- http://wiki.eclipse.org/Equinox_Launcher#Finding_a_VM.2C_Using_JNI_Invocation_or_Executing_Java -->
-			<groupId>com.sun</groupId>
-			<artifactId>tools</artifactId>
-			<version>1.4.2</version>
-			<!-- http://maven.apache.org/general.html#tools-jar-dependency -->
-			<scope>system</scope>
-			<!-- ${java.home} can be checked in Eclipse in Help/About Eclipse/Installation 
-				Details/Configuration -->
-			<systemPath>${java.home}/../lib/tools.jar</systemPath>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-loader-tools</artifactId>
 		</dependency>
 
 		<dependency>
