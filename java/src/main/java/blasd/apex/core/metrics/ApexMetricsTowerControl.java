@@ -198,6 +198,9 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 		}
 	}
 
+	private static final String LOG_MESSAGE = "Task active since {} ({}): {}";
+	private static final String LOG_MESSAGE_PROGRESS = "Task active since {} ({} since {}): {}";
+
 	protected void logLongRunningTasks() {
 		LocalDateTime now = LocalDateTime.now();
 
@@ -209,7 +212,6 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 		// By default: log in warn if above 1min30
 		LocalDateTime muchtooOldBarrier = now.minusSeconds(FACTOR_FOR_TOO_OLD * longRunningCheckSeconds);
 
-		String logMessage = "Task active since ({}) {}: {}";
 		for (Entry<StartMetricEvent, LocalDateTime> active : activeTasks.asMap().entrySet()) {
 			LocalDateTime activeSince = active.getValue();
 			int seconds = Seconds.secondsBetween(activeSince, now).getSeconds();
@@ -217,19 +219,39 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 
 			StartMetricEvent startEvent = active.getKey();
 			Object cleanKey = noNewLine(startEvent);
-			if (activeSince.isBefore(muchtooOldBarrier)) {
-				// This task is active since more than XXX seconds
-				LOGGER.warn(logMessage, time, activeSince, cleanKey);
 
-				// If this is the first encounter as verySLow, we may have additional operations
-				verySlowTasks.refresh(startEvent);
+			if (startEvent.getProgress().isPresent()) {
+				Object rate =
+						ApexLogHelper.getNiceRate(startEvent.getProgress().getAsLong(), seconds, TimeUnit.SECONDS);
 
-			} else if (activeSince.isBefore(tooOldBarrier)) {
-				LOGGER.info(logMessage, time, activeSince, cleanKey);
-			} else if (activeSince.isBefore(oldBarrier)) {
-				LOGGER.debug(logMessage, time, activeSince, cleanKey);
+				if (activeSince.isBefore(muchtooOldBarrier)) {
+					// This task is active since more than XXX seconds
+					LOGGER.warn(LOG_MESSAGE_PROGRESS, time, rate, activeSince, cleanKey);
+
+					// If this is the first encounter as verySLow, we may have additional operations
+					verySlowTasks.refresh(startEvent);
+				} else if (activeSince.isBefore(tooOldBarrier)) {
+					LOGGER.info(LOG_MESSAGE_PROGRESS, activeSince, rate, time, cleanKey);
+				} else if (activeSince.isBefore(oldBarrier)) {
+					LOGGER.debug(LOG_MESSAGE_PROGRESS, activeSince, rate, time, cleanKey);
+				} else {
+					LOGGER.trace(LOG_MESSAGE_PROGRESS, activeSince, rate, time, cleanKey);
+				}
 			} else {
-				LOGGER.trace(logMessage, time, activeSince, cleanKey);
+				if (activeSince.isBefore(muchtooOldBarrier)) {
+					// This task is active since more than XXX seconds
+					LOGGER.warn(LOG_MESSAGE, time, activeSince, cleanKey);
+
+					// If this is the first encounter as verySLow, we may have additional operations
+					verySlowTasks.refresh(startEvent);
+
+				} else if (activeSince.isBefore(tooOldBarrier)) {
+					LOGGER.info(LOG_MESSAGE, activeSince, time, cleanKey);
+				} else if (activeSince.isBefore(oldBarrier)) {
+					LOGGER.debug(LOG_MESSAGE, activeSince, time, cleanKey);
+				} else {
+					LOGGER.trace(LOG_MESSAGE, activeSince, time, cleanKey);
+				}
 			}
 		}
 	}

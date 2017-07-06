@@ -78,7 +78,7 @@ public class OfferWithTimeoutPolicy implements RejectedExecutionHandler {
 				}
 			} catch (InterruptedException e) {
 				isGoingToLog.set(false);
-				throw new RejectedExecutionException("Task " + r.toString() + " rejected from " + e.toString());
+				throw new RejectedExecutionException("Task " + r.toString() + " rejected", e);
 			}
 		} else {
 			try {
@@ -88,7 +88,7 @@ public class OfferWithTimeoutPolicy implements RejectedExecutionHandler {
 					throw new RuntimeException("We failed pushing the task " + r + " after waiting " + timeout + unit);
 				}
 			} catch (InterruptedException e) {
-				throw new RejectedExecutionException("Task " + r.toString() + " rejected from " + e.toString());
+				throw new RejectedExecutionException("Task " + r.toString() + " rejected", e);
 			}
 		}
 	}

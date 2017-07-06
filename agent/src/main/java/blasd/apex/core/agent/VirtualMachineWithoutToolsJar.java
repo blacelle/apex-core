@@ -219,12 +219,7 @@ public class VirtualMachineWithoutToolsJar {
 		} catch (final ClassNotFoundException e) {
 			throw new UnsupportedOperationException("You should use a JDK instead of a JRE", e);
 		} catch (final Exception e) {
-			// si on obtient com.sun.tools.attach.AttachNotSupportedException:
-			// no providers installed
-			if ("com.sun.tools.attach.AttachNotSupportedException".equals(e.getClass().getName())) {
-				throw new UnsupportedOperationException("Jmap is not available", e);
-			}
-			throw e;
+			throw new RuntimeException(e);
 		}
 	}
 

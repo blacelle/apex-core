@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -203,5 +204,14 @@ public class StartMetricEvent extends AMetricEvent {
 
 	public Optional<EndMetricEvent> getEndEvent() {
 		return Optional.ofNullable(endMetricEvent.get());
+	}
+
+	public OptionalLong getProgress() {
+		long current = progress.getAsLong();
+		if (current == -1) {
+			return OptionalLong.empty();
+		} else {
+			return OptionalLong.of(current);
+		}
 	}
 }

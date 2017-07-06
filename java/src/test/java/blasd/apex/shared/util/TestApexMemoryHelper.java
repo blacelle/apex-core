@@ -29,6 +29,7 @@ import org.assertj.core.api.Assertions;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -212,5 +213,22 @@ public class TestApexMemoryHelper {
 		Assert.assertEquals("1K206B", ApexMemoryHelper.memoryAsString(1230));
 		Assert.assertEquals("1M177K", ApexMemoryHelper.memoryAsString(1230000));
 		Assert.assertEquals("1G149M", ApexMemoryHelper.memoryAsString(1230000000));
+	}
+
+	@Test
+	public void testStringMemory() {
+		long memory = ApexMemoryHelper.getStringMemory("Youpi");
+		Assert.assertEquals(48, memory);
+	}
+
+	@Test
+	public void testStringMemory_huge() {
+		CharSequence existingRef = Mockito.mock(CharSequence.class);
+
+		// Consider a very large String
+		Mockito.when(existingRef.length()).thenReturn(Integer.MAX_VALUE);
+
+		long memory = ApexMemoryHelper.getStringMemory(existingRef);
+		Assertions.assertThat(memory).isGreaterThan(Integer.MAX_VALUE + 1L);
 	}
 }

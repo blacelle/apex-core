@@ -34,6 +34,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.IntPredicate;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
@@ -171,7 +174,8 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 		int nbChars = existingRef.length();
 
 		// String are essentially char[], 8 for char
-		return JVM_MEMORY_CHUNK * (int) ((nbChars * JVM_BYTES_PER_CHAR + JVM_STRING_HEADER) / JVM_MEMORY_CHUNK);
+		long nbBits = (long) nbChars * JVM_BYTES_PER_CHAR + JVM_STRING_HEADER;
+		return JVM_MEMORY_CHUNK * (nbBits / JVM_MEMORY_CHUNK);
 	}
 
 	protected static void stopDictionarizing(Class<?> clazz, Field field) {
