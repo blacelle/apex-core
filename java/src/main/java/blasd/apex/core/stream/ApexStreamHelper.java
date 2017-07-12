@@ -80,7 +80,7 @@ public class ApexStreamHelper {
 	}
 
 	public static <T> Stream<T> singleton(T item) {
-		return Collections.singleton(item).stream();
+		return Stream.of(item);
 	}
 
 	/**

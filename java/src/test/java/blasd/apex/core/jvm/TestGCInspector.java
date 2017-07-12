@@ -22,7 +22,6 @@
  */
 package blasd.apex.core.jvm;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,14 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource;
 import org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler;
-import org.springframework.jmx.export.metadata.InvalidMetadataException;
-import org.springframework.jmx.export.metadata.JmxAttributeSource;
-import org.springframework.jmx.export.metadata.ManagedAttribute;
-import org.springframework.jmx.export.metadata.ManagedMetric;
-import org.springframework.jmx.export.metadata.ManagedNotification;
-import org.springframework.jmx.export.metadata.ManagedOperation;
-import org.springframework.jmx.export.metadata.ManagedOperationParameter;
-import org.springframework.jmx.export.metadata.ManagedResource;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
