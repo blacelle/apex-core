@@ -241,9 +241,10 @@ public class VirtualMachineWithoutToolsJar {
 			ClassNotFoundException, MalformedURLException, NoSuchMethodException {
 		// https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/tooldescr014.html#BABJIIHH
 		// http://docs.oracle.com/javase/7/docs/technotes/tools/share/jmap.html
-		final Method heapHistoMethod = virtualMachineClass.getMethod(methodName, Object[].class);
+		final Method methodForInputStream = virtualMachineClass.getMethod(methodName, Object[].class);
 
-		return (InputStream) heapHistoMethod.invoke(getJvmVirtualMachine(), new Object[] { argument });
+		LOGGER.info("About to invoke {} on {}", methodName, virtualMachineClass);
+		return (InputStream) methodForInputStream.invoke(getJvmVirtualMachine(), new Object[] { argument });
 	}
 
 	public static InputStream heapDump() throws Exception {

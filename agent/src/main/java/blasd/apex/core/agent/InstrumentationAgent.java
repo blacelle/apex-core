@@ -72,7 +72,13 @@ public class InstrumentationAgent {
 			try {
 				File holdingJarPath = ApexAgentHelper.getHoldingJarPath(InstrumentationAgent.class);
 				if (holdingJarPath != null) {
+					// TODO we may want a custom .attach method to enable options
+					// https://blogs.oracle.com/corejavatechtips/the-attach-api
+					// https://github.com/avaje-common/avaje-agentloader/blob/master/src/main/java/org/avaje/agentloader/AgentLoader.java
+					String suffix = InstrumentationAgent.class + " from " + holdingJarPath;
+					LOGGER.log(Level.INFO, "Attaching the agent for " + suffix);
 					AgentAttacher.attach(holdingJarPath);
+					LOGGER.log(Level.INFO, "Attached successfully the agent for " + suffix);
 				} else {
 					LOGGER.log(Level.SEVERE, "Can not find a jar holding the class " + InstrumentationAgent.class);
 				}
@@ -103,7 +109,7 @@ public class InstrumentationAgent {
 	public static Instrumentation safeGetInstrumentation() {
 		try {
 			return getInstrumentation();
-		} catch (RuntimeException e) {
+		} catch (Throwable e) {
 			LOGGER.log(Level.FINE, "Issue while getting instrumentation", e);
 			return null;
 		}

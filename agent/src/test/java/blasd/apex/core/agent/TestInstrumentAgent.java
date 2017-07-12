@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.server.monitoring.memory;
+package blasd.apex.core.agent;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
