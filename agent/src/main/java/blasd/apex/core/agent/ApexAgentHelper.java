@@ -27,6 +27,10 @@ public class ApexAgentHelper {
 	public static File getHoldingJarPath(Class<?> clazz) {
 		URI jarFileURI = getHoldingJarURI(clazz);
 
+		if (jarFileURI == null) {
+			return null;
+		}
+
 		if (!jarFileURI.getPath().toLowerCase().endsWith(".jar")) {
 			throw new IllegalStateException(clazz.getName() + " should be in a jar file. Found in: " + jarFileURI);
 		}
@@ -44,6 +48,10 @@ public class ApexAgentHelper {
 
 	public static File getOrMakeHoldingJarPath(Class<?> clazz) {
 		URI jarFileURI = getHoldingJarURI(clazz);
+
+		if (jarFileURI == null) {
+			return null;
+		}
 
 		if (!jarFileURI.getPath().toLowerCase().endsWith(".jar")) {
 			throw new IllegalStateException(clazz.getName() + " should be in a jar file. Found in: " + jarFileURI);
@@ -67,12 +75,16 @@ public class ApexAgentHelper {
 					// https://stackoverflow.com/questions/344920/can-i-extract-a-file-from-a-jar-that-is-3-directories-deep
 					JarFile jarFile = new JarFile(warPath);
 
-					File tmpFile = File.createTempFile("apex-agent", ".jar");
+					try {
+						File tmpFile = File.createTempFile("apex-agent", ".jar");
 
-					InputStream jarIS = jarFile.getInputStream(jarFile.getEntry(pathInsideJar));
-					byteStreamsDotCopy(jarIS, new FileOutputStream(tmpFile));
+						InputStream jarIS = jarFile.getInputStream(jarFile.getEntry(pathInsideJar));
+						byteStreamsDotCopy(jarIS, new FileOutputStream(tmpFile));
 
-					return tmpFile;
+						return tmpFile;
+					} finally {
+						jarFile.close();
+					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

@@ -154,15 +154,14 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 			long timeInMs = endEvent.get().durationInMs();
 
 			long longRunningInMillis = TimeUnit.SECONDS.toMillis(longRunningCheckSeconds);
+			Object lazyToString = ApexLogHelper.lazyToString(() -> endEvent.get().startEvent.toStringNoStack());
 			if (timeInMs > FACTOR_FOR_TOO_OLD * longRunningInMillis) {
-				LOGGER.warn("Very-long {} ended",
-						ApexLogHelper.lazyToString(() -> endEvent.get().startEvent.toStringNoStack()));
+				LOGGER.warn("End of very-long {}", lazyToString);
 			} else if (timeInMs > longRunningInMillis) {
-				LOGGER.info("Long {} ended",
-						ApexLogHelper.lazyToString(() -> endEvent.get().startEvent.toStringNoStack()));
+				LOGGER.info("End of long {} ended", lazyToString);
 			} else {
 				// Prevent building the .toString too often
-				LOGGER.trace("{} ended", ApexLogHelper.lazyToString(() -> endEvent.get().startEvent.toStringNoStack()));
+				LOGGER.trace("End of {} ended", lazyToString);
 			}
 		}
 	}
@@ -302,8 +301,10 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 
 	protected void invalidateStartEvent(StartMetricEvent startEvent) {
 		if (activeTasks.getIfPresent(startEvent) == null) {
-			LOGGER.debug("And EndEvent has been submitted without its StartEvent having been registered"
-					+ ", or after having been already invalidated: {}", startEvent);
+			LOGGER.debug(
+					"And EndEvent has been submitted without its StartEvent having been registered"
+							+ ", or after having been already invalidated: {}",
+					startEvent);
 		} else {
 			invalidate(startEvent);
 		}

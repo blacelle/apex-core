@@ -398,9 +398,8 @@ public class ApexSerializationHelper {
 	}
 
 	public static List<String> parseList(String asString) {
-		return Splitter.on(',')
-				.trimResults()
-				.splitToList(asString.substring(asString.indexOf('[') + 1, asString.lastIndexOf(']')));
+		return Splitter.on(',').trimResults().splitToList(
+				asString.substring(asString.indexOf('[') + 1, asString.lastIndexOf(']')));
 	}
 
 	/**
@@ -414,10 +413,9 @@ public class ApexSerializationHelper {
 	}
 
 	public static <T extends Serializable> T fromBytes(byte[] data) throws IOException, ClassNotFoundException {
-		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
-		Object o = ois.readObject();
-		ois.close();
-		return (T) o;
+		try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
+			return (T) ois.readObject();
+		}
 	}
 
 	/**
@@ -430,9 +428,10 @@ public class ApexSerializationHelper {
 
 	public static byte[] toBytes(Serializable o) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(baos);
-		oos.writeObject(o);
-		oos.close();
+
+		try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+			oos.writeObject(o);
+		}
 		return baos.toByteArray();
 	}
 
