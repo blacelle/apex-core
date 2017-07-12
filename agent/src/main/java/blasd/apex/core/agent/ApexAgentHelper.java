@@ -1,7 +1,5 @@
 package blasd.apex.core.agent;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -96,8 +94,6 @@ public class ApexAgentHelper {
 	 * Duplicated from Guava com.google.common.io.ByteStreams
 	 */
 	private static long byteStreamsDotCopy(InputStream from, OutputStream to) throws IOException {
-		checkNotNull(from);
-		checkNotNull(to);
 		byte[] buf = new byte[8192];
 		long total = 0;
 		while (true) {

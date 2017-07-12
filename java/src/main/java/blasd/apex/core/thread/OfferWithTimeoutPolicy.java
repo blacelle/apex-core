@@ -77,6 +77,7 @@ public class OfferWithTimeoutPolicy implements RejectedExecutionHandler {
 					throw new RuntimeException("We failed pushing the task " + r + " after waiting " + timeout + unit);
 				}
 			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 				isGoingToLog.set(false);
 				throw new RejectedExecutionException("Task " + r.toString() + " rejected", e);
 			}
@@ -88,6 +89,7 @@ public class OfferWithTimeoutPolicy implements RejectedExecutionHandler {
 					throw new RuntimeException("We failed pushing the task " + r + " after waiting " + timeout + unit);
 				}
 			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 				throw new RejectedExecutionException("Task " + r.toString() + " rejected", e);
 			}
 		}
