@@ -113,8 +113,11 @@ public class ApexJMXHelper {
 			Iterable<? extends Map<String, ?>> iterator) {
 		// Convert to brand HashMap of String for JMX compatibility
 		// Lexicographical order over String
-		Iterable<? extends Map<String, String>> asString =
-				Iterables.transform(iterator, input -> new TreeMap<>(Maps.transformValues(input, String::valueOf)));
+
+		// Cast to Map to workaround eclipse 3.7 compiler issue
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=519539
+		Iterable<? extends Map<String, String>> asString = Iterables.transform(iterator,
+				input -> new TreeMap<>(Maps.transformValues((Map) input, String::valueOf)));
 
 		// Convert to brand ArrayList for JMX compatibility
 		return Lists.newArrayList(asString);

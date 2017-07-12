@@ -1,16 +1,17 @@
 package blasd.apex.core.agent;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.CodeSource;
 import java.util.jar.JarFile;
-
-import com.google.common.io.ByteStreams;
 
 /**
  * Utilities to help working with java agents
@@ -71,7 +72,7 @@ public class ApexAgentHelper {
 					File tmpFile = File.createTempFile("apex-agent", ".jar");
 
 					InputStream jarIS = jarFile.getInputStream(jarFile.getEntry(pathInsideJar));
-					ByteStreams.copy(jarIS, new FileOutputStream(tmpFile));
+					byteStreamsDotCopy(jarIS, new FileOutputStream(tmpFile));
 
 					return tmpFile;
 				} catch (IOException e) {
@@ -89,6 +90,25 @@ public class ApexAgentHelper {
 				throw new RuntimeException("Issue with " + jarFileURI, e);
 			}
 		}
+	}
+
+	/**
+	 * Duplicated from Guava com.google.common.io.ByteStreams
+	 */
+	private static long byteStreamsDotCopy(InputStream from, OutputStream to) throws IOException {
+		checkNotNull(from);
+		checkNotNull(to);
+		byte[] buf = new byte[8192];
+		long total = 0;
+		while (true) {
+			int r = from.read(buf);
+			if (r == -1) {
+				break;
+			}
+			to.write(buf, 0, r);
+			total += r;
+		}
+		return total;
 	}
 
 	public static URI getHoldingJarURI(Class<?> clazz) {
