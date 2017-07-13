@@ -398,8 +398,9 @@ public class ApexSerializationHelper {
 	}
 
 	public static List<String> parseList(String asString) {
-		return Splitter.on(',').trimResults().splitToList(
-				asString.substring(asString.indexOf('[') + 1, asString.lastIndexOf(']')));
+		return Splitter.on(',')
+				.trimResults()
+				.splitToList(asString.substring(asString.indexOf('[') + 1, asString.lastIndexOf(']')));
 	}
 
 	/**

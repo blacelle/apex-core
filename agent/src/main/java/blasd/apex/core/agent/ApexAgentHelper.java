@@ -20,6 +20,7 @@ import java.util.jar.JarFile;
 // Some details handled in
 // https://github.com/avaje-common/avaje-agentloader/blob/master/src/main/java/org/avaje/agentloader/AgentLoader.java
 public class ApexAgentHelper {
+
 	protected ApexAgentHelper() {
 		// hidden
 	}

@@ -57,10 +57,14 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 public class ApexThreadDump implements IApexThreadDumper {
 	private final ThreadMXBean threadMXBean;
 
+	public ApexThreadDump() {
+		this(ManagementFactory.getThreadMXBean());
+	}
+
 	/**
 	 * 
 	 * @param threadMXBean
-	 *            may be ManagementFactory.getThreadMXBean()
+	 *            typically ManagementFactory.getThreadMXBean()
 	 */
 	public ApexThreadDump(ThreadMXBean threadMXBean) {
 		this.threadMXBean = threadMXBean;
