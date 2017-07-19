@@ -23,6 +23,7 @@
 package com.google.common.hash;
 
 import java.lang.reflect.Field;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +70,9 @@ public class BloomFilterSpy {
 	 *         if at least one put happened
 	 */
 	public static long estimateCardinality(BloomFilter<?> bloomFilter) {
-		if (bloomFilter == null) {
+		// We do not do a simple null-check else Sonar believes bloomFilter can not be null even if we have a dedicated
+		// unit-test
+		if (!Optional.of(bloomFilter).isPresent()) {
 			return 0L;
 		} else if (BIT_ARRAY_FIELD == null || NUM_HASH_FUNCTIONS_FIELD == null) {
 			LOGGER.warn("BloomFilter.estimateCardinality is not available");
