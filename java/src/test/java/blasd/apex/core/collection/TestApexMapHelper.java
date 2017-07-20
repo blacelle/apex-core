@@ -22,6 +22,7 @@
  */
 package blasd.apex.core.collection;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 
 public class TestApexMapHelper {
 	@Test
@@ -56,5 +58,12 @@ public class TestApexMapHelper {
 		merged.put("key", null);
 		merged.put("key2", null);
 		Assert.assertEquals(merged, newMap);
+	}
+
+	@Test
+	public void fromLists() {
+		Map<String, String> map = ApexMapHelper.fromLists(Arrays.asList("k1", "k2"), Arrays.asList("v1", "v2"));
+
+		Assert.assertEquals(ImmutableMap.of("k1", "v1", "k2", "v2"), map);
 	}
 }

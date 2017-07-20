@@ -197,28 +197,4 @@ public class SetStaticMBean {
 
 		return resources;
 	}
-
-	public static void main(String[] args) throws IOException {
-		String className = SetStaticMBean.class.getName();
-
-		System.out.println("From " + className);
-		for (String url : new SetStaticMBean().getResourcesFor(className)) {
-			System.out.println(url);
-		}
-		System.out.println();
-
-		String shortPath = className.replace('.', '/');
-		System.out.println("From " + shortPath);
-		for (String url : new SetStaticMBean().getResourcesFor(shortPath)) {
-			System.out.println(url);
-		}
-		System.out.println();
-
-		String path = shortPath + ".class";
-		System.out.println("From " + path);
-		for (String url : new SetStaticMBean().getResourcesFor(path)) {
-			System.out.println(url);
-		}
-		System.out.println();
-	}
 }

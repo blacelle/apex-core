@@ -22,6 +22,10 @@
  */
 package blasd.apex.core.jmx;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.assertj.core.api.Assertions;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -88,5 +92,26 @@ public class TestSetStatic {
 		setSTatic.setStatic(TestSetStatic.class.getName(), "DOUBLE_STATIC", newValue);
 
 		Assert.assertEquals(initialDouble + 1D, DOUBLE_STATIC, 0.0001D);
+	}
+
+	@Test
+	public void testGetResourcesFor()
+			throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException, IOException {
+		SetStaticMBean setSTatic = new SetStaticMBean();
+
+		List<String> pathes = setSTatic.getResourcesFor(this.getClass().getName());
+
+		Assert.assertEquals(1, pathes.size());
+		Assertions.assertThat(pathes.get(0)).startsWith("file:/").endsWith(".class");
+
+		List<String> pathesWithSlahes =
+				setSTatic.getResourcesFor(this.getClass().getName().toString().replace('.', '/'));
+		Assert.assertEquals(1, pathesWithSlahes.size());
+		Assertions.assertThat(pathesWithSlahes.get(0)).startsWith("file:/").endsWith(".class");
+
+		List<String> pathesWithSlahesAndDotClassSuffix =
+				setSTatic.getResourcesFor(this.getClass().getName().toString().replace('.', '/') + ".class");
+		Assert.assertEquals(1, pathesWithSlahesAndDotClassSuffix.size());
+		Assertions.assertThat(pathesWithSlahesAndDotClassSuffix.get(0)).startsWith("file:/").endsWith(".class");
 	}
 }

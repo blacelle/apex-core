@@ -51,6 +51,15 @@ public class TestGZipStringBuilder {
 	}
 
 	@Test
+	public void testAppendStringBuilder() {
+		GZipStringBuilder sb = new GZipStringBuilder();
+
+		sb.append(new StringBuilder("Azaz"), 1, 3);
+
+		Assert.assertEquals("za", sb.toString());
+	}
+
+	@Test
 	public void testNull() {
 		GZipStringBuilder sb = new GZipStringBuilder();
 
