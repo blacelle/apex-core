@@ -168,8 +168,9 @@ public class ApexStreamHelper {
 	 * 
 	 * @return an empty Stream
 	 */
+	@Deprecated
 	public static <T> Stream<T> emptyStream() {
-		return Collections.<T>emptyList().stream();
+		return Stream.empty();
 	}
 
 	private static <T> BinaryOperator<T> throwingMerger() {

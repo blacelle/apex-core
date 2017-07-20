@@ -10,6 +10,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.CodeSource;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Utilities to help working with java agents
@@ -20,6 +22,8 @@ import java.util.jar.JarFile;
 // Some details handled in
 // https://github.com/avaje-common/avaje-agentloader/blob/master/src/main/java/org/avaje/agentloader/AgentLoader.java
 public class ApexAgentHelper {
+	// SLF4J in not available in the Agents
+	protected static final Logger LOGGER = Logger.getLogger(InstrumentationAgent.class.getName());
 
 	protected ApexAgentHelper() {
 		// hidden
@@ -29,6 +33,8 @@ public class ApexAgentHelper {
 		URI jarFileURI = getHoldingJarURI(clazz);
 
 		if (jarFileURI == null) {
+			LOGGER.log(Level.WARNING,
+					"codeSource=null for " + clazz + " with protectedDomain=" + clazz.getProtectionDomain());
 			return null;
 		}
 
