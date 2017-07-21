@@ -29,6 +29,12 @@ import javax.management.openmbean.CompositeData;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
 
+/**
+ * Wrap the usage of GarbageCollectionNotificationInfo which is restricted API
+ * 
+ * @author Benoit Lacelle
+ *
+ */
 public class ApexGarbageCollectionNotificationInfo implements IApexGarbageCollectionNotificationInfo {
 	protected final GarbageCollectionNotificationInfo info;
 

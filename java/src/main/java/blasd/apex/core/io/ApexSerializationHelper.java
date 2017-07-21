@@ -28,12 +28,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -58,6 +63,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.io.ByteStreams;
 
 import blasd.apex.core.jmx.SetStaticMBean;
 
@@ -97,6 +103,8 @@ public class ApexSerializationHelper {
 	public static final char COLLECTION_SEPARATOR = PIPE;
 
 	public static final char FORCE_SEPARATOR = '#';
+
+	private static final int HEX_FILTER = 0xFF;
 
 	// TODO: Not useful at all?
 	@Deprecated
@@ -436,4 +444,36 @@ public class ApexSerializationHelper {
 		return baos.toByteArray();
 	}
 
+	public static String toMD5(String input) {
+		final MessageDigest md;
+		try {
+			md = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+
+		return toMD5(input, Charset.defaultCharset(), md);
+	}
+
+	public static String toMD5(String input, Charset charset, MessageDigest md) {
+		try (InputStream baos = new DigestInputStream(new ByteArrayInputStream(input.getBytes(charset)), md)) {
+			ByteStreams.exhaust(baos);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		byte[] digest = md.digest();
+
+		StringBuffer hexString = new StringBuffer();
+		for (int i = 0; i < digest.length; i++) {
+			String hex = Integer.toHexString(HEX_FILTER & digest[i]);
+			if (hex.length() == 1) {
+				// could use a for loop, but we're only dealing with a
+				// single byte
+				hexString.append('0');
+			}
+			hexString.append(hex);
+		}
+		return hexString.toString();
+	}
 }

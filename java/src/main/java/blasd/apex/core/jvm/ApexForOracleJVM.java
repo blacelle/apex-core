@@ -23,6 +23,7 @@
 package blasd.apex.core.jvm;
 
 import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.ThreadMXBean;
 import java.util.OptionalDouble;
 
 import com.google.common.annotations.Beta;
@@ -53,6 +54,36 @@ public class ApexForOracleJVM {
 			return OptionalDouble.of(cpu);
 		} else {
 			return OptionalDouble.empty();
+		}
+	}
+
+	public static long getThreadAllocatedBytes(ThreadMXBean threadMbean, long l) {
+		if (threadMbean instanceof com.sun.management.ThreadMXBean) {
+			return ((com.sun.management.ThreadMXBean) threadMbean).getThreadAllocatedBytes(l);
+		} else {
+			return -1L;
+		}
+	}
+
+	public static boolean isThreadAllocatedMemorySupported(ThreadMXBean threadMbean) {
+		if (threadMbean instanceof com.sun.management.ThreadMXBean) {
+			return ((com.sun.management.ThreadMXBean) threadMbean).isThreadAllocatedMemorySupported();
+		} else {
+			return false;
+		}
+	}
+
+	public static boolean isThreadAllocatedMemoryEnabled(ThreadMXBean threadMbean) {
+		if (threadMbean instanceof com.sun.management.ThreadMXBean) {
+			return ((com.sun.management.ThreadMXBean) threadMbean).isThreadAllocatedMemoryEnabled();
+		} else {
+			return false;
+		}
+	}
+
+	public static void setThreadAllocatedMemoryEnabled(ThreadMXBean threadMbean, boolean enable) {
+		if (threadMbean instanceof com.sun.management.ThreadMXBean) {
+			((com.sun.management.ThreadMXBean) threadMbean).setThreadAllocatedMemoryEnabled(enable);
 		}
 	}
 }

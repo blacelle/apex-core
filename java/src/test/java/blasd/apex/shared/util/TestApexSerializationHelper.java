@@ -26,6 +26,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -33,6 +35,7 @@ import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
@@ -130,5 +133,18 @@ public class TestApexSerializationHelper {
 				Integer.MAX_VALUE);
 
 		Assert.assertEquals("\"In\"\"Middle\";;\"Wrapped\"", sw.toString());
+	}
+
+	@Test
+	public void testMD5_utf8_md5() throws NoSuchAlgorithmException {
+		String md5 = ApexSerializationHelper.toMD5("Youpi", Charsets.UTF_8, MessageDigest.getInstance("MD5"));
+		Assert.assertEquals("c2dd8be8874b1200530e72bcb5d416da", md5);
+	}
+
+	// This test depends on the platform (e.g. default charset)
+	@Test
+	public void testMD5_default() throws NoSuchAlgorithmException {
+		String output = ApexSerializationHelper.toMD5("Youpi");
+		Assert.assertTrue(output.length() > 0);
 	}
 }

@@ -863,42 +863,37 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 	}
 
 	protected Map<? extends String, ? extends Long> getThreadNameToAllocatedHeap() {
-		if (THREAD_MBEAN instanceof com.sun.management.ThreadMXBean) {
-			com.sun.management.ThreadMXBean sunThreadMBean = (com.sun.management.ThreadMXBean) THREAD_MBEAN;
+		if (ApexForOracleJVM.isThreadAllocatedMemorySupported(THREAD_MBEAN)) {
+			if (!ApexForOracleJVM.isThreadAllocatedMemoryEnabled(THREAD_MBEAN)) {
+				ApexForOracleJVM.setThreadAllocatedMemoryEnabled(THREAD_MBEAN, true);
+			}
 
-			if (sunThreadMBean.isThreadAllocatedMemorySupported()) {
-				if (!sunThreadMBean.isThreadAllocatedMemoryEnabled()) {
-					sunThreadMBean.setThreadAllocatedMemoryEnabled(true);
-				}
+			// Order Thread by Name
+			Map<String, Long> threadNameToAllocatedMemory = new TreeMap<>();
 
-				// Order Thread by Name
-				Map<String, Long> threadNameToAllocatedMemory = new TreeMap<>();
+			// Snapshot total allocation until now
+			{
+				long[] liveThreadIds = THREAD_MBEAN.getAllThreadIds();
 
-				// Snapshot total allocation until now
-				{
-					long[] liveThreadIds = sunThreadMBean.getAllThreadIds();
+				ThreadInfo[] threadInfos = THREAD_MBEAN.getThreadInfo(liveThreadIds);
 
-					ThreadInfo[] threadInfos = sunThreadMBean.getThreadInfo(liveThreadIds);
+				for (int i = 0; i < liveThreadIds.length; i++) {
+					ThreadInfo threadInfo = threadInfos[i];
+					if (threadInfo == null) {
+						LOGGER.debug("No more info about thread #{}", i);
+					} else {
+						long threadAllocatedBytes =
+								ApexForOracleJVM.getThreadAllocatedBytes(THREAD_MBEAN, liveThreadIds[i]);
 
-					for (int i = 0; i < liveThreadIds.length; i++) {
-						ThreadInfo threadInfo = threadInfos[i];
-						if (threadInfo == null) {
-							LOGGER.debug("No more info about thread #{}", i);
-						} else {
-							long threadAllocatedBytes = sunThreadMBean.getThreadAllocatedBytes(liveThreadIds[i]);
-
-							// We may receive -1
-							if (threadAllocatedBytes > 0) {
-								threadNameToAllocatedMemory.put(threadInfo.getThreadName(), threadAllocatedBytes);
-							}
+						// We may receive -1
+						if (threadAllocatedBytes > 0) {
+							threadNameToAllocatedMemory.put(threadInfo.getThreadName(), threadAllocatedBytes);
 						}
 					}
 				}
-
-				return Collections.unmodifiableMap(threadNameToAllocatedMemory);
-			} else {
-				return Collections.emptyMap();
 			}
+
+			return Collections.unmodifiableMap(threadNameToAllocatedMemory);
 		} else {
 			return Collections.emptyMap();
 		}
