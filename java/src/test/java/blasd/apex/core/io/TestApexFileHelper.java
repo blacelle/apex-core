@@ -24,13 +24,12 @@ package blasd.apex.core.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import blasd.apex.core.io.ApexFileHelper;
 
 public class TestApexFileHelper {
 	@Test
@@ -47,12 +46,12 @@ public class TestApexFileHelper {
 	}
 
 	@Test
-	public void testExpandJarToDisk() throws IOException {
+	public void testExpandJarToDisk() throws IOException, URISyntaxException {
 		// Choose a class in a small jar so the test remains fast
 		String pathToResourceInJar = "/org/slf4j/Logger.class";
 		URL resource = ApexFileHelper.getResourceURL(pathToResourceInJar);
 
-		Path jarPath = ApexFileHelper.getHoldingJarPath(resource).get();
+		Path jarPath = ApexFileHelper.getHoldingJarPath(resource.toURI()).get();
 
 		Path tmpPath = ApexFileHelper.createTempPath("apex", "testExpandJarToDisk");
 		ApexFileHelper.expandJarToDisk(jarPath, tmpPath);

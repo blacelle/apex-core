@@ -51,4 +51,19 @@ public class TestApexURLHelper {
 	public void testGetHost_mailto() {
 		Assert.assertFalse(ApexURLHelper.getHost("mailto:adresse@serveur.com").isPresent());
 	}
+
+	@Test
+	public void testExtractDomainNamespace() {
+		Assert.assertEquals("amazon.fr", ApexURLHelper.getHost("www.amazon.fr").get().getHostSpace().get());
+	}
+
+	@Test
+	public void testDomainIsNamespace() {
+		Assert.assertEquals("amazon.fr", ApexURLHelper.getHost("www.amazon.fr").get().getHostSpace().get());
+	}
+
+	@Test
+	public void testExtractDomainNamespaceStartWithDot() {
+		Assert.assertFalse(ApexURLHelper.getHost(".www.amazon.fr").get().getHostSpace().isPresent());
+	}
 }

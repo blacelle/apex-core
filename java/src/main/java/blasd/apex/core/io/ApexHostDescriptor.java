@@ -97,4 +97,23 @@ public class ApexHostDescriptor {
 		return "ApexHostDescriptor [host=" + host + ", hostIsIp=" + hostIsIp + ", hostIsValid=" + hostIsValid + "]";
 	}
 
+	public Optional<String> getHostSpace() {
+		if (!getIsValid() || getIsIP()) {
+			return Optional.empty();
+		}
+
+		String domain = getHost();
+
+		int lastDot = domain.lastIndexOf('.');
+		if (lastDot < 0) {
+			return Optional.of(domain);
+		}
+		int beforeLastDot = domain.lastIndexOf('.', lastDot - 1);
+		if (beforeLastDot < 0) {
+			return Optional.of(domain);
+		} else {
+			return Optional.of(domain.substring(beforeLastDot + 1));
+		}
+	}
+
 }

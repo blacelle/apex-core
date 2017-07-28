@@ -177,4 +177,20 @@ public class TestApexLogHelper {
 	public void testLimitChars_underlimit() {
 		Assert.assertEquals("123456789", ApexLogHelper.getFirstChars("123456789", 15).toString());
 	}
+
+	@Test
+	public void testSingleRow() {
+		Assert.assertEquals("a b", ApexLogHelper.getSingleRow("a\rb", true).toString());
+		Assert.assertEquals("a b", ApexLogHelper.getSingleRow("a\nb", true).toString());
+		Assert.assertEquals("a b", ApexLogHelper.getSingleRow("a\r\nb", true).toString());
+
+		// \n\r leads to 2 whitespaces
+		Assert.assertEquals("a  b", ApexLogHelper.getSingleRow("a\n\rb", true).toString());
+
+		Assert.assertEquals(" a b c ", ApexLogHelper.getSingleRow("\na\rb\r\nc\r", true).toString());
+
+		Assert.assertEquals("a\\rb", ApexLogHelper.getSingleRow("a\rb", false).toString());
+		Assert.assertEquals("a\\nb", ApexLogHelper.getSingleRow("a\nb", false).toString());
+		Assert.assertEquals("a\\r\\nb", ApexLogHelper.getSingleRow("a\r\nb", false).toString());
+	}
 }

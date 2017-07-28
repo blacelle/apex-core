@@ -197,6 +197,12 @@ public class TestApexMemoryHelper {
 		Assert.assertEquals(123 * IApexMemoryConstants.GB, ApexMemoryHelper.memoryAsLong("123g"));
 	}
 
+	// Happens on vmmap|pmap. See ApexProcessHelper.getProcessResidentMemory(long)
+	@Test
+	public void testParseMemory_withDot() {
+		Assert.assertEquals((long) (1.2 * IApexMemoryConstants.GB), ApexMemoryHelper.memoryAsLong("1.2G"));
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void testParseMemoryFailsOnUnknownEndChars() {
 		ApexMemoryHelper.memoryAsLong("123A");

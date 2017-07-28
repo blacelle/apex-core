@@ -23,7 +23,9 @@
 package blasd.apex.core.io;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,9 +37,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Strings;
+import com.google.common.io.ByteStreams;
 
 /**
  * Various utility methods related to files
@@ -68,27 +72,47 @@ public class ApexFileHelper {
 		// hidden
 	}
 
-	public static File getResourceFile(String path) {
+	/**
+	 * 
+	 * @param resource
+	 *            a resource to be made available as a Path
+	 * @return the path to the input resource if already on disk, else a tmp file where the resource content has been
+	 *         copied
+	 */
+	public static Path getResourceAsPath(Resource resource) {
 		try {
-			return new ClassPathResource(path).getFile();
+			if (resource.exists()) {
+				try {
+					return resource.getFile().toPath();
+				} catch (FileNotFoundException e) {
+					// This tmp file will be removed on JVM shutdown
+					Path tmpFile = ApexFileHelper.createTempFile("ApexFileHelper", resource.getFilename());
+
+					byte[] from = ByteStreams.toByteArray(resource.getInputStream());
+
+					Files.write(tmpFile, from);
+
+					return tmpFile;
+				}
+			} else {
+				// Let it fails as it does not exist anyway
+				return resource.getFile().toPath();
+			}
 		} catch (IOException e) {
 			// Do not throw the explicit IOException so this method can be used for field definition in tests
 			throw new RuntimeException(e);
 		}
 	}
 
+	/**
+	 * 
+	 * @param path
+	 *            a path like '/folder/file' in folder in a folder in the classpath
+	 * @return
+	 */
 	public static URL getResourceURL(String path) {
 		try {
 			return new ClassPathResource(path).getURL();
-		} catch (IOException e) {
-			// Do not throw the explicit IOException so this method can be used for field definition in tests
-			throw new RuntimeException(e);
-		}
-	}
-
-	public static Path getResourcePath(String path) {
-		try {
-			return new ClassPathResource(path).getFile().toPath();
 		} catch (IOException e) {
 			// Do not throw the explicit IOException so this method can be used for field definition in tests
 			throw new RuntimeException(e);
@@ -152,7 +176,7 @@ public class ApexFileHelper {
 		}
 	}
 
-	// Useful to expand a .jar holding .csv files to be loaded by ActivePivot CSV source
+	// Useful to expand a .jar holding .csv files while these are expected to be available as File
 	@Beta
 	public static void expandJarToDisk(Path jarPath, Path targetPath) throws IOException {
 		// https://stackoverflow.com/questions/1529611/how-to-write-a-java-program-which-can-extract-a-jar-file-and-store-its-data-in-s
@@ -183,10 +207,10 @@ public class ApexFileHelper {
 		}
 	}
 
-	public static Optional<Path> getHoldingJarPath(URL resource) throws IOException {
+	public static Optional<Path> getHoldingJarPath(URI resource) throws IOException {
 		// "jar:file:/C:/HOMEWARE/ITEC-Toolbox/apps/jdk/sunjdk180_112_x64/jre/lib/rt.jar!/java/lang/String.class";
-		if (resource.getProtocol().toLowerCase().equals("jar")) {
-			String path = resource.getPath();
+		if (resource.getScheme().toLowerCase().equals("jar")) {
+			String path = resource.getRawSchemeSpecificPart();
 
 			int indexOfInsideJar = path.indexOf("!/");
 			DefaultResourceLoader defaultResourceLoader = new DefaultResourceLoader();

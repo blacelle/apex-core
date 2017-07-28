@@ -471,7 +471,8 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 			digits = targetMax.substring(0, targetMax.length() - 1);
 		}
 
-		return Long.parseLong(digits) * multiplier;
+		double parsedAsDouble = Double.parseDouble(digits);
+		return (long) (parsedAsDouble * multiplier);
 	}
 
 	public static String memoryAsString(long bytes) {

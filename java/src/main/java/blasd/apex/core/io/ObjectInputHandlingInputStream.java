@@ -64,8 +64,7 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 							decorated.readFully(bytes);
 						} catch (IOException e) {
 							throw new RuntimeException(
-									"Failure while retrieveing a chunk with nbBytes=" + nextByteMarker.getNbBytes(),
-									e);
+									"Failure while retrieveing a chunk with nbBytes=" + nextByteMarker.getNbBytes(), e);
 						}
 						// Transfer these bytes in the pipe
 						pos.write(bytes);
