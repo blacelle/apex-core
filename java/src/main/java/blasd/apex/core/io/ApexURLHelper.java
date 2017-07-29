@@ -92,44 +92,44 @@ public class ApexURLHelper {
 		return getHost(toHttpURL(string));
 	}
 
-//	/**
-//	 * for 'www.amazon.fr', return 'amazon.fr'
-//	 */
-//	public static String getDomainSpace(String url) {
-//		String domain = getDomain(url);
-//
-//		if (FAILED_DOMAIN.equals(domain)) {
-//			return FAILED_DOMAIN;
-//		}
-//
-//		int lastDot = domain.lastIndexOf('.');
-//		if (lastDot < 0) {
-//			return domain;
-//		}
-//		int beforeLastDot = domain.lastIndexOf('.', lastDot - 1);
-//		if (beforeLastDot < 0) {
-//			return domain;
-//		} else {
-//			return domain.substring(beforeLastDot + 1);
-//		}
-//	}
-//
-//	public static String getDomainSpace(URL url) {
-//		String domain = getDomain(url);
-//
-//		if (FAILED_DOMAIN.equals(domain)) {
-//			return FAILED_DOMAIN;
-//		}
-//
-//		int lastDot = domain.lastIndexOf('.');
-//		if (lastDot < 0) {
-//			return domain;
-//		}
-//		int beforeLastDot = domain.lastIndexOf('.', lastDot - 1);
-//		if (beforeLastDot < 0) {
-//			return domain;
-//		} else {
-//			return domain.substring(beforeLastDot + 1);
-//		}
-//	}
+	//	/**
+	//	 * for 'www.amazon.fr', return 'amazon.fr'
+	//	 */
+	//	public static String getDomainSpace(String url) {
+	//		String domain = getDomain(url);
+	//
+	//		if (FAILED_DOMAIN.equals(domain)) {
+	//			return FAILED_DOMAIN;
+	//		}
+	//
+	//		int lastDot = domain.lastIndexOf('.');
+	//		if (lastDot < 0) {
+	//			return domain;
+	//		}
+	//		int beforeLastDot = domain.lastIndexOf('.', lastDot - 1);
+	//		if (beforeLastDot < 0) {
+	//			return domain;
+	//		} else {
+	//			return domain.substring(beforeLastDot + 1);
+	//		}
+	//	}
+	//
+	//	public static String getDomainSpace(URL url) {
+	//		String domain = getDomain(url);
+	//
+	//		if (FAILED_DOMAIN.equals(domain)) {
+	//			return FAILED_DOMAIN;
+	//		}
+	//
+	//		int lastDot = domain.lastIndexOf('.');
+	//		if (lastDot < 0) {
+	//			return domain;
+	//		}
+	//		int beforeLastDot = domain.lastIndexOf('.', lastDot - 1);
+	//		if (beforeLastDot < 0) {
+	//			return domain;
+	//		} else {
+	//			return domain.substring(beforeLastDot + 1);
+	//		}
+	//	}
 }

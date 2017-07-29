@@ -230,7 +230,7 @@
 							an OOM -->
 						<!-- -Djava.util.logging.config.file so that tests fallback on logback -->
 						<!-- -Xmx512M is OK but not for apex-server-postprocessor -->
-						<argLine><![CDATA[-ea -Xmx512M -XX:+StartAttachListener -XX:-HeapDumpOnOutOfMemoryError -Djava.util.logging.config.file=logging.properties ${argLine}]]></argLine>
+						<argLine><![CDATA[-ea -Xmx256M -XX:+StartAttachListener -XX:-HeapDumpOnOutOfMemoryError -Djava.util.logging.config.file=logging.properties ${argLine}]]></argLine>
 
 						<!-- http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html -->
 						<!-- We choose to fork to prevent AP License to complain -->
