@@ -6,7 +6,8 @@ os:
 #  - osx
 
 #https://docs.travis-ci.com/user/languages/java/
-sudo: false
+#https://github.com/travis-ci/travis-ci/issues/8172
+sudo: required
 
 #https://docs.travis-ci.com/user/hosts
 addons:
