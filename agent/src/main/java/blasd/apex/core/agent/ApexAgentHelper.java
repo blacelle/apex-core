@@ -202,12 +202,11 @@ public class ApexAgentHelper {
 		try {
 			final ZipOutputStream zos = new ZipOutputStream(fos);
 			try {
-
-				java.nio.file.Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
+				Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
 					@Override
 					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 						zos.putNextEntry(new ZipEntry(folder.relativize(file).toString()));
-						java.nio.file.Files.copy(file, zos);
+						Files.copy(file, zos);
 						zos.closeEntry();
 						return FileVisitResult.CONTINUE;
 					}
