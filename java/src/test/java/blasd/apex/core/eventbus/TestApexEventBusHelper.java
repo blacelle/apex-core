@@ -9,6 +9,12 @@ import org.junit.Test;
 import com.google.common.eventbus.EventBus;
 
 public class TestApexEventBusHelper {
+
+	@Test
+	public void test_ctor_coverage() {
+		Assert.assertNotNull(new ApexEventBusHelper());
+	}
+
 	@Test
 	public void testAsConsumer() {
 		EventBus eventBus = new EventBus();

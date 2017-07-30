@@ -38,6 +38,12 @@ public class ApexEventBusHelper {
 		// hidden
 	}
 
+	/**
+	 * One may want not to depends on Guava EventBus: it could then rely on a Object consumer
+	 * 
+	 * @param eventBus
+	 * @return
+	 */
 	public static Optional<Consumer<Object>> asConsumer(EventBus eventBus) {
 		return Optional.ofNullable(eventBus).<Consumer<Object>>map(eb -> eb::post);
 	}

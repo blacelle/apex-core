@@ -26,6 +26,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class TestApexMathHelper {
+
+	@Test
+	public void test_ctor_coverage() {
+		Assert.assertNotNull(new ApexMathHelper());
+	}
+
 	@Test
 	public void testNextFloat() {
 		Assert.assertEquals(1F, ApexMathHelper.nextFloat(1F), 0.000001F);
