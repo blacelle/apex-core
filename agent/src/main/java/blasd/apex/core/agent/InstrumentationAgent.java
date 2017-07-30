@@ -110,7 +110,8 @@ public class InstrumentationAgent {
 		try {
 			return getInstrumentation();
 		} catch (Throwable e) {
-			LOGGER.log(Level.FINE, "Issue while getting instrumentation", e);
+			System.out.println(e.getMessage());
+			LOGGER.log(Level.INFO, "Issue while getting instrumentation", e);
 			return null;
 		}
 	}

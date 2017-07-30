@@ -22,21 +22,40 @@
  */
 package blasd.apex.core.agent;
 
+import java.io.File;
+import java.lang.instrument.Instrumentation;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import blasd.apex.core.agent.ApexAgentHelper;
-import blasd.apex.core.agent.InstrumentationAgent;
+import org.mockito.Mockito;
 
 public class TestInstrumentAgent {
 	protected static final Logger LOGGER = Logger.getLogger(TestInstrumentAgent.class.getName());
 
 	@Test
+	public void test_ctor() {
+		Assert.assertNotNull(new InstrumentationAgent());
+	}
+
+	@Test
 	public void testPID() {
 		Assert.assertTrue(Integer.parseInt(ApexAgentHelper.getPIDForAgent()) > 0);
+	}
+
+	@Test
+	public void testMain() {
+		Instrumentation mock = Mockito.mock(Instrumentation.class);
+
+		InstrumentationAgent.agentmain("args", mock);
+	}
+
+	@Test
+	public void testPreMain() {
+		Instrumentation mock = Mockito.mock(Instrumentation.class);
+
+		InstrumentationAgent.premain("args", mock);
 	}
 
 	@Test
@@ -47,6 +66,13 @@ public class TestInstrumentAgent {
 			// OK, it happens since the test classes are not compiled in a jar
 			LOGGER.log(Level.FINE, "Expected exception", e);
 		}
+	}
+
+	@Test
+	public void testGetOrMakePathToJarFile() {
+		File jarFile = ApexAgentHelper.getOrMakeHoldingJarPath(TestInstrumentAgent.class);
+
+		Assert.assertTrue(jarFile.isFile());
 	}
 
 	@Test

@@ -8,10 +8,17 @@ import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Utilities to help working with java agents
@@ -38,16 +45,27 @@ public class ApexAgentHelper {
 			return null;
 		}
 
-		if (!jarFileURI.getPath().toLowerCase().endsWith(".jar")) {
+		File asFile = fronURIToJarFile(jarFileURI);
+
+		// Optional is not available as restricted to JRE6
+		if (asFile == null) {
 			throw new IllegalStateException(clazz.getName() + " should be in a jar file. Found in: " + jarFileURI);
+		} else {
+			return asFile;
+		}
+	}
+
+	public static File fronURIToJarFile(URI jarURI) {
+		if (!jarURI.getPath().toLowerCase().endsWith(".jar")) {
+			return null;
 		}
 
 		final File path;
 		try {
-			path = new File(jarFileURI);
+			path = new File(jarURI);
 
 		} catch (RuntimeException e) {
-			throw new RuntimeException("Issue with " + jarFileURI, e);
+			throw new RuntimeException("Issue with " + jarURI, e);
 		}
 
 		return path;
@@ -60,15 +78,45 @@ public class ApexAgentHelper {
 			return null;
 		}
 
-		if (!jarFileURI.getPath().toLowerCase().endsWith(".jar")) {
-			throw new IllegalStateException(clazz.getName() + " should be in a jar file. Found in: " + jarFileURI);
-		}
+		File asFile = fronURIToJarFile(jarFileURI);
 
-		return jarUriToFile(jarFileURI);
+		// Optional is not available as restricted to JRE6
+		if (asFile == null) {
+			return jarUriToFile(jarFileURI);
+		} else {
+			return asFile;
+		}
 	}
 
 	public static File jarUriToFile(URI jarFileURI) {
-		if (jarFileURI.getScheme().equals("jar")) {
+		if (jarFileURI.getScheme().equals("file")) {
+			// TODO: This will not work if some characters has been encoded (e.g. path with a ' ' (-> %20), or with a
+			// '@')
+			// https://stackoverflow.com/questions/8885204/how-to-get-the-file-path-from-uri
+			File asFile = new File(jarFileURI.getPath());
+
+			if (asFile.isFile()) {
+				// A file in the file-system: OK if it is a jar
+				if (!jarFileURI.getPath().toLowerCase().endsWith(".jar")) {
+					LOGGER.warning("We have a jar in a file not ending by .jar: " + jarFileURI);
+				}
+
+				return asFile;
+			} else if (asFile.isDirectory()) {
+				// Else if it is a folder, need to wrap in a jar
+				try {
+					Path tmpFile = Files.createTempFile("AgentHelper", ".jar");
+					pack(asFile.toPath(), tmpFile);
+					tmpFile.toFile().deleteOnExit();
+					return tmpFile.toFile();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+
+			} else {
+				throw new RuntimeException("Can not handle " + jarFileURI + " which is neither a file or a directory");
+			}
+		} else if (jarFileURI.getScheme().equals("jar")) {
 			// jar:file:/home/user/app.war!/WEB-INF/lib/apex-core-agent-1.N.jar!/
 			if (jarFileURI.toString().endsWith("!/")) {
 				// A jar inside a war
@@ -100,12 +148,7 @@ public class ApexAgentHelper {
 				throw new RuntimeException("We do not handle jar URI: " + jarFileURI);
 			}
 		} else {
-			// A jar on the file system: OK as an agent jar
-			try {
-				return new File(jarFileURI);
-			} catch (RuntimeException e) {
-				throw new RuntimeException("Issue with " + jarFileURI, e);
-			}
+			throw new RuntimeException("Not handlded case: " + jarFileURI);
 		}
 	}
 
@@ -143,6 +186,45 @@ public class ApexAgentHelper {
 			throw new RuntimeException(e);
 		}
 		return jarFileURI;
+	}
+
+	// https://stackoverflow.com/questions/15968883/how-to-zip-a-folder-itself-using-java
+	/**
+	 * 
+	 * @param folder
+	 *            a file-system folder were to read files and folders
+	 * @param zipFilePath
+	 *            a file-system path where to create a new archive
+	 * @throws IOException
+	 */
+	public static void pack(final Path folder, final Path zipFilePath) throws IOException {
+		FileOutputStream fos = new FileOutputStream(zipFilePath.toFile());
+		try {
+			final ZipOutputStream zos = new ZipOutputStream(fos);
+			try {
+
+				java.nio.file.Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+						zos.putNextEntry(new ZipEntry(folder.relativize(file).toString()));
+						java.nio.file.Files.copy(file, zos);
+						zos.closeEntry();
+						return FileVisitResult.CONTINUE;
+					}
+
+					@Override
+					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+						zos.putNextEntry(new ZipEntry(folder.relativize(dir).toString() + "/"));
+						zos.closeEntry();
+						return FileVisitResult.CONTINUE;
+					}
+				});
+			} finally {
+				zos.close();
+			}
+		} finally {
+			fos.close();
+		}
 	}
 
 	/**
