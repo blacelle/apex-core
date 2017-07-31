@@ -111,8 +111,16 @@ public class InstrumentationAgent {
 		try {
 			return getInstrumentation();
 		} catch (Throwable e) {
-			System.out.println(e.getMessage());
-			System.out.println(Arrays.asList(e.getStackTrace()));
+			Throwable s = e;
+			while (s != null) {
+				System.out.println(e.getMessage());
+				System.out.println(Arrays.asList(e.getStackTrace()));
+				if (s == e.getCause()) {
+					break;
+				} else {
+					s = e.getCause();
+				}
+			}
 			LOGGER.log(Level.INFO, "Issue while getting instrumentation", e);
 			return null;
 		}
