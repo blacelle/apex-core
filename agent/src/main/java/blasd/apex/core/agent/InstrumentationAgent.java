@@ -24,6 +24,7 @@ package blasd.apex.core.agent;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -111,6 +112,7 @@ public class InstrumentationAgent {
 			return getInstrumentation();
 		} catch (Throwable e) {
 			System.out.println(e.getMessage());
+			System.out.println(Arrays.asList(e.getStackTrace()));
 			LOGGER.log(Level.INFO, "Issue while getting instrumentation", e);
 			return null;
 		}
