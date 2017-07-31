@@ -117,18 +117,20 @@ public class ApexAgentHelper {
 				throw new RuntimeException("Can not handle " + jarFileURI + " which is neither a file or a directory");
 			}
 		} else if (jarFileURI.getScheme().equals("jar")) {
+			String jarFilePath = jarFileURI.toString();
+
 			// jar:file:/home/user/app.war!/WEB-INF/lib/apex-core-agent-1.N.jar!/
-			if (jarFileURI.toString().endsWith("!/")) {
+			if (jarFilePath.endsWith("!/")) {
 				// A jar inside a war
-				String jarPathInWar = jarFileURI.toString().substring("jar:".length(),
-						jarFileURI.toString().length() - "!/".length());
+				String jarPathInWar = jarFilePath.substring("jar:".length(), jarFilePath.length() - "!/".length());
 
 				String warPath = jarPathInWar.substring(0, jarPathInWar.indexOf("!/"));
 				String pathInsideJar = jarPathInWar.substring(jarPathInWar.indexOf("!/") + "!/".length());
 
 				try {
 					// https://stackoverflow.com/questions/344920/can-i-extract-a-file-from-a-jar-that-is-3-directories-deep
-					JarFile jarFile = new JarFile(warPath);
+					String warCleanPath = new URI(warPath).getPath();
+					JarFile jarFile = new JarFile(warCleanPath);
 
 					try {
 						File tmpFile = File.createTempFile("apex-agent", ".jar");
@@ -141,6 +143,8 @@ public class ApexAgentHelper {
 						jarFile.close();
 					}
 				} catch (IOException e) {
+					throw new RuntimeException(e);
+				} catch (URISyntaxException e) {
 					throw new RuntimeException(e);
 				}
 			} else {
@@ -169,6 +173,12 @@ public class ApexAgentHelper {
 		return total;
 	}
 
+	/**
+	 * We prefer returning an URI as URL .equals is not safe
+	 * 
+	 * @param clazz
+	 * @return the URI of the .jar or folder holding this class
+	 */
 	public static URI getHoldingJarURI(Class<?> clazz) {
 		CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
 
