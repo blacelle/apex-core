@@ -117,7 +117,7 @@ public class InstrumentationAgent {
 	 * @return an {@link Instrumentation} instance as instantiated by the JVM itself, or null if anything bad happened
 	 */
 	public static Instrumentation safeGetInstrumentation() {
-		if (new Random().nextInt() >= 0) {
+		if (new Random().nextInt(1) >= 0) {
 			return AgentLoaderSpy.getInstrumentation();
 		}
 		try {
