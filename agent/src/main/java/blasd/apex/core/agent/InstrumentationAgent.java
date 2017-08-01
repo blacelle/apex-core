@@ -25,6 +25,7 @@ package blasd.apex.core.agent;
 import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -116,7 +117,7 @@ public class InstrumentationAgent {
 	 * @return an {@link Instrumentation} instance as instantiated by the JVM itself, or null if anything bad happened
 	 */
 	public static Instrumentation safeGetInstrumentation() {
-		if (true) {
+		if (new Random().nextInt() >= 0) {
 			return AgentLoaderSpy.getInstrumentation();
 		}
 		try {
