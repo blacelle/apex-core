@@ -118,8 +118,8 @@ public class InstrumentationAgent {
 		} catch (Throwable e) {
 			Throwable s = e;
 			while (s != null) {
-				System.out.println(e.getMessage());
-				System.out.println(Arrays.asList(e.getStackTrace()));
+				System.out.println(s.getMessage());
+				System.out.println(Arrays.asList(s.getStackTrace()));
 				if (s == e.getCause()) {
 					break;
 				} else {
