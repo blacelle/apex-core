@@ -30,7 +30,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.ehcache.sizeof.SizeOf;
 import org.ehcache.sizeof.impl.AgentLoaderSpy;
 import org.springframework.boot.loader.tools.AgentAttacher;
 
