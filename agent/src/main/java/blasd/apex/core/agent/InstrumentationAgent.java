@@ -92,6 +92,7 @@ public class InstrumentationAgent {
 			} catch (RuntimeException e) {
 				// makes sure the exception gets printed at
 				// least once
+				e.printStackTrace();
 				LOGGER.log(Level.SEVERE, "Ouch", e);
 				throw e;
 			}

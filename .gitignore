@@ -22,6 +22,9 @@ release.properties
 pom.xml.tag
 pom.xml.next
 
+# Evosuite
+.evosuite
+
 # GWT
 ######################
 war

@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -19,6 +20,9 @@
 	<!-- Add missing licenses -->
 	<!-- mvn com.mycila:license-maven-plugin:format -->
 
+	<!-- EXPERIMENTAL: evosuite -->
+	<!-- mvn -DmemoryInMB=2000 -Dcores=2 org.evosuite.plugins:evosuite-maven-plugin:generate 
+		org.evosuite.plugins:evosuite-maven-plugin:export test -->
 
 	<!-- Make a release -->
 	<!-- mvn release:clean release:prepare -Darguments="-DskipTests" -->
@@ -41,6 +45,8 @@
 
 		<jacoco.instruction.ratio>0.70</jacoco.instruction.ratio>
 		<jacoco.branch.ratio>0.50</jacoco.branch.ratio>
+
+		<!-- <evosuiteVersion>1.0.5</evosuiteVersion> -->
 
 		<!-- TODO Exclude a few Sonar rules -->
 		<!-- https://docs.sonarqube.org/display/SONAR/Analysis+Parameters#AnalysisParameters-Exclusions/Inclusions -->
@@ -175,6 +181,14 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 		</dependency>
+
+		<!-- EXPERIMENTAL -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.evosuite</groupId> -->
+		<!-- <artifactId>evosuite-standalone-runtime</artifactId> -->
+		<!-- <version>${evosuiteVersion}</version> -->
+		<!-- <scope>test</scope> -->
+		<!-- </dependency> -->
 	</dependencies>
 
 	<build>
@@ -242,6 +256,14 @@
 
 						<!-- default is filesystem -->
 						<runOrder>alphabetical</runOrder>
+
+						<!-- <properties> -->
+						<!-- <property> -->
+						<!-- http://www.evosuite.org/documentation/maven-plugin/ -->
+						<!-- <name>listener</name> -->
+						<!-- <value>org.evosuite.runtime.InitializingListener</value> -->
+						<!-- </property> -->
+						<!-- </properties> -->
 					</configuration>
 				</plugin>
 
@@ -376,6 +398,28 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
 					<version>2.5.1</version>
+				</plugin>
+
+				<plugin>
+					<!-- http://www.evosuite.org/documentation/maven-plugin/ -->
+					<groupId>org.evosuite.plugins</groupId>
+					<artifactId>evosuite-maven-plugin</artifactId>
+					<version>${evosuiteVersion}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>prepare</goal>
+							</goals>
+							<phase>process-test-classes</phase>
+							<configuration>
+								<project>
+									<properties>
+										<targetFolder>src/test/java</targetFolder>
+									</properties>
+								</project>
+							</configuration>
+						</execution>
+					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>

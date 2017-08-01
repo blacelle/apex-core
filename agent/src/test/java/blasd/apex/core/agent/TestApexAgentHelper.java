@@ -70,7 +70,7 @@ public class TestApexAgentHelper {
 
 		// Write the war file next to the folder holding the war content
 		Path warPath = warFolder.resolve("../testJarInWar.war").normalize();
-		ApexAgentHelper.pack(warFolder, warPath);
+		ApexAgentHelper.packToZip(warFolder, warPath);
 
 		// It would typically be 'jar:file:/home/user/app.war!/WEB-INF/lib/apex-core-agent-1.N.jar!/'
 		String path = "jar:file:" + warPath + "!/subFolder/" + asJarFile.getName() + "!/";

@@ -1,6 +1,7 @@
 package blasd.apex.core.agent;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,8 +18,11 @@ import java.security.CodeSource;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import com.google.common.io.ByteStreams;
 
 /**
  * Utilities to help working with java agents
@@ -106,7 +110,7 @@ public class ApexAgentHelper {
 				// Else if it is a folder, need to wrap in a jar
 				try {
 					Path tmpFile = Files.createTempFile("AgentHelper", ".jar");
-					pack(asFile.toPath(), tmpFile);
+					packToZip(asFile.toPath(), tmpFile);
 					tmpFile.toFile().deleteOnExit();
 					return tmpFile.toFile();
 				} catch (IOException e) {
@@ -207,7 +211,7 @@ public class ApexAgentHelper {
 	 *            a file-system path where to create a new archive
 	 * @throws IOException
 	 */
-	public static void pack(final Path folder, final Path zipFilePath) throws IOException {
+	public static void packToZip(final Path folder, final Path zipFilePath) throws IOException {
 		FileOutputStream fos = new FileOutputStream(zipFilePath.toFile());
 		try {
 			final ZipOutputStream zos = new ZipOutputStream(fos);
@@ -229,6 +233,31 @@ public class ApexAgentHelper {
 						return FileVisitResult.CONTINUE;
 					}
 				});
+			} finally {
+				zos.close();
+			}
+		} finally {
+			fos.close();
+		}
+	}
+
+	/**
+	 * Gzip enable compressing a single file
+	 * 
+	 * @param inputPath
+	 * @param zipFilePath
+	 * @throws IOException
+	 */
+	public static void packToGzip(final Path inputPath, final Path zipFilePath) throws IOException {
+		File inputFile = inputPath.toFile();
+
+		FileOutputStream fos = new FileOutputStream(zipFilePath.toFile());
+
+		try {
+			final GZIPOutputStream zos = new GZIPOutputStream(fos);
+
+			try {
+				ByteStreams.copy(new FileInputStream(inputFile), zos);
 			} finally {
 				zos.close();
 			}
