@@ -22,8 +22,6 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import com.google.common.io.ByteStreams;
-
 /**
  * Utilities to help working with java agents
  * 
@@ -249,15 +247,13 @@ public class ApexAgentHelper {
 	 * @throws IOException
 	 */
 	public static void packToGzip(final Path inputPath, final Path zipFilePath) throws IOException {
-		File inputFile = inputPath.toFile();
-
 		FileOutputStream fos = new FileOutputStream(zipFilePath.toFile());
 
 		try {
 			final GZIPOutputStream zos = new GZIPOutputStream(fos);
 
 			try {
-				ByteStreams.copy(new FileInputStream(inputFile), zos);
+				Files.copy(inputPath, zos);
 			} finally {
 				zos.close();
 			}
