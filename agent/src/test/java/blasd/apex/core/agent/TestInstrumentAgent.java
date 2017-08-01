@@ -30,9 +30,17 @@ import java.util.logging.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public class TestInstrumentAgent {
 	protected static final Logger LOGGER = Logger.getLogger(TestInstrumentAgent.class.getName());
+
+	// When run from Eclipse, logging.properties is not found (unlike in maven where surefire config refers to
+	// logging.properties)
+	static {
+		SLF4JBridgeHandler.removeHandlersForRootLogger();
+		SLF4JBridgeHandler.install();
+	}
 
 	@Test
 	public void test_ctor() {
@@ -78,10 +86,20 @@ public class TestInstrumentAgent {
 	@Test
 	public void testinitializeIfNeeded() {
 		try {
-			InstrumentationAgent.initializeIfNeeded();
-		} catch (IllegalStateException e) {
-			// OK, it happens since the test classes are not compiled in a jar
+			InstrumentationAgent.ensureAgentInitialisation();
+		} catch (RuntimeException e) {
+			// OK, it happens since the test classes are not compiled in a jar: we should have succeed wrapping them in
+			// a jar, but we may be missing the manifest file
+			// Expected RuntimeException from org.springframework.boot.loader.tools.AgentAttacher.attach(File)
 			LOGGER.log(Level.FINE, "Expected exception", e);
+
+			Assert.assertNotNull(e.getCause());
+			Assert.assertNotNull(e.getCause().getCause());
+
+			// The root-cause is actually that the manifest is missing
+			Throwable rootCause = e.getCause().getCause();
+			Assert.assertEquals("com.sun.tools.attach.AgentLoadException", rootCause.getClass().getName());
+			Assert.assertEquals("Agent JAR not found or no Agent-Class attribute", rootCause.getMessage());
 		}
 	}
 

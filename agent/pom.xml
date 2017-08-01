@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -12,7 +13,8 @@
 	<packaging>jar</packaging>
 
 	<properties>
-		<!-- There is barely no code, leading most branches to be rare edge cases, which are tough to be unit-tested -->
+		<!-- There is barely no code, leading most branches to be rare edge cases, 
+			which are tough to be unit-tested -->
 		<jacoco.instruction.ratio>0.40</jacoco.instruction.ratio>
 		<jacoco.branch.ratio>0.25</jacoco.branch.ratio>
 
@@ -34,6 +36,17 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jul-to-slf4j</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

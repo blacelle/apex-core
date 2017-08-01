@@ -215,6 +215,7 @@ public class ApexAgentHelper {
 				Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
 					@Override
 					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+						LOGGER.log(Level.FINE, "Adding " + file + " in " + zipFilePath);
 						zos.putNextEntry(new ZipEntry(folder.relativize(file).toString()));
 						Files.copy(file, zos);
 						zos.closeEntry();

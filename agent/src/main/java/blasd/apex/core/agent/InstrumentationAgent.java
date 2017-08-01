@@ -25,6 +25,8 @@ package blasd.apex.core.agent;
 import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,7 +46,10 @@ public class InstrumentationAgent {
 	// SLF4J in not available in the Agents
 	protected static final Logger LOGGER = Logger.getLogger(InstrumentationAgent.class.getName());
 
-	private static volatile Instrumentation instrumentation;
+	// The initialization can fail for many reasons (tools.jar not available,...)
+	private static final AtomicBoolean INIT_TRIED = new AtomicBoolean(false);
+
+	private static final AtomicReference<Instrumentation> INTRUMENTATION_REF = new AtomicReference<Instrumentation>();
 
 	protected InstrumentationAgent() {
 		// Hide the constructor
@@ -59,19 +64,20 @@ public class InstrumentationAgent {
 	public static void premain(String args, Instrumentation instr) {
 		System.out.println(InstrumentationAgent.class + ": premain");
 
-		instrumentation = instr;
+		INTRUMENTATION_REF.set(instr);
 	}
 
 	public static void agentmain(String args, Instrumentation instr) {
 		System.out.println(InstrumentationAgent.class + ": agentmain");
 
-		instrumentation = instr;
+		INTRUMENTATION_REF.set(instr);
 	}
 
-	public static void initializeIfNeeded() {
-		if (instrumentation == null) {
+	public static void ensureAgentInitialisation() {
+		// Try only once to hook the agent
+		if (INIT_TRIED.compareAndSet(false, true)) {
 			try {
-				File holdingJarPath = ApexAgentHelper.getHoldingJarPath(InstrumentationAgent.class);
+				File holdingJarPath = ApexAgentHelper.getOrMakeHoldingJarPath(InstrumentationAgent.class);
 				if (holdingJarPath != null) {
 					// TODO we may want a custom .attach method to enable options
 					// https://blogs.oracle.com/corejavatechtips/the-attach-api
@@ -97,10 +103,9 @@ public class InstrumentationAgent {
 	 * @return an {@link Instrumentation} instance as instantiated by the JVM itself
 	 */
 	public static Instrumentation getInstrumentation() {
-		if (instrumentation == null) {
-			InstrumentationAgent.initializeIfNeeded();
-		}
-		return instrumentation;
+		InstrumentationAgent.ensureAgentInitialisation();
+
+		return INTRUMENTATION_REF.get();
 	}
 
 	/**
