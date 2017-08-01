@@ -88,10 +88,7 @@ public class TestApexSerializationHelper {
 
 	@Test
 	public void testAppendLineInCSV() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempFile("apex.test", ".csv");
-
-		// Delete tmp file
-		tmpFile.toFile().deleteOnExit();
+		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv", true);
 
 		ApexSerializationHelper.appendLineInCSVFile(tmpFile, Arrays.asList("col1", "col2"));
 
@@ -101,10 +98,7 @@ public class TestApexSerializationHelper {
 
 	@Test
 	public void testAppendLineInFileOutputStream() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempFile("apex.test", ".csv");
-
-		// Delete tmp file
-		tmpFile.toFile().deleteOnExit();
+		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv", true);
 
 		FileOutputStream fos = new FileOutputStream(tmpFile.toFile());
 

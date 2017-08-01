@@ -20,6 +20,8 @@
 
 		<!-- Enable wider compatibility -->
 		<compiler.targetVersion>1.6</compiler.targetVersion>
+
+		<sizeof.version>0.3.0</sizeof.version>
 	</properties>
 
 	<dependencies>
@@ -49,6 +51,14 @@
 			<artifactId>logback-core</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/net.sf.ehcache/ehcache -->
+		<dependency>
+			<groupId>org.ehcache</groupId>
+			<artifactId>sizeof</artifactId>
+			<version>${sizeof.version}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

@@ -161,7 +161,7 @@ public class TestApexJMXHelper {
 
 	@Test
 	public void testConvertURL() throws IOException {
-		Path testPath = ApexFileHelper.createTempFile("apex", "tmp");
+		Path testPath = ApexFileHelper.createTempPath("apex", "tmp", true);
 
 		URL asURL = ApexJMXHelper.convertToURL(testPath.toString());
 
@@ -173,7 +173,7 @@ public class TestApexJMXHelper {
 
 	@Test
 	public void testConvertURL_withspace() throws IOException {
-		Path testPath = ApexFileHelper.createTempFile("ap ex", "tmp");
+		Path testPath = ApexFileHelper.createTempPath("ap ex", "tmp", true);
 
 		URL asURL = ApexJMXHelper.convertToURL(testPath.toString());
 

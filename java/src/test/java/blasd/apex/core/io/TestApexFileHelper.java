@@ -34,7 +34,7 @@ import org.junit.Test;
 public class TestApexFileHelper {
 	@Test
 	public void testCreateTempPath() throws IOException {
-		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv");
+		Path tmpFile = ApexFileHelper.createTempPath("apex.test", ".csv", true);
 
 		// Check the path does not exist
 		Assert.assertFalse(tmpFile.toFile().exists());
@@ -53,7 +53,7 @@ public class TestApexFileHelper {
 
 		Path jarPath = ApexFileHelper.getHoldingJarPath(resource.toURI()).get();
 
-		Path tmpPath = ApexFileHelper.createTempPath("apex", "testExpandJarToDisk");
+		Path tmpPath = ApexFileHelper.createTempPath("apex", "testExpandJarToDisk", true);
 		ApexFileHelper.expandJarToDisk(jarPath, tmpPath);
 
 		Assert.assertTrue(new File(tmpPath.toFile(), pathToResourceInJar).exists());

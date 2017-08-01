@@ -30,7 +30,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.jar.JarEntry;
 
 import org.slf4j.Logger;
@@ -53,26 +52,12 @@ public class ApexFileHelper {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ApexFileHelper.class);
 
-	static {
-		try {
-			initParentTmpFolder();
-		} catch (IOException e) {
-			LOGGER.error("Failure while creating a top tmp folder", e);
-			applicationTemporaryFolder = null;
-		}
-	}
-
-	private static Path applicationTemporaryFolder;
-
-	private static synchronized void initParentTmpFolder() throws IOException {
-		applicationTemporaryFolder = Files.createTempDirectory("apex");
-	}
-
 	protected ApexFileHelper() {
 		// hidden
 	}
 
 	/**
+	 * 
 	 * 
 	 * @param resource
 	 *            a resource to be made available as a Path
@@ -86,7 +71,7 @@ public class ApexFileHelper {
 					return resource.getFile().toPath();
 				} catch (FileNotFoundException e) {
 					// This tmp file will be removed on JVM shutdown
-					Path tmpFile = ApexFileHelper.createTempFile("ApexFileHelper", resource.getFilename());
+					Path tmpFile = Files.createTempFile("ApexFileHelper", resource.getFilename());
 
 					byte[] from = ByteStreams.toByteArray(resource.getInputStream());
 
@@ -119,53 +104,30 @@ public class ApexFileHelper {
 		}
 	}
 
-	// A shortcut to workaround several classes named Files
-	@Beta
-	public static Path createTempFile(String prefix, String suffix) throws IOException {
-		return Files.createTempFile(prefix, suffix);
-	}
-
 	/**
+	 * Enable creating a tmp path to a not-existing file.
+	 * 
 	 * @return a path to a non-existing but unique temporary file
 	 * @throws IOException
 	 */
 	// http://stackoverflow.com/questions/1293655/how-to-create-tmp-file-name-with-out-creating-file
-	public static Path createTempPath(String prefix, String suffix) throws IOException {
-		if (applicationTemporaryFolder == null) {
-			initParentTmpFolder();
+	public static Path createTempPath(String prefix, String suffix, boolean deleteOnExit) throws IOException {
+		Path path = Files.createTempFile(prefix, suffix);
+
+		File asFile = path.toFile();
+		if (asFile.exists()) {
+			LOGGER.trace("Tmp file exists: delete it as we have been requested for a path");
+			if (!asFile.delete()) {
+				throw new IllegalStateException("We failed creating a non-existing tmp file");
+			}
 		}
-
-		String fileName = prefix + UUID.randomUUID() + suffix;
-
-		Path tmpFilePath = applicationTemporaryFolder.resolve(fileName);
-
-		if (tmpFilePath.toFile().exists()) {
-			throw new IllegalStateException("We failed creating a non-existing tmp file");
-		}
-
-		return tmpFilePath;
-	}
-
-	/**
-	 * 
-	 * @param prefix
-	 * @param suffix
-	 * @return a Path to a non-existing file in a tmp folder
-	 * @throws IOException
-	 */
-	public static Path createTestPath(String prefix, String suffix) throws IOException {
-		// By default, we want to remove tmp path on JVM exit
-		return createTestPath(prefix, suffix, true);
-	}
-
-	public static Path createTestPath(String prefix, String suffix, boolean deleteOnExit) throws IOException {
-		Path testPath = createTempPath(prefix, suffix);
 
 		if (deleteOnExit) {
-			testPath.toFile().deleteOnExit();
+			// If the path is later materialized, it will be automatically removed on JVM shutdown
+			asFile.deleteOnExit();
 		}
 
-		return testPath;
+		return path;
 	}
 
 	public static String cleanWhitespaces(String mdx) {

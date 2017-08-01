@@ -30,6 +30,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.ehcache.sizeof.SizeOf;
+import org.ehcache.sizeof.impl.AgentLoaderSpy;
 import org.springframework.boot.loader.tools.AgentAttacher;
 
 /**
@@ -85,6 +87,7 @@ public class InstrumentationAgent {
 					String suffix = InstrumentationAgent.class + " from " + holdingJarPath;
 					LOGGER.log(Level.INFO, "Attaching the agent for " + suffix);
 					AgentAttacher.attach(holdingJarPath);
+
 					LOGGER.log(Level.INFO, "Attached successfully the agent for " + suffix);
 				} else {
 					LOGGER.log(Level.SEVERE, "Can not find a jar holding the class " + InstrumentationAgent.class);
@@ -114,6 +117,9 @@ public class InstrumentationAgent {
 	 * @return an {@link Instrumentation} instance as instantiated by the JVM itself, or null if anything bad happened
 	 */
 	public static Instrumentation safeGetInstrumentation() {
+		if (true) {
+			return AgentLoaderSpy.getInstrumentation();
+		}
 		try {
 			return getInstrumentation();
 		} catch (Throwable e) {
