@@ -22,17 +22,21 @@
  */
 package blasd.apex.core.agent;
 
-import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.ehcache.sizeof.impl.AgentLoaderApexSpy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
 
 /**
  * Classe d'attachement dynamique utilisée ici pour obtenir l'histogramme de la mémoire. <br/>
@@ -48,7 +52,8 @@ import org.slf4j.LoggerFactory;
 public class VirtualMachineWithoutToolsJar {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(VirtualMachineWithoutToolsJar.class);
 
-	private static boolean heapHistogramEnabled = isJmapSupported();
+	// Switched to true if incompatible JVM, or attach failed
+	private static final AtomicBoolean WILL_NOT_WORK = new AtomicBoolean(false);
 
 	private static final AtomicReference<Object> JVM_VIRTUAL_MACHINE = new AtomicReference<Object>();
 
@@ -62,115 +67,69 @@ public class VirtualMachineWithoutToolsJar {
 	static boolean isJmapSupported() {
 		// pour nodes Hudson/Jenkins, on réévalue sans utiliser de constante
 		final String javaVendor = getJavaVendor();
+		// http://www.oracle.com/technetwork/middleware/jrockit/overview/index.html
 		return javaVendor.contains("Sun") || javaVendor.contains("Oracle")
 				|| javaVendor.contains("Apple")
 				|| isJRockit();
 	}
 
 	/**
-	 * @return true if JRockit
-	 * @see http://www.oracle.com/technetwork/middleware/jrockit/overview/index.html
+	 * @return true if current JVM is a JRockIt JVM
 	 */
 	public static boolean isJRockit() {
-		// for Hudson/Jenkins
 		return getJavaVendor().contains("BEA");
 	}
 
-	/**
-	 * @return false if not supported or if an attach failed or an histogram failed, true if supported but not tried, or
-	 *         tried successfully
-	 */
-	static synchronized boolean isEnabled() {
-		return heapHistogramEnabled;
+	public static synchronized Optional<Object> getJvmVirtualMachine() {
+		try {
+			return getUnsafeJvmVirtualMachine();
+		} catch (Throwable e) {
+			LOGGER.warn("Issue while loading VirtualMachine", e);
+			return Optional.absent();
+		}
 	}
 
-	/**
-	 * @return Singleton initialisé à la demande de l'instance de com.sun.tools.attach.VirtualMachine, null si enabled
-	 *         est false
-	 * @throws MalformedURLException
-	 * @throws ClassNotFoundException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException
-	 * @throws InvocationTargetException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws Exception
-	 *             e
-	 */
-	public static synchronized Object getJvmVirtualMachine() throws ClassNotFoundException, MalformedURLException,
-			NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+	public static synchronized Optional<Object> getUnsafeJvmVirtualMachine() throws ClassNotFoundException,
+			MalformedURLException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		if (WILL_NOT_WORK.get()) {
+			return Optional.absent();
+		}
+
 		// si hotspot retourne une instance de
 		// sun.tools.attach.HotSpotVirtualMachine
 		// cf
 		// http://www.java2s.com/Open-Source/Java-Document/6.0-JDK-Modules-sun/tools/sun/tools/attach/HotSpotVirtualMachine.java.htm
 		// et sous windows : sun.tools.attach.WindowsVirtualMachine
 		if (JVM_VIRTUAL_MACHINE.get() == null) {
-			// on utilise la réflexion pour éviter de dépendre de tools.jar du
-			// jdk à la compilation
-			final Class<?> virtualMachineClass = findVirtualMachineClass();
-			final Method attachMethod = virtualMachineClass.getMethod("attach", String.class);
-			final String pid = ApexAgentHelper.getPIDForAgent();
-			try {
-				JVM_VIRTUAL_MACHINE.set(attachMethod.invoke(null, pid));
-			} finally {
-				heapHistogramEnabled = JVM_VIRTUAL_MACHINE.get() != null;
+			final Optional<? extends Class<?>> virtualMachineClass = findVirtualMachineClass();
+
+			if (virtualMachineClass.isPresent()) {
+				final Method attachMethod = virtualMachineClass.get().getMethod("attach", String.class);
+				final String pid = ApexAgentHelper.getPIDForAgent();
+				try {
+					JVM_VIRTUAL_MACHINE.set(attachMethod.invoke(null, pid));
+				} finally {
+					if (JVM_VIRTUAL_MACHINE.get() == null) {
+						LOGGER.warn("Failure attaching VirtualMachine");
+						WILL_NOT_WORK.set(true);
+					} else {
+						Class<? extends Object> vmClass = JVM_VIRTUAL_MACHINE.get().getClass();
+						LOGGER.info("VirtualMachine has been loaded: {}. Available methods: {}",
+								vmClass.getName(),
+								Arrays.asList(vmClass.getMethods()));
+					}
+				}
 			}
 		}
-		return JVM_VIRTUAL_MACHINE.get();
+		return Optional.fromNullable(JVM_VIRTUAL_MACHINE.get());
 	}
 
-	public static Class<?> findVirtualMachineClass() throws ClassNotFoundException, MalformedURLException {
-		// méthode inspirée de javax.tools.ToolProvider.Lazy.findClass
-		// http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/6-b27/javax/tools/ToolProvider.java#ToolProvider.Lazy.findClass%28%29
-		final String virtualMachineClassName = "com.sun.tools.attach.VirtualMachine";
+	public static Optional<? extends Class<?>> findVirtualMachineClass() {
 		try {
-			// try loading class directly, in case tools.jar is in the classpath
-			return Class.forName(virtualMachineClassName);
-		} catch (final ClassNotFoundException e) {
-			// exception ignored, try looking in the default tools location
-			// (lib/tools.jar)
-			File file = new File(System.getProperty("java.home"));
-			if ("jre".equalsIgnoreCase(file.getName())) {
-				file = file.getParentFile();
-			}
-			final String[] defaultToolsLocation = { "lib", "tools.jar" };
-			for (final String name : defaultToolsLocation) {
-				file = new File(file, name);
-			}
-			// if tools.jar not found, no point in trying a URLClassLoader
-			// so rethrow the original exception.
-			if (!file.exists()) {
-				throw e;
-			}
-
-			final URL url = file.toURI().toURL();
-			final ClassLoader cl;
-			// if (ClassLoader.getSystemClassLoader() instanceof URLClassLoader)
-			// {
-			// // The attachment API relies on JNI, so if we have other code in
-			// the JVM that tries to use the attach API
-			// // (like the monitoring of another webapp), it'll cause a failure
-			// (issue 398):
-			// // "UnsatisfiedLinkError: Native Library C:\Program
-			// Files\Java\jdk1.6.0_35\jre\bin\attach.dll already loaded in
-			// another classloader
-			// // [...] com.sun.tools.attach.AttachNotSupportedException: no
-			// providers installed"
-			// // So we try to load tools.jar into the system classloader, so
-			// that later attempts to load tools.jar will see it.
-			// cl = ClassLoader.getSystemClassLoader();
-			// // The URLClassLoader.addURL method is protected
-			// final Method addURL =
-			// URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-			// addURL.setAccessible(true);
-			// addURL.invoke(cl, url);
-			// } else {
-			final URL[] urls = { url };
-			cl = URLClassLoader.newInstance(urls);
-			// }
-			return Class.forName(virtualMachineClassName, true, cl);
-		} catch (java.lang.UnsupportedClassVersionError e) {
-			throw new ClassNotFoundException("Wrong Java version", e);
+			return AgentLoaderApexSpy.getVirtualMachineClass();
+		} catch (Throwable e) {
+			LOGGER.warn("Issue while getting VirtualMachine class", e);
+			return Optional.absent();
 		}
 	}
 
@@ -180,12 +139,13 @@ public class VirtualMachineWithoutToolsJar {
 	 * @throws Exception
 	 *             e
 	 */
-	public static synchronized void detach() throws Exception { // NOPMD
-		if (JVM_VIRTUAL_MACHINE.get() != null) {
-			final Class<?> virtualMachineClass = JVM_VIRTUAL_MACHINE.get().getClass();
-			final Method detachMethod = virtualMachineClass.getMethod("detach");
-			detachMethod.invoke(JVM_VIRTUAL_MACHINE.get());
-			JVM_VIRTUAL_MACHINE.set(null);
+	public static synchronized void detach() throws Exception {
+		// Ensure VirtualMachine reference will not be used anymore
+		Object localRef = JVM_VIRTUAL_MACHINE.getAndSet(null);
+		if (localRef != null) {
+			// We have an attached VirtualMachine : detach it
+			final Method detachMethod = localRef.getClass().getMethod("detach");
+			detachMethod.invoke(localRef);
 		}
 	}
 
@@ -194,19 +154,51 @@ public class VirtualMachineWithoutToolsJar {
 	 * @throws Exception
 	 *             e
 	 */
-	public static InputStream heapHisto() throws Exception {
-		if (!isJmapSupported()) {
-			throw new UnsupportedOperationException("Current JVM does not support HeapHistogram: " + getJavaVendor());
-		}
-		if (!isEnabled()) {
-			throw new UnsupportedOperationException("heap_histo_non_actif");
+	public static Optional<InputStream> heapHisto() {
+		Optional<InputStream> asInputStream = getJvmVirtualMachine().transform(new Function<Object, InputStream>() {
+
+			@Override
+			public InputStream apply(Object vm) {
+				try {
+					return invokeForInputStream(vm, "heapHisto", "-all");
+				} catch (Throwable e) {
+					throw new RuntimeException("Issue on invoking 'heapHisto -all'", e);
+				}
+			}
+
+		});
+
+		if (!asInputStream.isPresent()) {
+			LOGGER.warn("'heapHisto' seems not available. Java-version: {}", getJavaVendor());
 		}
 
-		return invokeForInputStream("heapHisto", "-all");
+		return asInputStream;
+	}
+
+	public static Optional<InputStream> heapDump() throws Exception {
+		Optional<InputStream> asInputStream = getJvmVirtualMachine().transform(new Function<Object, InputStream>() {
+
+			@Override
+			public InputStream apply(Object vm) {
+				try {
+					return invokeForInputStream(vm, "dumpHeap", "-all");
+				} catch (Throwable e) {
+					throw new RuntimeException("Issue on invoking 'dumpHeap -all'", e);
+				}
+			}
+
+		});
+
+		if (!asInputStream.isPresent()) {
+			LOGGER.warn("'dumpHeap' seems not available. Java-version: {}", getJavaVendor());
+		}
+
+		return asInputStream;
 	}
 
 	/**
 	 * @param string
+	 *            the methodName
 	 * @param string2
 	 * @return
 	 * @throws Exception
@@ -235,27 +227,19 @@ public class VirtualMachineWithoutToolsJar {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	protected static InputStream invokeForInputStream(Class<?> virtualMachineClass,
-			String methodName,
-			String... argument) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
-			ClassNotFoundException, MalformedURLException, NoSuchMethodException {
+	protected static InputStream invokeForInputStream(Object virtualMachine, String methodName, String... argument)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException,
+			MalformedURLException, NoSuchMethodException {
+		Objects.requireNonNull(virtualMachine);
+
+		Class<?> vmClass = virtualMachine.getClass();
+
 		// https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/tooldescr014.html#BABJIIHH
 		// http://docs.oracle.com/javase/7/docs/technotes/tools/share/jmap.html
-		final Method methodForInputStream = virtualMachineClass.getMethod(methodName, Object[].class);
+		final Method methodForInputStream = vmClass.getMethod(methodName, Object[].class);
 
-		LOGGER.info("About to invoke {} on {}", methodName, virtualMachineClass);
-		return (InputStream) methodForInputStream.invoke(getJvmVirtualMachine(), new Object[] { argument });
-	}
-
-	public static InputStream heapDump() throws Exception {
-		if (!isJmapSupported()) {
-			throw new UnsupportedOperationException("Current JVM does not support Jmap: " + getJavaVendor());
-		}
-		if (!isEnabled()) {
-			throw new UnsupportedOperationException("Jmap operations are not available");
-		}
-
-		return invokeForInputStream("dumpHeap", "-all");
+		LOGGER.info("About to invoke {} on {}", methodName, vmClass);
+		return (InputStream) methodForInputStream.invoke(virtualMachine, new Object[] { argument });
 	}
 
 	private static String getJavaVendor() {

@@ -28,6 +28,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Optional;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
 import com.google.common.util.concurrent.AtomicLongMap;
@@ -276,24 +278,27 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 	 *            a predicate returning true if it is the first encounter of given object. It may return false even if
 	 *            an object has not been considered before, woult it be because the identity policy is not guaranteed
 	 *            (e.g. we rely on a BloomFilter) or if we want to exclude some objects
-	 * @return 0 if the Instrumentation agent is not available. Else an estimation of the memory consumption.
+	 * @return Long.MAX_VALUE if the Instrumentation agent is not available. Else an estimation of the memory
+	 *         consumption.
 	 */
 	public static long deepSize(Object object, IntPredicate identityPredicate) {
 		if (object == null) {
 			return 0L;
 		} else {
-			Instrumentation instrumentation = InstrumentationAgent.safeGetInstrumentation();
+			Optional<Instrumentation> instrumentation = InstrumentationAgent.getInstrumentation();
 
-			if (instrumentation == null) {
-				LOGGER.debug("Instrumentation is not available");
-				return 0L;
+			if (instrumentation.isPresent()) {
+				LongAdder totalSize = new LongAdder();
+
+				deepSize(instrumentation.get(), identityPredicate, totalSize, object);
+
+				return totalSize.sum();
+			} else {
+				LOGGER.debug("Instrumentation is not available for {}", object);
+
+				// We prefer to return MAX-VALUE to prevent the caller believing this object has no memory foot-print
+				return Long.MAX_VALUE;
 			}
-
-			LongAdder totalSize = new LongAdder();
-
-			deepSize(instrumentation, identityPredicate, totalSize, object);
-
-			return totalSize.sum();
 		}
 	}
 
@@ -333,6 +338,8 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 			IntPredicate identities,
 			LongAdder totalSize,
 			Object object) {
+		Objects.requireNonNull(instrumentation);
+
 		if (object == null) {
 			return;
 		} else {

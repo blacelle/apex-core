@@ -177,13 +177,13 @@ public class HeapHistogram implements IHeapHistogram, Serializable {
 	 *             e
 	 */
 	public static HeapHistogram createHeapHistogram() throws Exception {
-		try (InputStream input = VirtualMachineWithoutToolsJar.heapHisto()) {
+		try (InputStream input = VirtualMachineWithoutToolsJar.heapHisto().get()) {
 			return new HeapHistogram(input, VirtualMachineWithoutToolsJar.isJRockit());
 		}
 	}
 
 	public static String createHeapHistogramAsString() throws Exception {
-		byte[] byteArray = ByteStreams.toByteArray(VirtualMachineWithoutToolsJar.heapHisto());
+		byte[] byteArray = ByteStreams.toByteArray(VirtualMachineWithoutToolsJar.heapHisto().get());
 		return new String(byteArray, JMAP_CHARSET);
 	}
 
@@ -195,7 +195,7 @@ public class HeapHistogram implements IHeapHistogram, Serializable {
 	 * @throws Exception
 	 */
 	public static long saveHeapDump(File file, boolean gzipped) throws Exception {
-		try (InputStream input = VirtualMachineWithoutToolsJar.heapDump()) {
+		try (InputStream input = VirtualMachineWithoutToolsJar.heapDump().get()) {
 			InputStream wrapped;
 			if (gzipped) {
 				wrapped = new GZIPInputStream(input);

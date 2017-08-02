@@ -168,6 +168,7 @@ public class ApexLogHelper {
 		return getNiceTime(timeInMs, TimeUnit.MILLISECONDS);
 	}
 
+	private static final String DAYS_PREFIX = "days";
 	private static final String HOURS_PREFIX = "hours";
 	private static final String MINUTES_PREFIX = "min";
 	private static final String SECONDS_PREFIX = "sec";
@@ -177,7 +178,17 @@ public class ApexLogHelper {
 		return ApexLogHelper.lazyToString(() -> {
 			long timeInMs = timeUnit.toMillis(time);
 
-			if (timeInMs >= TimeUnit.HOURS.toMillis(1)) {
+			if (timeInMs >= TimeUnit.DAYS.toMillis(1)) {
+				String minString = TimeUnit.MILLISECONDS.toDays(timeInMs) + DAYS_PREFIX;
+
+				long hours = timeInMs - TimeUnit.DAYS.toMillis(1) * TimeUnit.MILLISECONDS.toDays(timeInMs);
+
+				if (hours > 0) {
+					return minString + " " + TimeUnit.MILLISECONDS.toHours(hours) + HOURS_PREFIX;
+				} else {
+					return minString;
+				}
+			} else if (timeInMs >= TimeUnit.HOURS.toMillis(1)) {
 				String minString = TimeUnit.MILLISECONDS.toHours(timeInMs) + HOURS_PREFIX;
 
 				long minutes = timeInMs - TimeUnit.HOURS.toMillis(1) * TimeUnit.MILLISECONDS.toHours(timeInMs);

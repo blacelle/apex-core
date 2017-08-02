@@ -38,7 +38,7 @@ public class TestVirtualMachineWithoutToolsJar {
 	@Test
 	public void testFindVirtualMachineClass() throws ClassNotFoundException, MalformedURLException {
 		Assert.assertEquals("class com.sun.tools.attach.VirtualMachine",
-				VirtualMachineWithoutToolsJar.findVirtualMachineClass().toString());
+				VirtualMachineWithoutToolsJar.findVirtualMachineClass().get().toString());
 	}
 
 	@Test
@@ -48,7 +48,7 @@ public class TestVirtualMachineWithoutToolsJar {
 
 	@Test
 	public void testHeapHisto() throws Exception {
-		InputStream is = VirtualMachineWithoutToolsJar.heapHisto();
+		InputStream is = VirtualMachineWithoutToolsJar.heapHisto().get();
 		String asString = CharStreams.toString(new InputStreamReader(is, Charsets.UTF_8));
 		Assert.assertNotNull(asString);
 	}

@@ -25,9 +25,11 @@ package blasd.apex.core.jvm;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.lang.management.BufferPoolMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
@@ -730,9 +732,11 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 	}
 
 	public static void streamHeapHistogram(OutputStream os, int nbRows) {
-		if (VirtualMachineWithoutToolsJar.isVirtualMachineAvailable()) {
-			try (BufferedReader br = new BufferedReader(
-					new InputStreamReader(VirtualMachineWithoutToolsJar.heapHisto(), IHeapHistogram.JMAP_CHARSET));
+		Optional<InputStream> optIS = VirtualMachineWithoutToolsJar.heapHisto().toJavaUtil();
+
+		if (optIS.isPresent()) {
+			try (Reader reader = new InputStreamReader(optIS.get(), IHeapHistogram.JMAP_CHARSET);
+					BufferedReader br = new BufferedReader(reader);
 					BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os, IHeapHistogram.JMAP_CHARSET))) {
 
 				boolean firstRow = true;

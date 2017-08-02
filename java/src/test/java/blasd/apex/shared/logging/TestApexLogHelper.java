@@ -153,6 +153,16 @@ public class TestApexLogHelper {
 	}
 
 	@Test
+	public void testGetNiceDays() {
+		Assert.assertEquals("5days", ApexLogHelper.getNiceTime(5, TimeUnit.DAYS).toString());
+	}
+
+	@Test
+	public void testGetNiceDaysAndHours() {
+		Assert.assertEquals("4days 4hours", ApexLogHelper.getNiceTime(100, TimeUnit.HOURS).toString());
+	}
+
+	@Test
 	public void testCollectionLimit_under() {
 		Assert.assertEquals("[0, 1]", ApexLogHelper.getToStringWithLimit(Arrays.asList(0, 1), 3).toString());
 	}

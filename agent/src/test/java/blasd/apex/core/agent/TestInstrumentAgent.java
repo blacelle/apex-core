@@ -23,13 +23,11 @@
 package blasd.apex.core.agent;
 
 import java.io.File;
-import java.lang.instrument.Instrumentation;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public class TestInstrumentAgent {
@@ -53,20 +51,6 @@ public class TestInstrumentAgent {
 	}
 
 	@Test
-	public void testMain() {
-		Instrumentation mock = Mockito.mock(Instrumentation.class);
-
-		InstrumentationAgent.agentmain("args", mock);
-	}
-
-	@Test
-	public void testPreMain() {
-		Instrumentation mock = Mockito.mock(Instrumentation.class);
-
-		InstrumentationAgent.premain("args", mock);
-	}
-
-	@Test
 	public void testGetPathToJarFileContainingThisClass() {
 		try {
 			Assert.assertEquals("", ApexAgentHelper.getHoldingJarPath(TestInstrumentAgent.class));
@@ -81,26 +65,6 @@ public class TestInstrumentAgent {
 		File jarFile = ApexAgentHelper.getOrMakeHoldingJarPath(TestInstrumentAgent.class);
 
 		Assert.assertTrue(jarFile.isFile());
-	}
-
-	@Test
-	public void testinitializeIfNeeded() {
-		try {
-			InstrumentationAgent.ensureAgentInitialisation();
-		} catch (RuntimeException e) {
-			// OK, it happens since the test classes are not compiled in a jar: we should have succeed wrapping them in
-			// a jar, but we may be missing the manifest file
-			// Expected RuntimeException from org.springframework.boot.loader.tools.AgentAttacher.attach(File)
-			LOGGER.log(Level.FINE, "Expected exception", e);
-
-			Assert.assertNotNull(e.getCause());
-			Assert.assertNotNull(e.getCause().getCause());
-
-			// The root-cause is actually that the manifest is missing
-			Throwable rootCause = e.getCause().getCause();
-			Assert.assertEquals("com.sun.tools.attach.AgentLoadException", rootCause.getClass().getName());
-			Assert.assertEquals("Agent JAR not found or no Agent-Class attribute", rootCause.getMessage());
-		}
 	}
 
 }

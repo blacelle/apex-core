@@ -25,6 +25,16 @@
 	</properties>
 
 	<dependencies>
+
+		<dependency>
+			<!-- Enables Optional and keeping JDK6 -->
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<!-- https://github.com/google/guava/wiki/Compatibility -->
+			<!-- Guava for JDK6 srops at 20.0 -->
+			<version>20.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-loader-tools</artifactId>
@@ -60,22 +70,4 @@
 		</dependency>
 
 	</dependencies>
-
-	<build>
-		<plugins>
-			<!-- Generate a Manifest enabling this jar to be used as preagent -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Premain-Class>blasd.apex.core.agent.InstrumentationAgent</Premain-Class>
-							<Agent-Class>blasd.apex.core.agent.InstrumentationAgent</Agent-Class>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 </project>

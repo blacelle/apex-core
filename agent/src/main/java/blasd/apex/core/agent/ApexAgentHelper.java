@@ -15,11 +15,12 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
 import java.util.jar.JarFile;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utilities to help working with java agents
@@ -30,8 +31,8 @@ import java.util.zip.ZipOutputStream;
 // Some details handled in
 // https://github.com/avaje-common/avaje-agentloader/blob/master/src/main/java/org/avaje/agentloader/AgentLoader.java
 public class ApexAgentHelper {
-	// SLF4J in not available in the Agents
-	protected static final Logger LOGGER = Logger.getLogger(InstrumentationAgent.class.getName());
+
+	protected static final Logger LOGGER = LoggerFactory.getLogger(ApexAgentHelper.class);
 
 	protected ApexAgentHelper() {
 		// hidden
@@ -41,8 +42,7 @@ public class ApexAgentHelper {
 		URI jarFileURI = getHoldingJarURI(clazz);
 
 		if (jarFileURI == null) {
-			LOGGER.log(Level.WARNING,
-					"codeSource=null for " + clazz + " with protectedDomain=" + clazz.getProtectionDomain());
+			LOGGER.warn("codeSource=null for {} with protectedDomain={}", clazz, clazz.getProtectionDomain());
 			return null;
 		}
 
@@ -99,7 +99,7 @@ public class ApexAgentHelper {
 			if (asFile.isFile()) {
 				// A file in the file-system: OK if it is a jar
 				if (!jarFileURI.getPath().toLowerCase().endsWith(".jar")) {
-					LOGGER.warning("We have a jar in a file not ending by .jar: " + jarFileURI);
+					LOGGER.warn("We have a jar in a file not ending by .jar: {}", jarFileURI);
 				}
 
 				return asFile;
@@ -216,7 +216,7 @@ public class ApexAgentHelper {
 				Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
 					@Override
 					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-						LOGGER.log(Level.FINE, "Adding " + file + " in " + zipFilePath);
+						LOGGER.debug("Adding {} in {}", file, zipFilePath);
 						zos.putNextEntry(new ZipEntry(folder.relativize(file).toString()));
 						Files.copy(file, zos);
 						zos.closeEntry();

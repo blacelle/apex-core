@@ -163,6 +163,9 @@ public class TestApexJMXHelper {
 	public void testConvertURL() throws IOException {
 		Path testPath = ApexFileHelper.createTempPath("apex", "tmp", true);
 
+		// We need the file to exist to enable derection of URL being a local file
+		testPath.toFile().createNewFile();
+
 		URL asURL = ApexJMXHelper.convertToURL(testPath.toString());
 
 		// Check the URL maps actually to the file
@@ -174,6 +177,9 @@ public class TestApexJMXHelper {
 	@Test
 	public void testConvertURL_withspace() throws IOException {
 		Path testPath = ApexFileHelper.createTempPath("ap ex", "tmp", true);
+
+		// We need the file to exist to enable derection of URL being a local file
+		testPath.toFile().createNewFile();
 
 		URL asURL = ApexJMXHelper.convertToURL(testPath.toString());
 
