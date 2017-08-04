@@ -24,14 +24,9 @@ package blasd.apex.core.memory;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.IntPredicate;
 
@@ -43,7 +38,6 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Optional;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
-import com.google.common.util.concurrent.AtomicLongMap;
 
 import blasd.apex.core.agent.InstrumentationAgent;
 
