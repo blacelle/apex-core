@@ -66,4 +66,17 @@ public class TestApexURLHelper {
 	public void testExtractDomainNamespaceStartWithDot() {
 		Assert.assertFalse(ApexURLHelper.getHost(".www.amazon.fr").get().getHostSpace().isPresent());
 	}
+
+	@Test
+	public void testRebuildLink_main() throws MalformedURLException {
+		Assert.assertEquals("http://youpi.com/arg", ApexURLHelper.resolve("http://youpi.com/grumph", "arg"));
+		Assert.assertEquals("http://youpi.com/arg", ApexURLHelper.resolve("http://youpi.com/grumph", "/arg"));
+	}
+
+	@Test
+	public void testRebuildLink_folder() throws MalformedURLException {
+		Assert.assertEquals("http://youpi.com/foo/arg", ApexURLHelper.resolve("http://youpi.com/foo/bar", "arg"));
+		Assert.assertEquals("http://youpi.com/arg", ApexURLHelper.resolve("http://youpi.com/foo/bar?glu", "/arg"));
+	}
+
 }
