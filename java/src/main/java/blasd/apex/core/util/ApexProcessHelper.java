@@ -29,12 +29,14 @@ public class ApexProcessHelper {
 	protected static final int OS_MARKER_WINDOWS = 1;
 	protected static final int OS_MARKER_MAC = 2;
 
+	private static final String CLASS_PROCESS_UNIX = "java.lang.UNIXProcess";
+
 	// Deprecated in Java9
 	public static synchronized long getPidOfProcess(Process p) {
 		long pid = -1;
 
 		try {
-			if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
+			if (p.getClass().getName().equals(CLASS_PROCESS_UNIX)) {
 				Field f = p.getClass().getDeclaredField("pid");
 				f.setAccessible(true);
 				pid = f.getLong(p);

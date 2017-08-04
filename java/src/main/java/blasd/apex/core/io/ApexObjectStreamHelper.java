@@ -34,28 +34,29 @@ public class ApexObjectStreamHelper {
 	 * @return the number of transmitted bytes, as reading from the InputStream
 	 * @throws IOException
 	 */
-	public long writeInputStreamToDataOutput(InputStream inputStream, ObjectOutput objectOutput) throws IOException {
-		return writeInputStreamToDataOutput(inputStream, objectOutput, IApexMemoryConstants.KB_INT);
+	public static long writeInputStream(ObjectOutput objectOutput, InputStream inputStream) throws IOException {
+		return writeInputStream(objectOutput, inputStream, IApexMemoryConstants.KB_INT);
 	}
 
 	/**
 	 * Default chunk size is 1024
 	 * 
-	 * @param inputStream
-	 *            the inputStream from which bytes are read. We consume it until EOF is encountered, however it is not
-	 *            automatically closed
 	 * @param objectOutput
 	 *            the ObjectOutput were the data from the inputStream are written. These bytes are send through a stream
 	 *            of ByteArrayMarker
+	 * @param inputStream
+	 *            the inputStream from which bytes are read. We consume it until EOF is encountered, however it is not
+	 *            automatically closed
 	 * @param chunkSize
 	 *            the size of the chunks in which the inputStream is fragmented
-	 * @return the number of transmitted bytes, as reading from the InputStream
+	 * @return the number of transmitted bytes, as reading from the InputStream. It does NOT include the overhead
+	 *         induced by the protocol (e.g. ByteArrayMarker own bytes)
 	 */
-	public long writeInputStreamToDataOutput(InputStream inputStream, ObjectOutput objectOutput, int chunkSize)
+	public static long writeInputStream(ObjectOutput objectOutput, InputStream inputStream, int chunkSize)
 			throws IOException {
 		byte[] buffer = new byte[chunkSize];
 
-		long actuallyWritten = 0;
+		long totalWritten = 0;
 		while (true) {
 			// Read the target chunk
 			int nbToCopy = ByteStreams.read(inputStream, buffer, 0, buffer.length);
@@ -65,19 +66,32 @@ public class ApexObjectStreamHelper {
 				break;
 			} else {
 				// We may have read less than chunkSize bytes when the stream is consumed
-				actuallyWritten += nbToCopy;
+				totalWritten += nbToCopy;
 			}
 
 			// The flow expected only objects
-			objectOutput.writeObject(new ByteArrayMarker(nbToCopy));
+			objectOutput.writeObject(new ByteArrayMarker(nbToCopy, false));
 
 			objectOutput.write(buffer, 0, nbToCopy);
+
+			LOGGER.trace("We have transmitted {} bytes", totalWritten);
 		}
 
-		return actuallyWritten;
+		// We need to indicate when there is no more data: instead of checking of the InputSTream has a next block, we
+		// simply submit a trailing empty block
+		objectOutput.writeObject(new ByteArrayMarker(0, true));
+		objectOutput.write(buffer, 0, 0);
+
+		return totalWritten;
 	}
 
-	public ObjectInput wrapToHandleInputStream(ObjectInput objectInput) {
+	/**
+	 * 
+	 * @param objectInput
+	 * @return an ObjectInput which may return InputStream on .readObject
+	 */
+	public static ObjectInput wrapToHandleInputStream(ObjectInput objectInput) {
 		return new ObjectInputHandlingInputStream(objectInput);
 	}
+
 }

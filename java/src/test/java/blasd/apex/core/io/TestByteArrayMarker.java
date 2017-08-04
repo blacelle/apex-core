@@ -30,7 +30,7 @@ import org.junit.Test;
 public class TestByteArrayMarker {
 	@Test
 	public void testSerialization() throws IOException, ClassNotFoundException {
-		ByteArrayMarker marker = new ByteArrayMarker(123);
+		ByteArrayMarker marker = new ByteArrayMarker(123, false);
 
 		String asString = ApexSerializationHelper.toString(marker);
 		Assert.assertEquals(123L, ((ByteArrayMarker) ApexSerializationHelper.fromString(asString)).getNbBytes());

@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,16 +23,25 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ObjectInputHandlingInputStream.class);
 
 	protected final ObjectInput decorated;
-	protected final ExecutorService inputStreamFiller =
-			ApexExecutorsHelper.newSingleThreadExecutor("ObjectInputHandling");
+
+	// The main thread will process the objects: we need an async process to read bytes
+	protected final ExecutorService inputStreamFiller;
 
 	protected final AtomicBoolean pipedOutputStreamIsOpen = new AtomicBoolean(false);
+	protected final AtomicReference<Exception> ouch = new AtomicReference<>();
 
-	private static final Object EOF_MARKER = new Object();
-	protected Object nextNotByteMarker;
-
+	/**
+	 * Build a ObjectInputHandlingInputStream with an asynchronous single-thread executor handling inputStream reading
+	 * 
+	 * @param decorated
+	 */
 	public ObjectInputHandlingInputStream(ObjectInput decorated) {
+		this(decorated, ApexExecutorsHelper.newSingleThreadExecutor("ObjectInputHandling"));
+	}
+
+	public ObjectInputHandlingInputStream(ObjectInput decorated, ExecutorService inputStreamFiller) {
 		this.decorated = decorated;
+		this.inputStreamFiller = inputStreamFiller;
 	}
 
 	@Override
@@ -46,15 +57,24 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 		if (next instanceof ByteArrayMarker) {
 			// We received an ByteArrayMarker: it has to be converted to an InputStream
 
+			// Wait for PipedOutputStream to be connected before returning the PipedInputStream
+			CountDownLatch connectedCdl = new CountDownLatch(1);
+
 			// DO not auto-close as this inputStream will be consumed out of this loop
 			PipedInputStream pis = new PipedInputStream();
 
 			// Connect a PipedOutputStream in which we will write the transmitted InputStream
-			pipedOutputStreamIsOpen.set(true);
-			PipedOutputStream pos = new PipedOutputStream(pis);
-			AtomicReference<Exception> ouch = new AtomicReference<>();
+			if (!pipedOutputStreamIsOpen.compareAndSet(false, true)) {
+				throw new IllegalStateException("Pipe was already open");
+			}
+
 			inputStreamFiller.execute(() -> {
-				try {
+				// PipedInputStream.read will throw if not connected: PipedOutputStream should be connected before
+				// leaving main thread
+				try (PipedOutputStream pos = new PipedOutputStream(pis)) {
+					// Indicate the pipe is connected
+					connectedCdl.countDown();
+
 					ByteArrayMarker nextByteMarker = (ByteArrayMarker) next;
 					while (true) {
 						byte[] bytes = new byte[Ints.checkedCast(nextByteMarker.getNbBytes())];
@@ -69,51 +89,56 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 						// Transfer these bytes in the pipe
 						pos.write(bytes);
 
-						try {
-							Object localNext = decorated.readObject();
-
-							if (localNext instanceof ByteArrayMarker) {
-								// We received another chunk of bytes: push it in current InputStream
-								nextByteMarker = (ByteArrayMarker) localNext;
-							} else {
-								// Next item is NOT a chunk for current InputStream: give it back as next action
-								// in the stream of action
-								nextNotByteMarker = localNext;
-								break;
-							}
-						} catch (EOFException e) {
-							// http://stackoverflow.com/questions/2626163/java-fileinputstream-objectinputstream-reaches-end-of-file-eof
-							LOGGER.trace(
-									"This EOF probably means there is no commands left, or the stream has been truncated",
-									e);
-							nextNotByteMarker = EOF_MARKER;
+						if (nextByteMarker.getIsFinished()) {
 							break;
+						}
+
+						Object localNext = decorated.readObject();
+
+						if (localNext instanceof ByteArrayMarker) {
+							// We received another chunk of bytes: push it in current InputStream
+							nextByteMarker = (ByteArrayMarker) localNext;
+						} else {
+							throw new IllegalStateException(
+									"We received ByteArrayMarker with isFinished=false while next object was a "
+											+ localNext);
 						}
 					}
 				} catch (IOException | ClassNotFoundException e) {
-					ouch.set(e);
-				} finally {
-					try {
-						pos.close();
-					} catch (IOException e) {
-						LOGGER.trace("Ouch", e);
+					if (!ouch.compareAndSet(null, e)) {
+						throw new RuntimeException(
+								"We encountered a new exception while previous one has not been reported", e);
 					}
+				} finally {
 					pipedOutputStreamIsOpen.set(false);
 				}
 			});
+
+			try {
+				if (!connectedCdl.await(1, TimeUnit.MINUTES)) {
+					pis.close();
+					throw new RuntimeException("It took too long to connect the pipes");
+				}
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new RuntimeException(e);
+			}
 
 			// return the PipedInputStream as it should be consumed externally
 			// Beware no call to ObjectInput.read should be done before the PipedOutputStream is done
 			return pis;
 		} else {
-			if (nextNotByteMarker != null) {
-				nextNotByteMarker = null;
-
-				if (nextNotByteMarker == EOF_MARKER) {
-					// TODO: should we rethrow the EOFException?
-					return null;
+			Exception pendingException = ouch.getAndSet(null);
+			// The caller requests for nextObject, but it
+			if (pendingException != null) {
+				if (pendingException instanceof EOFException) {
+					// The calling code may rely on Exception type for such case
+					throw (EOFException) pendingException;
+				} else if (pendingException instanceof IOException) {
+					// TODO: Is there other special kind of IOException?
+					throw new IOException(pendingException);
 				} else {
-					return nextNotByteMarker;
+					throw new RuntimeException(pendingException);
 				}
 			}
 

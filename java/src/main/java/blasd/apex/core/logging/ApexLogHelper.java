@@ -301,15 +301,25 @@ public class ApexLogHelper {
 	 * @param removeEOL
 	 *            if true, we replace end-of-line characters by a space, else we escape them
 	 * @return a String which is guaranteed to hold on a single row
+	 * @deprecated Prefer .removeNewLines or .escapeNewLines
 	 */
+	@Deprecated
 	public static Object getSingleRow(Object toString, boolean removeEOL) {
 		if (removeEOL) {
-			// Replace consecutive '\r\n' by a space (Windows), and then each individual by another space (Linux and
-			// Mac)
-			return lazyToString(() -> toString.toString().replaceAll("\r\n", " ").replaceAll("[\r\n]", " "));
+			return removeNewLines(toString);
 		} else {
-			return lazyToString(() -> toString.toString().replaceAll("\r", Matcher.quoteReplacement("\\r")).replaceAll(
-					"\n", Matcher.quoteReplacement("\\n")));
+			return escapeNewLines(toString);
 		}
+	}
+
+	public static Object removeNewLines(Object toString) {
+		// Replace consecutive '\r\n' by a space (Windows), and then each individual by another space (Linux and
+		// Mac)
+		return lazyToString(() -> toString.toString().replaceAll("\r\n", " ").replaceAll("[\r\n]", " "));
+	}
+
+	public static Object escapeNewLines(Object toString) {
+		return lazyToString(() -> toString.toString().replaceAll("\r", Matcher.quoteReplacement("\\r")).replaceAll("\n",
+				Matcher.quoteReplacement("\\n")));
 	}
 }

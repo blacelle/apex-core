@@ -35,12 +35,18 @@ public class ByteArrayMarker implements Serializable {
 	private static final long serialVersionUID = -3032117473402808084L;
 
 	protected final long nbBytes;
+	protected final boolean isfinished;
 
-	public ByteArrayMarker(long nbBytes) {
+	public ByteArrayMarker(long nbBytes, boolean isfinished) {
 		this.nbBytes = nbBytes;
+		this.isfinished = isfinished;
 	}
 
 	public long getNbBytes() {
 		return nbBytes;
+	}
+
+	public boolean getIsFinished() {
+		return isfinished;
 	}
 }
