@@ -8,6 +8,7 @@ import java.io.ObjectOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteStreams;
 
 import blasd.apex.core.memory.IApexMemoryConstants;
@@ -22,6 +23,9 @@ public class ApexObjectStreamHelper {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ApexObjectStreamHelper.class);
 
+	@VisibleForTesting
+	static final int DEFAULT_CHUNK_SIZE = IApexMemoryConstants.KB_INT;
+
 	protected ApexObjectStreamHelper() {
 		// hidden
 	}
@@ -35,7 +39,7 @@ public class ApexObjectStreamHelper {
 	 * @throws IOException
 	 */
 	public static long writeInputStream(ObjectOutput objectOutput, InputStream inputStream) throws IOException {
-		return writeInputStream(objectOutput, inputStream, IApexMemoryConstants.KB_INT);
+		return writeInputStream(objectOutput, inputStream, DEFAULT_CHUNK_SIZE);
 	}
 
 	/**
