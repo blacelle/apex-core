@@ -20,101 +20,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.shared.util;
-
-import java.util.HashMap;
-import java.util.Map;
+package blasd.apex.core.memory;
 
 import org.assertj.core.api.Assertions;
-import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
-
-import blasd.apex.core.memory.ApexMemoryHelper;
-import blasd.apex.core.memory.IApexMemoryConstants;
-
 public class TestApexMemoryHelper {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(TestApexMemoryHelper.class);
 
-	static class NotFinalField {
-		public String oneString;
-
-		public NotFinalField(String oneString) {
-			this.oneString = oneString;
-		}
-
-	}
-
-	static class FinalField {
-		public String oneString;
-
-		public FinalField(String oneString) {
-			this.oneString = oneString;
-		}
-
-	}
-
-	static class DerivedClass extends FinalField {
-
-		public DerivedClass(String oneString) {
-			super(oneString);
-		}
-
-	}
-
 	@Test
-	public void testNullRef() {
-		ApexMemoryHelper.dictionarize(null);
-		ApexMemoryHelper.dictionarizeArray(null);
-		ApexMemoryHelper.dictionarizeIterable(null);
-	}
-
-	@Test
-	public void testDictionarisationOnFinal() {
-		FinalField left = new FinalField("Youpi");
-		FinalField right = new FinalField(new String("Youpi"));
-
-		// Not same ref
-		Assert.assertNotSame(left.oneString, right.oneString);
-
-		ApexMemoryHelper.dictionarize(left);
-		ApexMemoryHelper.dictionarize(right);
-
-		Assert.assertSame(left.oneString, right.oneString);
-	}
-
-	@Test
-	public void testDictionarisationOnNotFinal() {
-		NotFinalField left = new NotFinalField("Youpi");
-		NotFinalField right = new NotFinalField(new String("Youpi"));
-
-		// Not same ref
-		Assert.assertNotSame(left.oneString, right.oneString);
-
-		ApexMemoryHelper.dictionarize(left);
-		ApexMemoryHelper.dictionarize(right);
-
-		Assert.assertSame(left.oneString, right.oneString);
-	}
-
-	@Test
-	public void testDictionarisationOnDerived() {
-		DerivedClass left = new DerivedClass("Youpi");
-		DerivedClass right = new DerivedClass(new String("Youpi"));
-
-		// Not same ref
-		Assert.assertNotSame(left.oneString, right.oneString);
-
-		ApexMemoryHelper.dictionarize(left);
-		ApexMemoryHelper.dictionarize(right);
-
-		Assert.assertSame(left.oneString, right.oneString);
+	public void testCtor() {
+		Assert.assertNotNull(new ApexMemoryHelper());
 	}
 
 	@Test

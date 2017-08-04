@@ -229,7 +229,9 @@ public class ApexAgentHelper {
 				}
 			} catch (IOException e) {
 				// Delete this tmp file
-				zipFilePath.delete();
+				if (zipFilePath.isFile() && !zipFilePath.delete()) {
+					LOGGER.debug("For some reason, we failed deleting {}", zipFilePath);
+				}
 
 				throw new IOException("Issue while writing in " + zipFilePath, e);
 			} finally {

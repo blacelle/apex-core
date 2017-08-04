@@ -7,7 +7,6 @@ import java.net.URISyntaxException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.util.FileSystemUtils;
 
 import com.google.common.io.Files;
 
