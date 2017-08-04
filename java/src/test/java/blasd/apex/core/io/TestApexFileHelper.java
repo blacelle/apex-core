@@ -24,6 +24,7 @@ package blasd.apex.core.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -57,5 +58,22 @@ public class TestApexFileHelper {
 		ApexFileHelper.expandJarToDisk(jarPath, tmpPath);
 
 		Assert.assertTrue(new File(tmpPath.toFile(), pathToResourceInJar).exists());
+	}
+
+	@Test
+	public void testURISpecialCharacters() throws IOException, URISyntaxException {
+		// '@' is a special characters leading to issues when converting back and forth to URL
+		Path file = File.createTempFile("TestApexAgentHelper", "special@char").toPath();
+
+		URI asURI = file.toUri();
+		URL asURL = asURI.toURL();
+
+		File backToFile = new File(asURI);
+		File backToFile2 = new File(asURI.getPath());
+		File backToFile3 = new File(asURL.toURI().getPath());
+
+		Assert.assertEquals(file, backToFile.toPath());
+		Assert.assertEquals(file, backToFile2.toPath());
+		Assert.assertEquals(file, backToFile3.toPath());
 	}
 }

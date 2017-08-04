@@ -8,12 +8,8 @@ import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
+import java.util.Iterator;
 import java.util.jar.JarFile;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -21,6 +17,8 @@ import java.util.zip.ZipOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.io.Files;
 
 /**
  * Utilities to help working with java agents
@@ -106,10 +104,10 @@ public class ApexAgentHelper {
 			} else if (asFile.isDirectory()) {
 				// Else if it is a folder, need to wrap in a jar
 				try {
-					Path tmpFile = Files.createTempFile("AgentHelper", ".jar");
-					packToZip(asFile.toPath(), tmpFile);
-					tmpFile.toFile().deleteOnExit();
-					return tmpFile.toFile();
+					File tmpFile = File.createTempFile("AgentHelper", ".jar");
+					packToZip(asFile, tmpFile);
+					tmpFile.deleteOnExit();
+					return tmpFile;
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -199,7 +197,6 @@ public class ApexAgentHelper {
 		return jarFileURI;
 	}
 
-	// https://stackoverflow.com/questions/15968883/how-to-zip-a-folder-itself-using-java
 	/**
 	 * 
 	 * @param folder
@@ -208,28 +205,33 @@ public class ApexAgentHelper {
 	 *            a file-system path where to create a new archive
 	 * @throws IOException
 	 */
-	public static void packToZip(final Path folder, final Path zipFilePath) throws IOException {
-		FileOutputStream fos = new FileOutputStream(zipFilePath.toFile());
+	public static void packToZip(final File folder, final File zipFilePath) throws IOException {
+		FileOutputStream fos = new FileOutputStream(zipFilePath);
 		try {
 			final ZipOutputStream zos = new ZipOutputStream(fos);
 			try {
-				Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
-					@Override
-					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-						LOGGER.debug("Adding {} in {}", file, zipFilePath);
-						zos.putNextEntry(new ZipEntry(folder.relativize(file).toString()));
-						Files.copy(file, zos);
-						zos.closeEntry();
-						return FileVisitResult.CONTINUE;
-					}
+				// https://stackoverflow.com/questions/15968883/how-to-zip-a-folder-itself-using-java
+				Iterator<File> iterator = Files.fileTreeTraverser().preOrderTraversal(folder).iterator();
 
-					@Override
-					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-						zos.putNextEntry(new ZipEntry(folder.relativize(dir).toString() + "/"));
+				while (iterator.hasNext()) {
+					File next = iterator.next();
+
+					if (next.isDirectory()) {
+						// https://stackoverflow.com/questions/204784/how-to-construct-a-relative-path-in-java-from-two-absolute-paths-or-urls
+						zos.putNextEntry(new ZipEntry(folder.toURI().relativize(next.toURI()).getPath() + "/"));
 						zos.closeEntry();
-						return FileVisitResult.CONTINUE;
+					} else if (next.isFile()) {
+						LOGGER.debug("Adding {} in {}", next, zipFilePath);
+						zos.putNextEntry(new ZipEntry(folder.toURI().relativize(next.toURI()).getPath()));
+						Files.copy(next, zos);
+						zos.closeEntry();
 					}
-				});
+				}
+			} catch (IOException e) {
+				// Delete this tmp file
+				zipFilePath.delete();
+
+				throw new IOException("Issue while writing in " + zipFilePath, e);
 			} finally {
 				zos.close();
 			}
@@ -245,8 +247,8 @@ public class ApexAgentHelper {
 	 * @param zipFilePath
 	 * @throws IOException
 	 */
-	public static void packToGzip(final Path inputPath, final Path zipFilePath) throws IOException {
-		FileOutputStream fos = new FileOutputStream(zipFilePath.toFile());
+	public static void packToGzip(final File inputPath, final File zipFilePath) throws IOException {
+		FileOutputStream fos = new FileOutputStream(zipFilePath);
 
 		try {
 			final GZIPOutputStream zos = new GZIPOutputStream(fos);

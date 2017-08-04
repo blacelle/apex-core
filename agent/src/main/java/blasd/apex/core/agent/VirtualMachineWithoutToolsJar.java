@@ -27,7 +27,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -230,7 +229,9 @@ public class VirtualMachineWithoutToolsJar {
 	protected static InputStream invokeForInputStream(Object virtualMachine, String methodName, String... argument)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException,
 			MalformedURLException, NoSuchMethodException {
-		Objects.requireNonNull(virtualMachine);
+		if (virtualMachine == null) {
+			throw new IllegalArgumentException("VirtualMachine is null");
+		}
 
 		Class<?> vmClass = virtualMachine.getClass();
 

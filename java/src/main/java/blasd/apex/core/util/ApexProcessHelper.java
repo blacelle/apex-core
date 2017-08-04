@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
@@ -55,13 +56,17 @@ public class ApexProcessHelper {
 	 * @return the number of bytes in the resident memory of given process
 	 * @throws IOException
 	 */
-	public static long getProcessResidentMemory(long pid) throws IOException {
+	public static OptionalLong getProcessResidentMemory(long pid) throws IOException {
 		ProcessBuilder memoryBuilder;
 
 		// https://stackoverflow.com/questions/131303/how-to-measure-actual-memory-usage-of-an-application-or-process
 		String pidAsString = Long.toString(pid);
 		if (SystemUtils.IS_OS_MAC) {
 			memoryBuilder = new ProcessBuilder("/usr/bin/vmmap", "-summary", pidAsString);
+		} else if (SystemUtils.IS_OS_WINDOWS) {
+			// https://stackoverflow.com/questions/54686/how-to-get-a-list-of-current-open-windows-process-with-java
+			// /nh: no header
+			memoryBuilder = new ProcessBuilder("tasklist.exe", "/fi", "PID eq " + pidAsString, "/fo", "csv", "/nh");
 		} else {
 			// In heroku, no need for sudo
 			memoryBuilder = new ProcessBuilder("pmap", pidAsString);
@@ -83,14 +88,14 @@ public class ApexProcessHelper {
 			osFlag = OS_MARKER_MAC;
 		} else {
 			LOGGER.trace("Unknown OS: {}", SystemUtils.OS_NAME);
-			return -1;
+			return OptionalLong.empty();
 		}
 
 		return extractMemory(osFlag, inputStream);
 	}
 
 	@VisibleForTesting
-	protected static long extractMemory(int osFlag, InputStream inputStream) throws IOException {
+	protected static OptionalLong extractMemory(int osFlag, InputStream inputStream) throws IOException {
 		LineProcessor<String> processor = new LineProcessor<String>() {
 			AtomicReference<String> lastLine = new AtomicReference<>("");
 
@@ -120,11 +125,11 @@ public class ApexProcessHelper {
 			}
 		};
 
-		String lastLine = CharStreams.readLines(new InputStreamReader(inputStream), processor);
+		String lastLine = CharStreams.readLines(new InputStreamReader(inputStream), processor).trim();
 
 		if (lastLine.isEmpty()) {
 			LOGGER.trace("Unexpected row: {}", lastLine);
-			return -1L;
+			return OptionalLong.empty();
 		} else {
 			if (osFlag == OS_MARKER_MAC) {
 				// MacOS
@@ -154,7 +159,7 @@ public class ApexProcessHelper {
 					if (firstSpace >= 0) {
 						lastLine = lastLine.substring(firstSpace + 1).trim();
 					} else {
-						return -1;
+						return OptionalLong.empty();
 					}
 
 					// Skip virtual size to move to resident size
@@ -162,10 +167,28 @@ public class ApexProcessHelper {
 					lastLine = lastLine.substring(0, secondSpace + 1).trim();
 
 					long memory = ApexMemoryHelper.memoryAsLong(lastLine);
-					return memory;
+					return OptionalLong.of(memory);
 				} else {
 					LOGGER.trace("Unexpected row: {}", lastLine);
-					return -1L;
+					return OptionalLong.empty();
+				}
+			} else if (osFlag == OS_MARKER_WINDOWS) {
+				// If no process matching pid: INFO: No tasks are running which match the specified criteria.
+				// If matching with "/fo csv": "chrome.exe","6740","Console","1","107,940 K"
+				// If matching with "/fo table": "chrome.exe\t6740\tConsole\t1\t108,760 K"
+				String WINDOWS_MEMORY_PATTERN = "\",\"";
+				int indexLastComa = lastLine.lastIndexOf(WINDOWS_MEMORY_PATTERN);
+				if (indexLastComa < 0) {
+					return OptionalLong.empty();
+				} else {
+					String memoryString = lastLine.substring(indexLastComa + WINDOWS_MEMORY_PATTERN.length(),
+							lastLine.length() - "\"".length());
+					if (memoryString.length() >= 1 && memoryString.charAt(0) == '\"') {
+						memoryString = memoryString.substring(1, memoryString.length() - 1);
+					}
+
+					long memory = ApexMemoryHelper.memoryAsLong(memoryString);
+					return OptionalLong.of(memory);
 				}
 			} else {
 				// Last line is like ' total 65512K'
@@ -173,10 +196,10 @@ public class ApexProcessHelper {
 				if (lastLine.startsWith("total")) {
 					lastLine = lastLine.substring("total".length()).trim();
 					long memory = ApexMemoryHelper.memoryAsLong(lastLine);
-					return memory;
+					return OptionalLong.of(memory);
 				} else {
 					LOGGER.trace("Unexpected row: {}", lastLine);
-					return -1L;
+					return OptionalLong.empty();
 				}
 			}
 		}

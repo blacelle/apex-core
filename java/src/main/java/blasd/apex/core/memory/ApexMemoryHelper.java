@@ -475,7 +475,13 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 						"Can not parse " + targetMax + ". It should end by a digit or one of 'k', 'm','g'");
 			}
 
-			digits = targetMax.substring(0, targetMax.length() - 1);
+			digits = targetMax.substring(0, targetMax.length() - 1).trim();
+		}
+
+		// Something like "123,456"
+		if (digits.length() >= 5 && digits.charAt(digits.length() - 4) == ',') {
+			// Transform "123,456" to "123" ~ "456"
+			digits = digits.substring(0, digits.length() - 4) + digits.substring(digits.length() - 3);
 		}
 
 		double parsedAsDouble = Double.parseDouble(digits);

@@ -150,6 +150,12 @@ public class TestApexMemoryHelper {
 		Assert.assertEquals((long) (1.2 * IApexMemoryConstants.GB), ApexMemoryHelper.memoryAsLong("1.2G"));
 	}
 
+	// happens on tasklist.exe in Windows
+	@Test
+	public void testParseMemory_windows() {
+		Assert.assertEquals(107940 * IApexMemoryConstants.KB, ApexMemoryHelper.memoryAsLong("107,940 K"));
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void testParseMemoryFailsOnUnknownEndChars() {
 		ApexMemoryHelper.memoryAsLong("123A");

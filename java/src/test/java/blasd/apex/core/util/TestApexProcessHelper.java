@@ -3,6 +3,7 @@ package blasd.apex.core.util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
@@ -31,8 +32,9 @@ public class TestApexProcessHelper {
 				.stream()
 				.collect(Collectors.joining("\r"));
 
-		long nbBytes = ApexProcessHelper.extractMemory(ApexProcessHelper.OS_MARKER_MAC,
-				new ByteArrayInputStream(macMemoryOutput.getBytes()));
+		long nbBytes = ApexProcessHelper
+				.extractMemory(ApexProcessHelper.OS_MARKER_MAC, new ByteArrayInputStream(macMemoryOutput.getBytes()))
+				.getAsLong();
 		Assert.assertEquals((long) (538.2D * IApexMemoryConstants.MB), nbBytes);
 	}
 
@@ -41,8 +43,9 @@ public class TestApexProcessHelper {
 		String macMemoryOutput =
 				"TOTAL                                1.5G   113.3M    7208K      52K       0K      20K       0K      485 ";
 
-		long nbBytes = ApexProcessHelper.extractMemory(ApexProcessHelper.OS_MARKER_MAC,
-				new ByteArrayInputStream(macMemoryOutput.getBytes()));
+		long nbBytes = ApexProcessHelper
+				.extractMemory(ApexProcessHelper.OS_MARKER_MAC, new ByteArrayInputStream(macMemoryOutput.getBytes()))
+				.getAsLong();
 		Assert.assertEquals((long) (113.3D * IApexMemoryConstants.MB), nbBytes);
 	}
 
@@ -50,9 +53,32 @@ public class TestApexProcessHelper {
 	public void testMemoryOnLinux() throws IOException {
 		String macMemoryOutput = Arrays.asList(" total 65512K").stream().collect(Collectors.joining("\n"));
 
-		long nbBytes = ApexProcessHelper.extractMemory(ApexProcessHelper.OS_MARKER_LINUX,
-				new ByteArrayInputStream(macMemoryOutput.getBytes()));
+		long nbBytes = ApexProcessHelper
+				.extractMemory(ApexProcessHelper.OS_MARKER_LINUX, new ByteArrayInputStream(macMemoryOutput.getBytes()))
+				.getAsLong();
 		Assert.assertEquals(65512 * IApexMemoryConstants.KB, nbBytes);
+	}
+
+	@Test
+	public void testMemoryOnWindows() throws IOException {
+		// "/fo csv"
+		String windowsMemoryOutput = "\"chrome.exe\",\"6740\",\"Console\",\"1\",\"107,940 K\"";
+
+		// "/fo table"
+		// String windowsMemoryOutput = "chrome.exe 6740 Console 1 108,760 K";
+
+		long nbBytes = ApexProcessHelper.extractMemory(ApexProcessHelper.OS_MARKER_WINDOWS,
+				new ByteArrayInputStream(windowsMemoryOutput.getBytes())).getAsLong();
+		Assert.assertEquals(107940 * IApexMemoryConstants.KB, nbBytes);
+	}
+
+	@Test
+	public void testMemoryOnWindows_pid_does_not_match() throws IOException {
+		String macMemoryOutput = "INFO: No tasks are running which match the specified criteria.";
+
+		OptionalLong nbBytes = ApexProcessHelper.extractMemory(ApexProcessHelper.OS_MARKER_WINDOWS,
+				new ByteArrayInputStream(macMemoryOutput.getBytes()));
+		Assert.assertFalse(nbBytes.isPresent());
 	}
 
 	/**
@@ -63,7 +89,7 @@ public class TestApexProcessHelper {
 	@Test
 	public void testMemoryOnCurrentSystem() throws IOException {
 		long currentProcessPID = Long.parseLong(ApexAgentHelper.getPIDForAgent());
-		long nbBytes = ApexProcessHelper.getProcessResidentMemory(currentProcessPID);
+		long nbBytes = ApexProcessHelper.getProcessResidentMemory(currentProcessPID).getAsLong();
 		Assert.assertTrue(nbBytes > 0);
 	}
 }

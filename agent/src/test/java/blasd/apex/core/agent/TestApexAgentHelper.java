@@ -4,30 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.util.FileSystemUtils;
+
+import com.google.common.io.Files;
 
 public class TestApexAgentHelper {
-	@Test
-	public void testURISpecialCharacters() throws IOException, URISyntaxException {
-		// '@' is a special characters leading to issues when converting back and forth to URL
-		Path file = Files.createTempFile("TestApexAgentHelper", "special@char");
-
-		URI asURI = file.toUri();
-		URL asURL = asURI.toURL();
-
-		File backToFile = new File(asURI);
-		File backToFile2 = new File(asURI.getPath());
-		File backToFile3 = new File(asURL.toURI().getPath());
-
-		Assert.assertEquals(file, backToFile.toPath());
-		Assert.assertEquals(file, backToFile2.toPath());
-		Assert.assertEquals(file, backToFile3.toPath());
-	}
 
 	@Test
 	public void jarIsFS() throws URISyntaxException {
@@ -62,18 +46,23 @@ public class TestApexAgentHelper {
 		File asJarFile = ApexAgentHelper.jarUriToFile(classUri);
 
 		// Move jar in folder and package folder as war
-		Path warFolder = Files.createTempDirectory(asJarFile.getParentFile().toPath(), "testJarInWar");
-		Path warSubFolder = warFolder.resolve("subFolder");
-		warSubFolder.toFile().mkdirs();
+		File warFolder = Files.createTempDir();
+		File warSubFolder = new File(warFolder, "subFolder");
+		if (!warSubFolder.mkdirs()) {
+			throw new IOException("Failure while creating folders");
+		}
 
-		Files.move(asJarFile.toPath(), warSubFolder.resolve(asJarFile.getName()));
+		Files.move(asJarFile, new File(warSubFolder, asJarFile.getName()));
 
 		// Write the war file next to the folder holding the war content
-		Path warPath = warFolder.resolve("../testJarInWar.war").normalize();
+		File warPath = new File(warFolder, "../testJarInWar.war");
 		ApexAgentHelper.packToZip(warFolder, warPath);
 
+		// We go through a normalization path else new URI will later fails under Windows OS
+		String normalizedPath = warPath.toURI().normalize().getPath();
+
 		// It would typically be 'jar:file:/home/user/app.war!/WEB-INF/lib/apex-core-agent-1.N.jar!/'
-		String path = "jar:file:" + warPath + "!/subFolder/" + asJarFile.getName() + "!/";
+		String path = "jar:file:" + normalizedPath + "!/subFolder/" + asJarFile.getName() + "!/";
 		// File asFile = ApexAgentHelper.jarUriToFile(new URI(path));
 
 		// Repackage jar in War as independant jar
