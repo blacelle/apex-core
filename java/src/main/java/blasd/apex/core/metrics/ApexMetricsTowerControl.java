@@ -49,6 +49,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalCause;
+import com.google.common.cache.RemovalNotification;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 
@@ -113,13 +114,7 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 				.expireAfterAccess(CACHE_TIMEOUT_MINUTES, TimeUnit.MINUTES)
 				.maximumSize(CACHE_MAX_SIZE)
 				.concurrencyLevel(ApexExecutorsHelper.DEFAULT_ACTIVE_TASKS)
-				.<StartMetricEvent, LocalDateTime>removalListener(removal -> {
-					if (removal.getCause().equals(RemovalCause.EXPIRED)) {
-						logOnFarTooMuchLongTask(removal.getKey());
-					} else if (removal.getCause().equals(RemovalCause.EXPLICIT)) {
-						logOnEndEvent(removal.getKey());
-					}
-				})
+				.removalListener(this::onActiveTaskRemoval)
 				.build(CacheLoader.from(key -> LocalDateTime.now()));
 
 		verySlowTasks = CacheBuilder.newBuilder()
@@ -127,6 +122,14 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 				.maximumSize(CACHE_MAX_SIZE)
 				.concurrencyLevel(ApexExecutorsHelper.DEFAULT_ACTIVE_TASKS)
 				.build(CacheLoader.from(startEvent -> startEvent));
+	}
+
+	protected void onActiveTaskRemoval(RemovalNotification<StartMetricEvent, LocalDateTime> removal) {
+		if (removal.getCause().equals(RemovalCause.EXPIRED)) {
+			logOnFarTooMuchLongTask(removal.getKey());
+		} else if (removal.getCause().equals(RemovalCause.EXPLICIT)) {
+			logOnEndEvent(removal.getKey());
+		}
 	}
 
 	protected void logOnFarTooMuchLongTask(StartMetricEvent startEvent) {

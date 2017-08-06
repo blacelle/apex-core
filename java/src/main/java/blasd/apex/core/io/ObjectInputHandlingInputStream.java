@@ -74,6 +74,8 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 					"We can not read next object as previous were a ByteArrayMarker and not all of them have been read");
 		}
 
+		rethrowException();
+
 		Object next = decorated.readObject();
 
 		if (next instanceof ByteArrayMarker) {
@@ -126,10 +128,12 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 											+ localNext);
 						}
 					}
-				} catch (IOException | ClassNotFoundException e) {
+				} catch (IOException | ClassNotFoundException | RuntimeException e) {
 					if (!ouch.compareAndSet(null, e)) {
 						throw new RuntimeException(
 								"We encountered a new exception while previous one has not been reported", e);
+					} else {
+						LOGGER.warn("Multiple issues in " + this, e);
 					}
 				} finally {
 					pipedOutputStreamIsOpen.set(false);
@@ -150,22 +154,24 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 			// Beware no call to ObjectInput.read should be done before the PipedOutputStream is done
 			return pis;
 		} else {
-			Exception pendingException = ouch.getAndSet(null);
-			// The caller requests for nextObject, but it
-			if (pendingException != null) {
-				if (pendingException instanceof EOFException) {
-					// The calling code may rely on Exception type for such case
-					throw (EOFException) pendingException;
-				} else if (pendingException instanceof IOException) {
-					// TODO: Is there other special kind of IOException?
-					throw new IOException(pendingException);
-				} else {
-					throw new RuntimeException(pendingException);
-				}
-			}
-
 			// There is nothing to do over this object
 			return next;
+		}
+	}
+
+	protected void rethrowException() throws EOFException, IOException {
+		Exception pendingException = ouch.getAndSet(null);
+		// The caller requests for nextObject, but it
+		if (pendingException != null) {
+			if (pendingException instanceof EOFException) {
+				// The calling code may rely on Exception type for such case
+				throw (EOFException) pendingException;
+			} else if (pendingException instanceof IOException) {
+				// TODO: Is there other special kind of IOException?
+				throw new IOException(pendingException);
+			} else {
+				throw new RuntimeException(pendingException);
+			}
 		}
 	}
 

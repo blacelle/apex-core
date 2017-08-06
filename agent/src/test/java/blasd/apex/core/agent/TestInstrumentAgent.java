@@ -22,23 +22,16 @@
  */
 package blasd.apex.core.agent;
 
-import java.io.File;
-import java.util.logging.Level;
+import java.lang.instrument.Instrumentation;
 import java.util.logging.Logger;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.slf4j.bridge.SLF4JBridgeHandler;
+
+import com.google.common.base.Optional;
 
 public class TestInstrumentAgent {
 	protected static final Logger LOGGER = Logger.getLogger(TestInstrumentAgent.class.getName());
-
-	// When run from Eclipse, logging.properties is not found (unlike in maven where surefire config refers to
-	// logging.properties)
-	static {
-		SLF4JBridgeHandler.removeHandlersForRootLogger();
-		SLF4JBridgeHandler.install();
-	}
 
 	@Test
 	public void test_ctor() {
@@ -46,25 +39,9 @@ public class TestInstrumentAgent {
 	}
 
 	@Test
-	public void testPID() {
-		Assert.assertTrue(Integer.parseInt(ApexAgentHelper.getPIDForAgent()) > 0);
+	public void testGetInstrument() {
+		Optional<Instrumentation> instrument = InstrumentationAgent.getInstrumentation();
+
+		Assert.assertTrue(instrument.isPresent());
 	}
-
-	@Test
-	public void testGetPathToJarFileContainingThisClass() {
-		try {
-			Assert.assertEquals("", ApexAgentHelper.getHoldingJarPath(TestInstrumentAgent.class));
-		} catch (IllegalStateException e) {
-			// OK, it happens since the test classes are not compiled in a jar
-			LOGGER.log(Level.FINE, "Expected exception", e);
-		}
-	}
-
-	@Test
-	public void testGetOrMakePathToJarFile() {
-		File jarFile = ApexAgentHelper.getOrMakeHoldingJarPath(TestInstrumentAgent.class);
-
-		Assert.assertTrue(jarFile.isFile());
-	}
-
 }

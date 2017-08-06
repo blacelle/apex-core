@@ -24,14 +24,23 @@ package blasd.apex.core.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.CharStreams;
+import com.google.common.io.Files;
 
 /**
  * Various utilities for GZip
@@ -40,6 +49,9 @@ import com.google.common.io.CharStreams;
  *
  */
 public class ApexGzipHelper {
+
+	protected static final Logger LOGGER = LoggerFactory.getLogger(ApexGzipHelper.class);
+
 	private static final int GZIP_MAGIC_SHIFT = 8;
 
 	protected ApexGzipHelper() {
@@ -101,4 +113,71 @@ public class ApexGzipHelper {
 		return CharStreams.toString(osw);
 	}
 
+	/**
+	 * 
+	 * @param folder
+	 *            a file-system folder were to read files and folders
+	 * @param zipFilePath
+	 *            a file-system path where to create a new archive
+	 * @throws IOException
+	 */
+	public static void packToZip(final File folder, final File zipFilePath) throws IOException {
+		FileOutputStream fos = new FileOutputStream(zipFilePath);
+		try {
+			final ZipOutputStream zos = new ZipOutputStream(fos);
+			try {
+				// https://stackoverflow.com/questions/15968883/how-to-zip-a-folder-itself-using-java
+				Iterator<File> iterator = Files.fileTreeTraverser().preOrderTraversal(folder).iterator();
+
+				while (iterator.hasNext()) {
+					File next = iterator.next();
+
+					if (next.isDirectory()) {
+						// https://stackoverflow.com/questions/204784/how-to-construct-a-relative-path-in-java-from-two-absolute-paths-or-urls
+						zos.putNextEntry(new ZipEntry(folder.toURI().relativize(next.toURI()).getPath() + "/"));
+						zos.closeEntry();
+					} else if (next.isFile()) {
+						LOGGER.debug("Adding {} in {}", next, zipFilePath);
+						zos.putNextEntry(new ZipEntry(folder.toURI().relativize(next.toURI()).getPath()));
+						Files.copy(next, zos);
+						zos.closeEntry();
+					}
+				}
+			} catch (IOException e) {
+				// Delete this tmp file
+				if (zipFilePath.isFile() && !zipFilePath.delete()) {
+					LOGGER.debug("For some reason, we failed deleting {}", zipFilePath);
+				}
+
+				throw new IOException("Issue while writing in " + zipFilePath, e);
+			} finally {
+				zos.close();
+			}
+		} finally {
+			fos.close();
+		}
+	}
+
+	/**
+	 * Gzip enable compressing a single file
+	 * 
+	 * @param inputPath
+	 * @param zipFilePath
+	 * @throws IOException
+	 */
+	public static void packToGzip(final File inputPath, final File zipFilePath) throws IOException {
+		FileOutputStream fos = new FileOutputStream(zipFilePath);
+
+		try {
+			final GZIPOutputStream zos = new GZIPOutputStream(fos);
+
+			try {
+				Files.copy(inputPath, zos);
+			} finally {
+				zos.close();
+			}
+		} finally {
+			fos.close();
+		}
+	}
 }

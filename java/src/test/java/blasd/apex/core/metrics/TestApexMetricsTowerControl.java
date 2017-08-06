@@ -23,22 +23,23 @@
 package blasd.apex.core.metrics;
 
 import java.lang.management.ManagementFactory;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.NavigableMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.google.common.cache.RemovalCause;
+import com.google.common.cache.RemovalNotification;
 import com.google.common.eventbus.EventBus;
 
-import blasd.apex.core.metrics.ApexMetricsTowerControl;
-import blasd.apex.core.metrics.AutoCloseableStartMetricEvent;
-import blasd.apex.core.metrics.EndMetricEvent;
-import blasd.apex.core.metrics.StartMetricEvent;
 import blasd.apex.core.thread.ApexExecutorsHelper;
 import blasd.apex.core.thread.ApexThreadDump;
 
@@ -204,5 +205,39 @@ public class TestApexMetricsTowerControl {
 
 		progress.set(-1L);
 		Assert.assertFalse(mtc.noNewLine(se).toString().contains("progress"));
+	}
+
+	// We test mainly coverage
+	@Test
+	public void testOnApexMetricsTowerControl() {
+		ApexMetricsTowerControl mtc = makeApexMetricsTowerControl();
+
+		StartMetricEvent startEvent = new StartMetricEvent(this, "testOnApexMetricsTowerControl");
+		Arrays.stream(RemovalCause.values())
+				.forEach(c -> mtc.onActiveTaskRemoval(RemovalNotification.create(startEvent, LocalDateTime.now(), c)));
+	}
+
+	@Test
+	public void testGetLongRunningCheck() throws Exception {
+		ApexMetricsTowerControl mtc = makeApexMetricsTowerControl();
+
+		Assert.assertEquals(ApexMetricsTowerControl.DEFAULT_LONGRUNNINGCHECK_SECONDS, mtc.getLongRunningCheckSeconds());
+
+		// This should call mtc.scheduleLogLongRunningTasks();
+		mtc.afterPropertiesSet();
+
+		// Get the current task future
+		ScheduledFuture<?> currentFuture = mtc.scheduledFuture.get();
+
+		// Change the timeout: this should cancel the previous recurrent task
+		mtc.setLongRunningCheckSeconds(123);
+
+		Assert.assertEquals(123, mtc.getLongRunningCheckSeconds());
+
+		Assert.assertNotSame(currentFuture, mtc.scheduledFuture.get());
+
+		Assert.assertFalse(mtc.scheduledFuture.get().isCancelled());
+		Assert.assertTrue(currentFuture.isCancelled());
+
 	}
 }

@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.core.csv;
+package blasd.apex.server.loading.csv;
 
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
@@ -30,6 +30,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.google.common.base.Charsets;
+
+import blasd.apex.core.csv.ApexCSVConfiguration;
+import blasd.apex.core.csv.ApexCSVParser;
+import blasd.apex.core.csv.ApexCSVParserFactory;
 
 /**
  * Main class to parse a sample file

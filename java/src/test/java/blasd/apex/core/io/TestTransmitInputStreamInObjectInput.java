@@ -219,4 +219,57 @@ public class TestTransmitInputStreamInObjectInput {
 			}
 		}
 	}
+
+	@SuppressWarnings("resource")
+	@Test
+	public void testDExceptionInIS() throws IOException, ClassNotFoundException {
+		// We ensure a large buffer as we will have a large overhead because of chunks
+		PipedInputStream pis = new PipedInputStream(IApexMemoryConstants.MB_INT);
+		PipedOutputStream pos = new PipedOutputStream(pis);
+
+		byte[] bytesFrance = ApexSerializationHelper.toBytes(ImmutableMap.of("k1", "v1"));
+
+		// We force very small chunks: very slow but good edge-case to test
+		int chunkSize = 1;
+		Assert.assertTrue(bytesFrance.length > chunkSize);
+
+		ObjectInputHandlingInputStream objectInput;
+		try (ObjectOutputStream oos = new ObjectOutputStream(pos)) {
+			// Write an InputStream
+			ApexObjectStreamHelper.writeInputStream(oos, new ByteArrayInputStream(bytesFrance), chunkSize);
+
+			// Ensure everything is submitted as we will read the pipe in the same thread
+			oos.flush();
+
+			objectInput = new ObjectInputHandlingInputStream(new ObjectInputStream(pis));
+			Object nextToRead = objectInput.readObject();
+
+			Assert.assertNotNull(nextToRead);
+			Assert.assertTrue(nextToRead instanceof InputStream);
+			InputStream readIS = (InputStream) nextToRead;
+
+			// We ensured publishing multiple chunks: the stream remains open as we have just transmitted the first one
+			Assert.assertTrue(objectInput.pipedOutputStreamIsOpen.get());
+
+			// ERROR BLOCK: we read the undelrying IS: it will corrupt the flow
+			{
+				pis.read();
+			}
+
+			// Ensure we are retrieving the whole chunk
+			byte[] transmitted = ByteStreams.toByteArray(readIS);
+			Assert.assertTrue(bytesFrance.length > transmitted.length);
+			Awaitility.await().untilFalse(objectInput.pipedOutputStreamIsOpen);
+
+			Exception exceptionToRethrow = objectInput.ouch.get();
+			Assert.assertNotNull(exceptionToRethrow);
+
+			try {
+				objectInput.readObject();
+				Assert.fail("Should have thrown");
+			} catch (Exception e) {
+				Assert.assertSame(exceptionToRethrow, e.getCause());
+			}
+		}
+	}
 }
