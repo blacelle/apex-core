@@ -8,7 +8,7 @@
 		<version>1.4-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>apex-core-agent</artifactId>
+	<artifactId>apex-agent</artifactId>
 
 	<packaging>jar</packaging>
 

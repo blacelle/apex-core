@@ -20,36 +20,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.core.eventbus;
+package blasd.apex.server.loading.csv;
 
-import java.util.Optional;
-import java.util.function.Consumer;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import com.google.common.eventbus.EventBus;
+import com.google.common.base.Charsets;
 
-public class TestApexEventBusHelper {
+import blasd.apex.core.csv.ApexCSVConfiguration;
+import blasd.apex.core.csv.ApexCSVParser;
+import blasd.apex.core.csv.ApexCSVParserFactory;
+
+@Ignore
+public class TestApexCSVParserForIntegers {
+	ApexCSVParserFactory parserFactory = new ApexCSVParserFactory(ApexCSVConfiguration.getDefaultConfiguration());
 
 	@Test
-	public void test_ctor_coverage() {
-		Assert.assertNotNull(new ApexEventBusHelper());
+	public void testSimpleStirng() {
+		check("123;456\r7;89", Arrays.asList(123, 456, 7, 89));
 	}
 
-	@Test
-	public void testAsConsumer() {
-		EventBus eventBus = new EventBus();
+	protected ApexCSVParser getParser(String string) {
+		ByteBuffer wrap = ByteBuffer.wrap(string.getBytes(Charsets.UTF_8));
 
-		Optional<Consumer<Object>> asConsumer = ApexEventBusHelper.asConsumer(eventBus);
-
-		Assert.assertTrue(asConsumer.isPresent());
+		return parserFactory.parserCharSequence(wrap);
 	}
 
-	@Test
-	public void testAsConsumer_null() {
-		Optional<Consumer<Object>> asConsumer = ApexEventBusHelper.asConsumer(null);
+	protected void check(String string, List<Integer> asList) {
+		ApexCSVParser parser = getParser(string);
 
-		Assert.assertFalse(asConsumer.isPresent());
+		// AtomicLong wordCount = new AtomicLong();
+		asList.forEach(s -> {
+			parser.parseNextAsInteger().equals(s.intValue());
+			// wordCount.incrementAndGet();
+		});
+
+		Assert.assertTrue(parser.isEmpty());
+		// Assert.assertEquals(, wordCount);
 	}
 }

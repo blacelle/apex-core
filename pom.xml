@@ -100,6 +100,9 @@
 		<!-- This project metadata, holding for instance deployement resources -->
 		<module>metadata</module>
 
+		<!-- Beta: zero-copy CSV reader -->
+		<module>csv</module>
+
 		<!-- a JConsole plugin to facilitate tracking of off-heap -->
 		<!-- Excluded as it is an experimental project -->
 		<!-- <module>buffermonitor</module> -->

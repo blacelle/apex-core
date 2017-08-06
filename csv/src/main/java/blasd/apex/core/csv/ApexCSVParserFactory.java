@@ -20,36 +20,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.core.eventbus;
+package blasd.apex.core.csv;
 
-import java.util.Optional;
-import java.util.function.Consumer;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
-import org.junit.Assert;
-import org.junit.Test;
+/**
+ * A factory for ApexCSVParser
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+public class ApexCSVParserFactory {
 
-import com.google.common.eventbus.EventBus;
+	protected final IApexCSVConfiguration apexCSVConfiguration;
 
-public class TestApexEventBusHelper {
-
-	@Test
-	public void test_ctor_coverage() {
-		Assert.assertNotNull(new ApexEventBusHelper());
+	public ApexCSVParserFactory(IApexCSVConfiguration apexCSVConfiguration) {
+		this.apexCSVConfiguration = apexCSVConfiguration;
 	}
 
-	@Test
-	public void testAsConsumer() {
-		EventBus eventBus = new EventBus();
-
-		Optional<Consumer<Object>> asConsumer = ApexEventBusHelper.asConsumer(eventBus);
-
-		Assert.assertTrue(asConsumer.isPresent());
+	public ApexCSVParser parserCharSequence(Charset charset, ByteBuffer wrap) {
+		return new ApexCSVParser(apexCSVConfiguration, charset, wrap);
 	}
 
-	@Test
-	public void testAsConsumer_null() {
-		Optional<Consumer<Object>> asConsumer = ApexEventBusHelper.asConsumer(null);
-
-		Assert.assertFalse(asConsumer.isPresent());
+	public ApexCSVParser parserCharSequence(ByteBuffer wrap) {
+		return parserCharSequence(Charset.defaultCharset(), wrap);
 	}
+
+	// public ApexCSVParser parserCharSequence(Charset charset, Path path) throws IOException {
+	// return parserCharSequence(charset, );
+	// }
+
 }

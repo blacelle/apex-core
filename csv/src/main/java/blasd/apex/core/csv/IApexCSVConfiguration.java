@@ -20,36 +20,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.core.eventbus;
+package blasd.apex.core.csv;
 
-import java.util.Optional;
-import java.util.function.Consumer;
+/**
+ * Holds CSV parsing configuration
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+public interface IApexCSVConfiguration {
 
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.google.common.eventbus.EventBus;
-
-public class TestApexEventBusHelper {
-
-	@Test
-	public void test_ctor_coverage() {
-		Assert.assertNotNull(new ApexEventBusHelper());
-	}
-
-	@Test
-	public void testAsConsumer() {
-		EventBus eventBus = new EventBus();
-
-		Optional<Consumer<Object>> asConsumer = ApexEventBusHelper.asConsumer(eventBus);
-
-		Assert.assertTrue(asConsumer.isPresent());
-	}
-
-	@Test
-	public void testAsConsumer_null() {
-		Optional<Consumer<Object>> asConsumer = ApexEventBusHelper.asConsumer(null);
-
-		Assert.assertFalse(asConsumer.isPresent());
-	}
+	String getColumnSeparator();
 }

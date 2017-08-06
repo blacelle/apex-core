@@ -20,36 +20,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.core.eventbus;
+package blasd.apex.core.csv;
 
-import java.util.Optional;
-import java.util.function.Consumer;
+/**
+ * Default CSV parsing
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+public class ApexCSVConfiguration implements IApexCSVConfiguration {
 
-import org.junit.Assert;
-import org.junit.Test;
+	protected final String columnSeparator;
 
-import com.google.common.eventbus.EventBus;
-
-public class TestApexEventBusHelper {
-
-	@Test
-	public void test_ctor_coverage() {
-		Assert.assertNotNull(new ApexEventBusHelper());
+	public ApexCSVConfiguration(char c) {
+		this.columnSeparator = Character.toString(c);
 	}
 
-	@Test
-	public void testAsConsumer() {
-		EventBus eventBus = new EventBus();
-
-		Optional<Consumer<Object>> asConsumer = ApexEventBusHelper.asConsumer(eventBus);
-
-		Assert.assertTrue(asConsumer.isPresent());
+	@Override
+	public String getColumnSeparator() {
+		return columnSeparator;
 	}
 
-	@Test
-	public void testAsConsumer_null() {
-		Optional<Consumer<Object>> asConsumer = ApexEventBusHelper.asConsumer(null);
-
-		Assert.assertFalse(asConsumer.isPresent());
+	public static final IApexCSVConfiguration getDefaultConfiguration() {
+		// By default, we consider comma (',') separated columns
+		return new ApexCSVConfiguration(',');
 	}
 }

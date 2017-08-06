@@ -20,36 +20,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.core.eventbus;
+package blasd.apex.core.csv;
 
-import java.util.Optional;
-import java.util.function.Consumer;
+import java.io.IOException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import org.junit.Assert;
-import org.junit.Test;
+import com.google.common.base.Charsets;
 
-import com.google.common.eventbus.EventBus;
-
-public class TestApexEventBusHelper {
-
-	@Test
-	public void test_ctor_coverage() {
-		Assert.assertNotNull(new ApexEventBusHelper());
+/**
+ * Main class to parse a sample file
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+public class MainParseFile {
+	protected MainParseFile() {
+		// hidden
 	}
 
-	@Test
-	public void testAsConsumer() {
-		EventBus eventBus = new EventBus();
+	public static void main(String[] args) throws IOException {
+		Path path = Paths.get("/Users/blasd/workspace/csv-parsers-comparison/src/main/resources/worldcitiespop.txt");
 
-		Optional<Consumer<Object>> asConsumer = ApexEventBusHelper.asConsumer(eventBus);
+		try (FileChannel fc = FileChannel.open(path)) {
+			MappedByteBuffer wrap = fc.map(MapMode.READ_ONLY, 0, path.toFile().length());
+			ApexCSVParser parser = new ApexCSVParserFactory(ApexCSVConfiguration.getDefaultConfiguration())
+					.parserCharSequence(Charsets.ISO_8859_1, wrap);
 
-		Assert.assertTrue(asConsumer.isPresent());
-	}
-
-	@Test
-	public void testAsConsumer_null() {
-		Optional<Consumer<Object>> asConsumer = ApexEventBusHelper.asConsumer(null);
-
-		Assert.assertFalse(asConsumer.isPresent());
+			parser.forEachValue(cs -> System.out.println(cs));
+		}
 	}
 }
