@@ -248,13 +248,13 @@ public class TestTransmitInputStreamInObjectInput {
 			Assert.assertTrue(nextToRead instanceof InputStream);
 			InputStream readIS = (InputStream) nextToRead;
 
-			// We ensured publishing multiple chunks: the stream remains open as we have just transmitted the first one
-			Assert.assertTrue(objectInput.pipedOutputStreamIsOpen.get());
-
-			// ERROR BLOCK: we read the undelrying IS: it will corrupt the flow
+			// ERROR BLOCK: we read the underlying IS: it will corrupt the flow
 			{
 				pis.read();
 			}
+
+			// Check we have read some byte BEFORE having done reading the pis
+			Assert.assertTrue(objectInput.pipedOutputStreamIsOpen.get());
 
 			// Ensure we are retrieving the whole chunk
 			byte[] transmitted = ByteStreams.toByteArray(readIS);

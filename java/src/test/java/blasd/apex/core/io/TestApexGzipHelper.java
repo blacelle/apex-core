@@ -24,11 +24,19 @@ package blasd.apex.core.io;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.google.common.io.Files;
+
 public class TestApexGzipHelper {
+	@Test
+	public void test_ctor() {
+		Assert.assertNotNull(new ApexGzipHelper());
+	}
+
 	@Test
 	public void testCompressedBackAndForth() throws IOException {
 		String string = "someString";
@@ -50,6 +58,34 @@ public class TestApexGzipHelper {
 	public void testIsGzipButTooSmall() throws IOException {
 		Assert.assertFalse(ApexGzipHelper.isGZIPStream(new byte[0]));
 		Assert.assertFalse(ApexGzipHelper.isGZIPStream(new byte[1]));
+	}
+
+	@Test
+	public void testPackToZip() throws IOException {
+		Path folder = ApexFileHelper.createTempPath("TestApexGzipHelper", "testPackToZip", true);
+
+		folder.toFile().mkdirs();
+
+		Files.touch(folder.resolve("subFile").toFile());
+		folder.resolve("subFolder").toFile().mkdirs();
+		Files.touch(folder.resolve("subFolder/subSubFile").toFile());
+
+		Path targetZip = ApexFileHelper.createTempPath("TestApexGzipHelper", ".zip", true);
+		ApexGzipHelper.packToZip(folder.toFile(), targetZip.toFile());
+
+		Assert.assertTrue(targetZip.toFile().length() > 0);
+	}
+
+	@Test
+	public void testPackToGzip() throws IOException {
+		Path fileToGzip = ApexFileHelper.createTempPath("TestApexGzipHelper", "testPackToGzip", true);
+
+		Files.touch(fileToGzip.toFile());
+
+		Path targetGzip = ApexFileHelper.createTempPath("TestApexGzipHelper", ".gz", true);
+		ApexGzipHelper.packToGzip(fileToGzip.toFile(), targetGzip.toFile());
+
+		Assert.assertTrue(targetGzip.toFile().length() > 0);
 	}
 
 }

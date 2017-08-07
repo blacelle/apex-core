@@ -84,7 +84,12 @@ public class ApexCartesianProductHelper {
 	public static <T, V> Set<? extends Map<T, ? extends Set<V>>> groupByKeyAndInValues(
 			Iterable<? extends Map<? extends T, ? extends V>> input, Consumer<Object> checkRegularly) {
 		if (input instanceof Collection<?>) {
-			LOGGER.debug("Compute covering cartesian products over {} entries", ((Collection<?>) input).size());
+			Collection<?> asCollection = (Collection<?>) input;
+			if (asCollection.size() >= 2) {
+				LOGGER.debug("Compute covering cartesian products over {} entries", asCollection.size());
+			} else {
+				LOGGER.trace("Compute covering cartesian products over {} entries", asCollection.size());
+			}
 		} else {
 			LOGGER.debug("Compute covering cartesian products over an Iterable");
 		}
@@ -259,9 +264,15 @@ public class ApexCartesianProductHelper {
 		assert inputToCoverSize <= cartesianProductSize;
 
 		if (inputToCoverSize == cartesianProductSize) {
-			LOGGER.debug("We have a perfect cartesian product for keyset={} with size {}",
-					keySet,
-					cartesianProductSize);
+			if (inputToCoverSize >= 2) {
+				LOGGER.debug("We have a perfect cartesian product for keyset={} with size {}",
+						keySet,
+						cartesianProductSize);
+			} else {
+				LOGGER.trace("We have a perfect cartesian product for keyset={} with size {}",
+						keySet,
+						cartesianProductSize);
+			}
 			// This is a full cartesian product
 			return Arrays.asList(Multimaps.asMap(keyToEncountered));
 		} else {
