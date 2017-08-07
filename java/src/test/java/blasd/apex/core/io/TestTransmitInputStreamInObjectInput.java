@@ -222,7 +222,7 @@ public class TestTransmitInputStreamInObjectInput {
 
 	@SuppressWarnings("resource")
 	@Test
-	public void testDExceptionInIS() throws IOException, ClassNotFoundException {
+	public void testExceptionInIS() throws IOException, ClassNotFoundException {
 		// We ensure a large buffer as we will have a large overhead because of chunks
 		PipedInputStream pis = new PipedInputStream(IApexMemoryConstants.MB_INT);
 		PipedOutputStream pos = new PipedOutputStream(pis);

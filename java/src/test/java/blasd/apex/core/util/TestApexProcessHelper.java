@@ -94,6 +94,20 @@ public class TestApexProcessHelper {
 		Assert.assertEquals(107940 * IApexMemoryConstants.KB, nbBytes);
 	}
 
+	// French has no comma as thousands separator
+	@Test
+	public void testMemoryOnWindows_FranchLocal() throws IOException {
+		// "/fo csv"
+		String windowsMemoryOutput = "\"chrome.exe\",\"6740\",\"Console\",\"1\",\"78 332 K\"";
+
+		// "/fo table"
+		// String windowsMemoryOutput = "chrome.exe 6740 Console 1 108,760 K";
+
+		long nbBytes = ApexProcessHelper.extractMemory(ApexProcessHelper.OS_MARKER_WINDOWS,
+				new ByteArrayInputStream(windowsMemoryOutput.getBytes())).getAsLong();
+		Assert.assertEquals(78332 * IApexMemoryConstants.KB, nbBytes);
+	}
+
 	@Test
 	public void testMemoryOnWindows_pid_does_not_match() throws IOException {
 		String macMemoryOutput = "INFO: No tasks are running which match the specified criteria.";

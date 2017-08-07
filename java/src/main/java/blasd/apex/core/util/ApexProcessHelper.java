@@ -26,8 +26,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,6 +99,8 @@ public class ApexProcessHelper {
 		// SImplify output by redirecting all stream in the same place
 		memoryBuilder.redirectErrorStream(true);
 
+		LOGGER.debug("About to execute {}", ApexProcessHelper.getCommandAsString(memoryBuilder.command()));
+
 		Process memoryProcess = memoryBuilder.start();
 
 		InputStream inputStream = memoryProcess.getInputStream();
@@ -114,6 +118,16 @@ public class ApexProcessHelper {
 		}
 
 		return extractMemory(osFlag, inputStream);
+	}
+
+	public static String getCommandAsString(List<String> command) {
+		return command.stream().map(s -> {
+			if (s.contains(" ")) {
+				return "\"" + s + "\"";
+			} else {
+				return s;
+			}
+		}).collect(Collectors.joining(" "));
 	}
 
 	@VisibleForTesting
@@ -199,18 +213,23 @@ public class ApexProcessHelper {
 				// If matching with "/fo csv": "chrome.exe","6740","Console","1","107,940 K"
 				// If matching with "/fo table": "chrome.exe\t6740\tConsole\t1\t108,760 K"
 				String WINDOWS_MEMORY_PATTERN = "\",\"";
-				int indexLastComa = lastLine.lastIndexOf(WINDOWS_MEMORY_PATTERN);
-				if (indexLastComa < 0) {
-					return OptionalLong.empty();
-				} else {
-					String memoryString = lastLine.substring(indexLastComa + WINDOWS_MEMORY_PATTERN.length(),
-							lastLine.length() - "\"".length());
-					if (memoryString.length() >= 1 && memoryString.charAt(0) == '\"') {
-						memoryString = memoryString.substring(1, memoryString.length() - 1);
-					}
 
-					long memory = ApexMemoryHelper.memoryAsLong(memoryString);
-					return OptionalLong.of(memory);
+				try {
+					int indexLastComa = lastLine.lastIndexOf(WINDOWS_MEMORY_PATTERN);
+					if (indexLastComa < 0) {
+						return OptionalLong.empty();
+					} else {
+						String memoryString = lastLine.substring(indexLastComa + WINDOWS_MEMORY_PATTERN.length(),
+								lastLine.length() - "\"".length());
+						if (memoryString.length() >= 1 && memoryString.charAt(0) == '\"') {
+							memoryString = memoryString.substring(1, memoryString.length() - 1);
+						}
+
+						long memory = ApexMemoryHelper.memoryAsLong(memoryString);
+						return OptionalLong.of(memory);
+					}
+				} catch (RuntimeException e) {
+					throw new RuntimeException("Issue when extracting memory from '" + lastLine + "'", e);
 				}
 			} else {
 				// Last line is like ' total 65512K'
