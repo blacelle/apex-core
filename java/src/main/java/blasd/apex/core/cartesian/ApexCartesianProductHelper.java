@@ -82,7 +82,8 @@ public class ApexCartesianProductHelper {
 	}
 
 	public static <T, V> Set<? extends Map<T, ? extends Set<V>>> groupByKeyAndInValues(
-			Iterable<? extends Map<? extends T, ? extends V>> input, Consumer<Object> checkRegularly) {
+			Iterable<? extends Map<? extends T, ? extends V>> input,
+			Consumer<Object> checkRegularly) {
 		if (input instanceof Collection<?>) {
 			Collection<?> asCollection = (Collection<?>) input;
 			if (asCollection.size() >= 2) {
@@ -99,13 +100,9 @@ public class ApexCartesianProductHelper {
 
 		flattenInput(input, keysToKeyToEncountered, keysToFlatMap);
 
-		if (LOGGER.isDebugEnabled()) {
+		if (LOGGER.isTraceEnabled()) {
 			for (Entry<Set<T>, Set<Map<T, V>>> entry : keysToFlatMap.entrySet()) {
-				if (entry.getValue().size() <= 1) {
-					LOGGER.trace("We flatten to {} entries for {}", entry.getValue().size(), entry.getKey());
-				} else {
-					LOGGER.debug("We flatten to {} entries for {}", entry.getValue().size(), entry.getKey());
-				}
+				LOGGER.trace("We flatten to {} entries for {}", entry.getValue().size(), entry.getKey());
 			}
 		}
 
@@ -480,7 +477,8 @@ public class ApexCartesianProductHelper {
 	}
 
 	public static <T> Set<? extends Map<T, ?>> mergeCartesianProducts(
-			Iterable<? extends Set<? extends Map<? extends T, ?>>> templates, Consumer<Object> checkRegularly) {
+			Iterable<? extends Set<? extends Map<? extends T, ?>>> templates,
+			Consumer<Object> checkRegularly) {
 		if (!templates.iterator().hasNext()) {
 			return Collections.emptySet();
 		}
@@ -543,7 +541,7 @@ public class ApexCartesianProductHelper {
 		// Filter out null Map, which are rejected combinations
 		Set<Map<T, ?>> output = Sets.newLinkedHashSet(Iterables.filter(merged, Predicates.notNull()));
 
-		LOGGER.debug("Reduced to {} combinations", output.size());
+		LOGGER.trace("Reduced to {} combinations", output.size());
 
 		return output;
 	}

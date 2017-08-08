@@ -36,7 +36,7 @@ public interface IApexSpringConstants {
 	String SPRING_PROFILE_DISCONNECTED = "apex.offline";
 
 	/**
-	 * -Dspring.profiles.active=apex.offline
+	 * -Dspring.profiles.active=!apex.offline
 	 */
 	String SPRING_PROFILE_NOT_DISCONNECTED = "!" + SPRING_PROFILE_DISCONNECTED;
 }

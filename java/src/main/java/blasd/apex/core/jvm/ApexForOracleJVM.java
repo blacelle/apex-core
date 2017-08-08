@@ -34,6 +34,7 @@ import com.google.common.annotations.Beta;
  * @author Benoit Lacelle
  *
  */
+@SuppressWarnings("restriction")
 @Beta
 public class ApexForOracleJVM {
 	protected ApexForOracleJVM() {

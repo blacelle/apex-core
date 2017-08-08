@@ -35,6 +35,7 @@ import com.sun.management.GarbageCollectionNotificationInfo;
  * @author Benoit Lacelle
  *
  */
+@SuppressWarnings("restriction")
 public class ApexGarbageCollectionNotificationInfo implements IApexGarbageCollectionNotificationInfo {
 	protected final GarbageCollectionNotificationInfo info;
 

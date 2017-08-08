@@ -71,7 +71,7 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 		if (pipedOutputStreamIsOpen.get()) {
 			// TODO: should we rather block until the stream is consumed? This may lead to deadlocks
 			throw new RuntimeException(
-					"We can not read next object as previous were a ByteArrayMarker and not all of them have been read");
+					"We can not read next object as previous was an InputStream which has not been flushed yet");
 		}
 
 		rethrowException();
@@ -108,7 +108,8 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 							decorated.readFully(bytes);
 						} catch (IOException e) {
 							throw new RuntimeException(
-									"Failure while retrieveing a chunk with nbBytes=" + nextByteMarker.getNbBytes(), e);
+									"Failure while retrieveing a chunk with nbBytes=" + nextByteMarker.getNbBytes(),
+									e);
 						}
 						// Transfer these bytes in the pipe
 						pos.write(bytes);
@@ -131,7 +132,8 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 				} catch (IOException | ClassNotFoundException | RuntimeException e) {
 					if (!ouch.compareAndSet(null, e)) {
 						throw new RuntimeException(
-								"We encountered a new exception while previous one has not been reported", e);
+								"We encountered a new exception while previous one has not been reported",
+								e);
 					} else {
 						LOGGER.warn("Multiple issues in " + this, e);
 					}
