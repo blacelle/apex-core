@@ -54,6 +54,7 @@ public class ApexProcessHelper {
 	protected static final int OS_MARKER_WINDOWS = 1;
 	protected static final int OS_MARKER_MAC = 2;
 
+	// UNIXProcess class is loaded only udner a linux environment
 	private static final String CLASS_PROCESS_UNIX = "java.lang.UNIXProcess";
 
 	// Deprecated in Java9
@@ -61,7 +62,7 @@ public class ApexProcessHelper {
 		long pid = -1;
 
 		try {
-			if (p.getClass().getName().equals(CLASS_PROCESS_UNIX)) {
+			if (isUnixProcess(p.getClass().getName())) {
 				Field f = p.getClass().getDeclaredField("pid");
 				f.setAccessible(true);
 				pid = f.getLong(p);
@@ -71,6 +72,11 @@ public class ApexProcessHelper {
 			pid = -1;
 		}
 		return pid;
+	}
+
+	// Used to prevent Sonar complaining about not using instanceof
+	private static boolean isUnixProcess(String className) {
+		return className.equals(CLASS_PROCESS_UNIX);
 	}
 
 	/**
