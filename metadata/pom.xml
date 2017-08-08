@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -13,7 +12,7 @@
 
 	<groupId>com.github.blasd.apex</groupId>
 	<artifactId>apex-core-metadata</artifactId>
-	<version>1.4-SNAPSHOT</version>
+	<version>1.4</version>
 
 	<packaging>pom</packaging>
 
@@ -242,7 +241,7 @@
 		<!-- Do not add developperConnection as parent is not a SNAPSHOT -->
 		<connection>${scm.connection}</connection>
 		<url>${scm.url}</url>
-		<tag>HEAD</tag>
+		<tag>apex-core1.4</tag>
 	</scm>
 
 	<!-- <pluginRepositories> -->
