@@ -22,14 +22,10 @@
  */
 package com.google.common.hash;
 
-import java.lang.reflect.Field;
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.ReflectionUtils;
-
-import com.google.common.hash.BloomFilterStrategies.BitArray;
 
 /**
  * Additional methods for BloomFilter
@@ -41,23 +37,6 @@ public class BloomFilterSpy {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(BloomFilterSpy.class);
 
-	private static final Field BIT_ARRAY_FIELD = ReflectionUtils.findField(BloomFilter.class, "bits", BitArray.class);
-	private static final Field NUM_HASH_FUNCTIONS_FIELD =
-			ReflectionUtils.findField(BloomFilter.class, "numHashFunctions", int.class);
-	static {
-		// Ensure the field is writtable
-		try {
-			if (BIT_ARRAY_FIELD != null) {
-				ReflectionUtils.makeAccessible(BIT_ARRAY_FIELD);
-			}
-			if (NUM_HASH_FUNCTIONS_FIELD != null) {
-				ReflectionUtils.makeAccessible(NUM_HASH_FUNCTIONS_FIELD);
-			}
-		} catch (Throwable t) {
-			LOGGER.warn("Issue with BloomFilter introspection", t);
-		}
-	}
-
 	protected BloomFilterSpy() {
 		// BloomFilterSpy
 	}
@@ -68,36 +47,10 @@ public class BloomFilterSpy {
 	 * @param bloomFilter
 	 * @return an estimation of the number of entries inserted in this BloomFilter. It is guaranteed to be at least one
 	 *         if at least one put happened
+	 * @deprecated BloomFilter.approximateElementCount has been introduced in Guava 23.0
 	 */
+	@Deprecated
 	public static long estimateCardinality(BloomFilter<?> bloomFilter) {
-		// We do not do a simple null-check else Sonar believes bloomFilter can not be null even if we have a dedicated
-		// unit-test
-		if (!Optional.ofNullable(bloomFilter).isPresent()) {
-			return 0L;
-		} else if (BIT_ARRAY_FIELD == null || NUM_HASH_FUNCTIONS_FIELD == null) {
-			LOGGER.warn("BloomFilter.estimateCardinality is not available");
-			return -1L;
-		}
-
-		try {
-			BitArray bitArray = (BitArray) ReflectionUtils.getField(BIT_ARRAY_FIELD, bloomFilter);
-
-			long x = bitArray.bitCount();
-
-			if (x == 0L) {
-				return 0L;
-			} else {
-
-				long m = bitArray.bitSize();
-				long k = NUM_HASH_FUNCTIONS_FIELD.getInt(bloomFilter);
-
-				long theory = (long) (-1L * m * Math.log(1 - (double) x / (double) m)) / k;
-
-				// As we have as least one bit set, the count must be at least 1;
-				return Math.max(1L, theory);
-			}
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
+		return Optional.ofNullable(bloomFilter).map(bf -> bf.approximateElementCount()).orElse(0L);
 	}
 }

@@ -35,15 +35,15 @@ public class TestBloomFilterSpy {
 		for (int i = 1; i < 1000; i++) {
 			bf.put(i);
 
-			if (i <= 13) {
+			if (i <= 86) {
 				// Exact match
-				Assert.assertEquals(i, BloomFilterSpy.estimateCardinality(bf));
+				Assert.assertEquals("" + i, i, BloomFilterSpy.estimateCardinality(bf));
 			} else if (i <= 24) {
 				// After 14, we start being slightly underestimating
-				Assert.assertEquals(i - 1, BloomFilterSpy.estimateCardinality(bf));
+				Assert.assertEquals("" + i, i - 1, BloomFilterSpy.estimateCardinality(bf));
 			} else if (i <= 76) {
 				// After 25, we are back on a nice estimation
-				Assert.assertEquals(i, BloomFilterSpy.estimateCardinality(bf));
+				Assert.assertEquals("" + i, i, BloomFilterSpy.estimateCardinality(bf));
 			} else {
 				// Stop checking here
 				break;
