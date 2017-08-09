@@ -23,7 +23,9 @@
 package blasd.apex.core.memory.histogram;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,10 +35,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.zip.GZIPInputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.ByteStreams;
-import com.google.common.io.Files;
+import com.google.common.io.CharStreams;
 
 import blasd.apex.core.agent.VirtualMachineWithoutToolsJar;
 
@@ -48,6 +52,8 @@ import blasd.apex.core.agent.VirtualMachineWithoutToolsJar;
 // TODO: restrict to 95% of the Heap
 public class HeapHistogram implements IHeapHistogram, Serializable {
 	private static final long serialVersionUID = 2163916067335213382L;
+
+	protected static final Logger LOGGER = LoggerFactory.getLogger(HeapHistogram.class);
 
 	private final List<ClassInfo> classes;
 	private final List<ClassInfo> permGenClasses;
@@ -173,16 +179,15 @@ public class HeapHistogram implements IHeapHistogram, Serializable {
 
 	/**
 	 * @return l'histogramme mémoire
-	 * @throws Exception
-	 *             e
+	 * @throws IOException
 	 */
-	public static HeapHistogram createHeapHistogram() throws Exception {
+	public static HeapHistogram createHeapHistogram() throws IOException {
 		try (InputStream input = VirtualMachineWithoutToolsJar.heapHisto().get()) {
 			return new HeapHistogram(input, VirtualMachineWithoutToolsJar.isJRockit());
 		}
 	}
 
-	public static String createHeapHistogramAsString() throws Exception {
+	public static String createHeapHistogramAsString() throws IOException {
 		byte[] byteArray = ByteStreams.toByteArray(VirtualMachineWithoutToolsJar.heapHisto().get());
 		return new String(byteArray, JMAP_CHARSET);
 	}
@@ -194,17 +199,17 @@ public class HeapHistogram implements IHeapHistogram, Serializable {
 	 * @return the number of written bytes
 	 * @throws Exception
 	 */
-	public static long saveHeapDump(File file, boolean gzipped) throws Exception {
-		try (InputStream input = VirtualMachineWithoutToolsJar.heapDump().get()) {
-			InputStream wrapped;
-			if (gzipped) {
-				wrapped = new GZIPInputStream(input);
-			} else {
-				wrapped = input;
-			}
+	public static String saveHeapDump(File file) throws IOException {
+		final String output;
 
-			// According to FileWriteMode, by default we truncate the file
-			return Files.asByteSink(file).writeFrom(wrapped);
+		try (InputStream input = VirtualMachineWithoutToolsJar.heapDump(file, true).get()) {
+			output = CharStreams.toString(new InputStreamReader(input));
 		}
+
+		if (output.startsWith("Heap dump file created")) {
+			LOGGER.info("Heap-Dump seems to have been successfully generated in {}", file);
+		}
+
+		return output;
 	}
 }

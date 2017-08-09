@@ -22,6 +22,7 @@
  */
 package blasd.apex.core.jvm;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.management.JMException;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -43,6 +45,7 @@ import org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 
+import blasd.apex.core.io.ApexFileHelper;
 import blasd.apex.core.memory.IApexMemoryConstants;
 import blasd.apex.core.thread.IApexThreadDumper;
 
@@ -149,6 +152,20 @@ public class TestGCInspector implements IApexMemoryConstants {
 
 		// Check we have many rows
 		Assert.assertTrue(asList.size() > 5);
+	}
+
+	@Test
+	public void testSaveHeap() throws Exception {
+		GCInspector gcInspector = new GCInspector(Mockito.mock(IApexThreadDumper.class));
+
+		Path heapFile = ApexFileHelper.createTempPath("testSaveHeap", ".hprof", true);
+
+		String outputMsg = gcInspector.saveHeapDump(heapFile);
+
+		Assertions.assertThat(outputMsg).startsWith("Heap dump file created");
+
+		// Check we have written data
+		Assert.assertTrue(heapFile.toFile().length() > 0);
 	}
 
 	@Test

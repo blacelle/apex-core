@@ -108,7 +108,8 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 							decorated.readFully(bytes);
 						} catch (IOException e) {
 							throw new RuntimeException(
-									"Failure while retrieveing a chunk with nbBytes=" + nextByteMarker.getNbBytes(), e);
+									"Failure while retrieveing a chunk with nbBytes=" + nextByteMarker.getNbBytes(),
+									e);
 						}
 						// Transfer these bytes in the pipe
 						pos.write(bytes);
@@ -129,11 +130,12 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 						}
 					}
 				} catch (IOException | ClassNotFoundException | RuntimeException e) {
-					if (!ouch.compareAndSet(null, e)) {
-						throw new RuntimeException(
-								"We encountered a new exception while previous one has not been reported", e);
+					if (ouch.compareAndSet(null, e)) {
+						LOGGER.trace("Keep aside the exception", e);
 					} else {
-						LOGGER.warn("Multiple issues in " + this, e);
+						throw new RuntimeException(
+								"We encountered a new exception while previous one has not been reported",
+								e);
 					}
 				} finally {
 					pipedOutputStreamIsOpen.set(false);

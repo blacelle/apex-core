@@ -107,10 +107,10 @@ public class ApexGzipHelper {
 	}
 
 	public static String inflate(byte[] inflated) throws IOException {
-		GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(inflated));
-		InputStreamReader osw = new InputStreamReader(gzipInputStream, StandardCharsets.UTF_8);
-
-		return CharStreams.toString(osw);
+		try (GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(inflated));
+				InputStreamReader osw = new InputStreamReader(gzipInputStream, StandardCharsets.UTF_8)) {
+			return CharStreams.toString(osw);
+		}
 	}
 
 	/**
@@ -122,9 +122,7 @@ public class ApexGzipHelper {
 	 * @throws IOException
 	 */
 	public static void packToZip(final File folder, final File zipFilePath) throws IOException {
-		FileOutputStream fos = new FileOutputStream(zipFilePath);
-		try {
-			final ZipOutputStream zos = new ZipOutputStream(fos);
+		try (FileOutputStream fos = new FileOutputStream(zipFilePath); ZipOutputStream zos = new ZipOutputStream(fos)) {
 			try {
 				// https://stackoverflow.com/questions/15968883/how-to-zip-a-folder-itself-using-java
 				Iterator<File> iterator = Files.fileTreeTraverser().preOrderTraversal(folder).iterator();
@@ -150,11 +148,7 @@ public class ApexGzipHelper {
 				}
 
 				throw new IOException("Issue while writing in " + zipFilePath, e);
-			} finally {
-				zos.close();
 			}
-		} finally {
-			fos.close();
 		}
 	}
 
@@ -166,18 +160,9 @@ public class ApexGzipHelper {
 	 * @throws IOException
 	 */
 	public static void packToGzip(final File inputPath, final File zipFilePath) throws IOException {
-		FileOutputStream fos = new FileOutputStream(zipFilePath);
-
-		try {
-			final GZIPOutputStream zos = new GZIPOutputStream(fos);
-
-			try {
-				Files.copy(inputPath, zos);
-			} finally {
-				zos.close();
-			}
-		} finally {
-			fos.close();
+		try (FileOutputStream fos = new FileOutputStream(zipFilePath);
+				GZIPOutputStream zos = new GZIPOutputStream(fos)) {
+			Files.copy(inputPath, zos);
 		}
 	}
 }

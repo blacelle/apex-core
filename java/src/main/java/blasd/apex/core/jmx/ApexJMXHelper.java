@@ -25,6 +25,8 @@ package blasd.apex.core.jmx;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -290,5 +292,15 @@ public class ApexJMXHelper {
 			// https://stackoverflow.com/questions/5442658/spaces-in-urls
 			return new URL(url.replaceAll(" ", "%20"));
 		}
+	}
+
+	public static Path convertToPath(String path) {
+		path = ApexJMXHelper.convertToString(path);
+
+		if (Strings.isNullOrEmpty(path)) {
+			return null;
+		}
+
+		return Paths.get(path);
 	}
 }

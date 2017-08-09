@@ -39,7 +39,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
-import blasd.apex.core.cartesian.ApexCartesianProductHelper;
+import blasd.apex.core.collection.ApexCartesianProductHelper;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class TestApexCartesianProductHelper {
@@ -60,6 +60,11 @@ public class TestApexCartesianProductHelper {
 	public static final Set<?> setN = Sets.newHashSet(N);
 
 	public static final Set<?> setMN = Sets.newHashSet(M, N);
+
+	@Test
+	public void test_cotr() {
+		Assert.assertNotNull(new ApexCartesianProductHelper());
+	}
 
 	@Test
 	public void testTrivialCases() {
@@ -166,10 +171,8 @@ public class TestApexCartesianProductHelper {
 		}
 		// four entry
 		{
-			Collection<? extends Map<?, ?>> input = Arrays.asList(ImmutableMap.of(A, M),
-					ImmutableMap.of(A, N),
-					ImmutableMap.of(B, M),
-					ImmutableMap.of(B, N));
+			Collection<? extends Map<?, ?>> input = Arrays
+					.asList(ImmutableMap.of(A, M), ImmutableMap.of(A, N), ImmutableMap.of(B, M), ImmutableMap.of(B, N));
 			Set<? extends Map<?, ? extends Set<?>>> result = ApexCartesianProductHelper.groupByKeyAndInValues(input);
 
 			Assert.assertEquals(2, result.size());

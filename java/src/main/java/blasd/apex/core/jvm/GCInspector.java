@@ -25,6 +25,7 @@ package blasd.apex.core.jvm;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -38,6 +39,7 @@ import java.lang.management.MemoryUsage;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
@@ -216,14 +218,13 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 		// In maven: org.apache.maven.surefire.booter.ForkedBooter.exit(ForkedBooter.java:144)
 		// Bean disposing is expected to be done in the main thead: does this main thread comes from junit or surefire?
 
-		Optional<StackTraceElement> matching =
-				Arrays.stream(Thread.currentThread().getStackTrace())
-						.filter(ste -> Arrays.asList(".surefire.", ".failsafe.", ".junit.")
-								.stream()
-								.filter(name -> ste.getClassName().contains(name))
-								.findAny()
-								.isPresent())
-						.findAny();
+		Optional<StackTraceElement> matching = Arrays.stream(Thread.currentThread().getStackTrace())
+				.filter(ste -> Arrays.asList(".surefire.", ".failsafe.", ".junit.")
+						.stream()
+						.filter(name -> ste.getClassName().contains(name))
+						.findAny()
+						.isPresent())
+				.findAny();
 
 		matching.ifPresent(ste -> LOGGER.info("We have detected a unit-test with: {}", ste));
 
@@ -991,26 +992,18 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 
 	@ManagedOperation
 	@Override
-	public String getHeapHistogram() {
-		try {
-			return HeapHistogram.createHeapHistogramAsString();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	public String getHeapHistogram() throws IOException {
+		return HeapHistogram.createHeapHistogramAsString();
 	}
 
 	@Override
-	public long saveHeapDump(String path, boolean gzipped) {
-		if (gzipped && !path.endsWith(".gz")) {
-			// Ensure proper suffix
-			path += ".gz";
-		}
+	public String saveHeapDump(Path path) throws IOException {
+		return HeapHistogram.saveHeapDump(path.toFile());
+	}
 
-		try {
-			return HeapHistogram.saveHeapDump(Paths.get(path).toFile(), gzipped);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	@ManagedOperation
+	public String saveHeapDump(String path) throws IOException {
+		return saveHeapDump(ApexJMXHelper.convertToPath(path));
 	}
 
 	@ManagedOperation

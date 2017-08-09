@@ -22,6 +22,7 @@
  */
 package blasd.apex.core.agent;
 
+import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -50,6 +51,10 @@ import com.google.common.base.Optional;
 // https://github.com/javamelody/javamelody/blob/master/javamelody-core/src/main/java/net/bull/javamelody/VirtualMachine.java
 public class VirtualMachineWithoutToolsJar {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(VirtualMachineWithoutToolsJar.class);
+
+	// http://cr.openjdk.java.net/~malenkov/8022746.8.1/jdk/src/share/classes/sun/tools/jmap/JMap.java.html
+	private static final String LIVE_OBJECTS_OPTION = "-live";
+	private static final String ALL_OBJECTS_OPTION = "-all";
 
 	// Switched to true if incompatible JVM, or attach failed
 	private static final AtomicBoolean WILL_NOT_WORK = new AtomicBoolean(false);
@@ -159,7 +164,7 @@ public class VirtualMachineWithoutToolsJar {
 			@Override
 			public InputStream apply(Object vm) {
 				try {
-					return invokeForInputStream(vm, "heapHisto", "-all");
+					return invokeForInputStream(vm, "heapHisto", ALL_OBJECTS_OPTION);
 				} catch (Throwable e) {
 					throw new RuntimeException("Issue on invoking 'heapHisto -all'", e);
 				}
@@ -174,15 +179,26 @@ public class VirtualMachineWithoutToolsJar {
 		return asInputStream;
 	}
 
-	public static Optional<InputStream> heapDump() throws Exception {
+	/**
+	 * 
+	 * @param allObjectsElseLive
+	 * @return if true, use "-all" option, else use "-live" but beware it will trigger a full GC
+	 */
+	public static Optional<InputStream> heapDump(final File targetFile, final boolean allObjectsElseLive) {
+		final File absoluteFile = targetFile.getAbsoluteFile();
+		if (absoluteFile.exists()) {
+			throw new IllegalArgumentException("Can not write heap-dump as file already exists: " + absoluteFile);
+		}
+
 		Optional<InputStream> asInputStream = getJvmVirtualMachine().transform(new Function<Object, InputStream>() {
 
 			@Override
 			public InputStream apply(Object vm) {
+				String option = getAllorLiveOption(allObjectsElseLive);
 				try {
-					return invokeForInputStream(vm, "dumpHeap", "-all");
+					return invokeForInputStream(vm, "dumpHeap", absoluteFile.getPath(), option);
 				} catch (Throwable e) {
-					throw new RuntimeException("Issue on invoking 'dumpHeap -all'", e);
+					throw new RuntimeException("Issue on invoking 'dumpHeap " + option + "'", e);
 				}
 			}
 
@@ -195,6 +211,14 @@ public class VirtualMachineWithoutToolsJar {
 		return asInputStream;
 	}
 
+	protected static String getAllorLiveOption(boolean allObjectsElseLive) {
+		if (allObjectsElseLive) {
+			return ALL_OBJECTS_OPTION;
+		} else {
+			return LIVE_OBJECTS_OPTION;
+		}
+	}
+
 	/**
 	 * @param string
 	 *            the methodName
@@ -202,7 +226,7 @@ public class VirtualMachineWithoutToolsJar {
 	 * @return
 	 * @throws Exception
 	 */
-	protected static InputStream invokeForInputStream(String methodName, String... argument) throws Exception {
+	protected static InputStream invokeForInputStream(String methodName, String... argument) {
 		try {
 			final Class<?> virtualMachineClass = getJvmVirtualMachine().getClass();
 
