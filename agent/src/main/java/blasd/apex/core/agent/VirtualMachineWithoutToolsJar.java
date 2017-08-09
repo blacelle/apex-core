@@ -28,6 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 
 /**
  * Classe d'attachement dynamique utilisée ici pour obtenir l'histogramme de la mémoire. <br/>
@@ -84,11 +86,19 @@ public class VirtualMachineWithoutToolsJar {
 		return getJavaVendor().contains("BEA");
 	}
 
+	private static final Set<Class<?>> REPORTED_ERRORS_FOR_VM = Sets.newConcurrentHashSet();
+
 	public static synchronized Optional<Object> getJvmVirtualMachine() {
 		try {
 			return getUnsafeJvmVirtualMachine();
 		} catch (Throwable e) {
-			LOGGER.warn("Issue while loading VirtualMachine", e);
+			if (REPORTED_ERRORS_FOR_VM.add(e.getClass())) {
+				// First encounter of this error
+				LOGGER.warn("Issue while loading VirtualMachine", e);
+			} else {
+				// This error has already been reported
+				LOGGER.trace("Issue while loading VirtualMachine", e);
+			}
 			return Optional.absent();
 		}
 	}

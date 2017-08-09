@@ -23,6 +23,7 @@
 package blasd.apex.core.logging;
 
 import java.text.DecimalFormat;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -121,6 +122,17 @@ public class ApexLogHelper {
 		return lazyToString(() -> {
 			if (o == null) {
 				return null + "(null)";
+			} else if (o instanceof Map<?, ?>) {
+				Map<?, ?> asMap = (Map<?, ?>) o;
+
+				// see java.util.AbstractMap.toString()
+				return asMap.entrySet().stream().map(e -> {
+					if (e.getValue() == o) {
+						return e.getKey() + "=" + "(this Map)";
+					} else {
+						return e.getKey() + "=" + getObjectAndClass(e.getValue());
+					}
+				}).collect(Collectors.joining(", ", "{", "}"));
 			} else {
 				return o.toString() + "(" + o.getClass().getName() + ")";
 			}

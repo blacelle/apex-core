@@ -103,39 +103,7 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 				// PipedInputStream.read will throw if not connected: PipedOutputStream should be connected before
 				// leaving main thread
 				try (PipedOutputStream pos = new PipedOutputStream(pis)) {
-					// Indicate the pipe is connected
-					connectedCdl.countDown();
-
-					ByteArrayMarker nextByteMarker = (ByteArrayMarker) next;
-					while (true) {
-						byte[] bytes = new byte[Ints.checkedCast(nextByteMarker.getNbBytes())];
-
-						// Read the expected number of bytes
-						try {
-							decorated.readFully(bytes);
-						} catch (IOException e) {
-							throw new RuntimeException(
-									"Failure while retrieveing a chunk with nbBytes=" + nextByteMarker.getNbBytes(),
-									e);
-						}
-						// Transfer these bytes in the pipe
-						pos.write(bytes);
-
-						if (nextByteMarker.getIsFinished()) {
-							break;
-						}
-
-						Object localNext = decorated.readObject();
-
-						if (localNext instanceof ByteArrayMarker) {
-							// We received another chunk of bytes: push it in current InputStream
-							nextByteMarker = (ByteArrayMarker) localNext;
-						} else {
-							throw new IllegalStateException(
-									"We received ByteArrayMarker with isFinished=false while next object was a "
-											+ localNext);
-						}
-					}
+					pumpBytes(next, connectedCdl, pos);
 				} catch (IOException | ClassNotFoundException | RuntimeException e) {
 					if (ouch.compareAndSet(null, e)) {
 						LOGGER.trace("Keep aside the exception", e);
@@ -165,6 +133,42 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 		} else {
 			// There is nothing to do over this object
 			return next;
+		}
+	}
+
+	private void pumpBytes(Object next, CountDownLatch connectedCdl, PipedOutputStream pos)
+			throws IOException, ClassNotFoundException {
+		// Indicate the pipe is connected
+		connectedCdl.countDown();
+
+		ByteArrayMarker nextByteMarker = (ByteArrayMarker) next;
+		while (true) {
+			byte[] bytes = new byte[Ints.checkedCast(nextByteMarker.getNbBytes())];
+
+			// Read the expected number of bytes
+			try {
+				decorated.readFully(bytes);
+			} catch (IOException e) {
+				throw new RuntimeException(
+						"Failure while retrieveing a chunk with nbBytes=" + nextByteMarker.getNbBytes(),
+						e);
+			}
+			// Transfer these bytes in the pipe
+			pos.write(bytes);
+
+			if (nextByteMarker.getIsFinished()) {
+				break;
+			}
+
+			Object localNext = decorated.readObject();
+
+			if (localNext instanceof ByteArrayMarker) {
+				// We received another chunk of bytes: push it in current InputStream
+				nextByteMarker = (ByteArrayMarker) localNext;
+			} else {
+				throw new IllegalStateException(
+						"We received ByteArrayMarker with isFinished=false while next object was a " + localNext);
+			}
 		}
 	}
 

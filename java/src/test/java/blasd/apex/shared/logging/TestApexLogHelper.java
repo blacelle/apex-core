@@ -23,10 +23,14 @@
 package blasd.apex.shared.logging;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableMap;
 
 import blasd.apex.core.logging.ApexLogHelper;
 
@@ -202,5 +206,29 @@ public class TestApexLogHelper {
 		Assert.assertEquals("a\\rb", ApexLogHelper.getSingleRow("a\rb", false).toString());
 		Assert.assertEquals("a\\nb", ApexLogHelper.getSingleRow("a\nb", false).toString());
 		Assert.assertEquals("a\\r\\nb", ApexLogHelper.getSingleRow("a\r\nb", false).toString());
+	}
+
+	@Test
+	public void testObjectAndClass() {
+		Assert.assertEquals("{k=v(java.lang.String), k2=2(java.lang.Long)}",
+				ApexLogHelper.getObjectAndClass(ImmutableMap.of("k", "v", "k2", 2L)).toString());
+	}
+
+	@Test
+	public void testObjectAndClass_recursive() {
+		Map<Object, Object> map = new LinkedHashMap<>();
+		Assert.assertEquals("{}", ApexLogHelper.getObjectAndClass(map).toString());
+
+		// Add itself as value
+		map.put("k", map);
+
+		// Legimitate use-case as handle by AsbtractMap.toString()
+		Assert.assertEquals("{k=(this Map)}", map.toString());
+		Assert.assertEquals("{k=(this Map)}", ApexLogHelper.getObjectAndClass(map).toString());
+
+		// Add another value
+		map.put("k2", "v2");
+
+		Assert.assertEquals("{k=(this Map), k2=v2(java.lang.String)}", ApexLogHelper.getObjectAndClass(map).toString());
 	}
 }
