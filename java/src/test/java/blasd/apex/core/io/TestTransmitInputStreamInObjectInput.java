@@ -23,8 +23,10 @@
 package blasd.apex.core.io;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PipedInputStream;
@@ -312,5 +314,31 @@ public class TestTransmitInputStreamInObjectInput {
 		// Closing the OOS has NOT shutdown the ES
 		objectInput.close();
 		Assert.assertFalse(objectInput.inputStreamFiller.isShutdown());
+	}
+
+	// Ensure we do not leak the ExecutorService used to transfer bytes
+	@Test
+	public void testNoLeak() throws IOException, ClassNotFoundException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+		ImmutableMap<String, String> serializable = ImmutableMap.of("k", "v");
+
+		// The leak is triggered by transmitting InputStream
+		try (ObjectOutputStream o = new ObjectOutputStream(baos)) {
+			ApexObjectStreamHelper.writeInputStream(o,
+					new ByteArrayInputStream(ApexSerializationHelper.toBytes(serializable)));
+		}
+
+		// Get the bytes once for all
+		byte[] byteArray = baos.toByteArray();
+
+		for (int i = 0; i < 100 * 1000; i++) {
+			try (ObjectInput ois = ApexObjectStreamHelper
+					.wrapToHandleInputStream(new ObjectInputStream(new ByteArrayInputStream(byteArray)))) {
+				InputStream is = (InputStream) ois.readObject();
+
+				Assert.assertEquals(serializable, ApexSerializationHelper.fromBytes(ByteStreams.toByteArray(is)));
+			}
+		}
 	}
 }

@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.primitives.Ints;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import blasd.apex.core.thread.ApexExecutorsHelper;
 
@@ -104,13 +105,17 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 				// leaving main thread
 				try (PipedOutputStream pos = new PipedOutputStream(pis)) {
 					pumpBytes(next, connectedCdl, pos);
+
+					// pipedOutputStreamIsOpen has to be set to false BEFORE PipedOutputStream is closed. Else, the
+					// PipedInputStream could be closed BEFORE pipedOutputStreamIsOpen is false, and next call to
+					// .readObject could arrive BEFORE pipedOutputStreamIsOpen is false
+					pipedOutputStreamIsOpen.set(false);
 				} catch (IOException | ClassNotFoundException | RuntimeException e) {
 					if (ouch.compareAndSet(null, e)) {
 						LOGGER.trace("Keep aside the exception", e);
 					} else {
 						throw new RuntimeException(
-								"We encountered a new exception while previous one has not been reported",
-								e);
+								"We encountered a new exception while previous one has not been reported", e);
 					}
 				} finally {
 					pipedOutputStreamIsOpen.set(false);
@@ -150,8 +155,7 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 				decorated.readFully(bytes);
 			} catch (IOException e) {
 				throw new RuntimeException(
-						"Failure while retrieveing a chunk with nbBytes=" + nextByteMarker.getNbBytes(),
-						e);
+						"Failure while retrieveing a chunk with nbBytes=" + nextByteMarker.getNbBytes(), e);
 			}
 			// Transfer these bytes in the pipe
 			pos.write(bytes);
@@ -293,7 +297,9 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 		decorated.close();
 
 		if (closeESWithInputStream) {
-			inputStreamFiller.shutdown();
+			// Prevent having too many-threads alive at the same time
+			// TODO: await only if more than N threads are alive
+			MoreExecutors.shutdownAndAwaitTermination(inputStreamFiller, 1, TimeUnit.SECONDS);
 		}
 	}
 
