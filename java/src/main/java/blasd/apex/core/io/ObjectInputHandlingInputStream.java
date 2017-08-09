@@ -48,6 +48,7 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 
 	// The main thread will process the objects: we need an async process to read bytes
 	protected final ExecutorService inputStreamFiller;
+	protected final boolean closeESWithInputStream;
 
 	protected final AtomicBoolean pipedOutputStreamIsOpen = new AtomicBoolean(false);
 	protected final AtomicReference<Exception> ouch = new AtomicReference<>();
@@ -58,12 +59,15 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 	 * @param decorated
 	 */
 	public ObjectInputHandlingInputStream(ObjectInput decorated) {
-		this(decorated, ApexExecutorsHelper.newSingleThreadExecutor("ObjectInputHandling"));
+		this(decorated, ApexExecutorsHelper.newSingleThreadExecutor("ObjectInputHandling"), true);
 	}
 
-	public ObjectInputHandlingInputStream(ObjectInput decorated, ExecutorService inputStreamFiller) {
+	public ObjectInputHandlingInputStream(ObjectInput decorated,
+			ExecutorService inputStreamFiller,
+			boolean closeESWithInputStream) {
 		this.decorated = decorated;
 		this.inputStreamFiller = inputStreamFiller;
+		this.closeESWithInputStream = closeESWithInputStream;
 	}
 
 	@Override
@@ -280,6 +284,10 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 	@Override
 	public void close() throws IOException {
 		decorated.close();
+
+		if (closeESWithInputStream) {
+			inputStreamFiller.shutdown();
+		}
 	}
 
 }

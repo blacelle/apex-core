@@ -38,6 +38,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
 
 import blasd.apex.core.memory.IApexMemoryConstants;
+import blasd.apex.core.thread.ApexExecutorsHelper;
 
 public class TestTransmitInputStreamInObjectInput {
 
@@ -271,5 +272,45 @@ public class TestTransmitInputStreamInObjectInput {
 				Assert.assertSame(exceptionToRethrow, e.getCause());
 			}
 		}
+	}
+
+	@Test
+	public void testExecutorServiceIsClosed() throws IOException, ClassNotFoundException {
+		// We ensure a large buffer as we will have a large overhead because of chunks
+		PipedInputStream pis = new PipedInputStream();
+		PipedOutputStream pos = new PipedOutputStream(pis);
+
+		ObjectInputHandlingInputStream objectInput;
+		try (ObjectOutputStream oos = new ObjectOutputStream(pos)) {
+			objectInput = new ObjectInputHandlingInputStream(new ObjectInputStream(pis));
+		}
+
+		// By default not shutdown
+		Assert.assertFalse(objectInput.inputStreamFiller.isShutdown());
+
+		// Closing the OOS has shutdown the ES
+		objectInput.close();
+		Assert.assertTrue(objectInput.inputStreamFiller.isShutdown());
+	}
+
+	@Test
+	public void testExecutorServiceIsClosed_noclose() throws IOException, ClassNotFoundException {
+		// We ensure a large buffer as we will have a large overhead because of chunks
+		PipedInputStream pis = new PipedInputStream();
+		PipedOutputStream pos = new PipedOutputStream(pis);
+
+		ObjectInputHandlingInputStream objectInput;
+		try (ObjectOutputStream oos = new ObjectOutputStream(pos)) {
+			objectInput = new ObjectInputHandlingInputStream(new ObjectInputStream(pis),
+					ApexExecutorsHelper.newSingleThreadExecutor("testExecutorServiceIsClosed_noclose"),
+					false);
+		}
+
+		// By default not shutdown
+		Assert.assertFalse(objectInput.inputStreamFiller.isShutdown());
+
+		// Closing the OOS has NOT shutdown the ES
+		objectInput.close();
+		Assert.assertFalse(objectInput.inputStreamFiller.isShutdown());
 	}
 }
