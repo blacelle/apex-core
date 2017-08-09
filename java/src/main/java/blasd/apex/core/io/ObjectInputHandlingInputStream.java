@@ -96,6 +96,9 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 				throw new IllegalStateException("Pipe was already open");
 			}
 
+			String mainThreadName = Thread.currentThread().getName();
+			LOGGER.trace("We should add {} in pipe thread name", mainThreadName);
+
 			inputStreamFiller.execute(() -> {
 				// PipedInputStream.read will throw if not connected: PipedOutputStream should be connected before
 				// leaving main thread
