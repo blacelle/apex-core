@@ -41,6 +41,16 @@ public class TestApexURLHelper {
 		Assert.assertEquals("http://youpi.com", ApexURLHelper.toHttpURL("youpi.com").toExternalForm());
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void testToUrl_Null() throws MalformedURLException {
+		ApexURLHelper.toHttpURL(null);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testToUrl_Empty() throws MalformedURLException {
+		ApexURLHelper.toHttpURL("");
+	}
+
 	@Test
 	public void testGetHost_lowerCase() throws MalformedURLException {
 		ApexHostDescriptor host = ApexURLHelper.getHost("YOUpi.com").get();

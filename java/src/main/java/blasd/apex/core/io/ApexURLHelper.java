@@ -69,6 +69,10 @@ public class ApexURLHelper {
 	 * @return an URL associated to given String, adding the protocol "http://" by default
 	 */
 	public static URL toHttpURL(String asString) {
+		if (asString == null) {
+			throw new IllegalArgumentException("Should not be null");
+		}
+
 		try {
 			int indexOfSemiColumn = asString.indexOf(':');
 

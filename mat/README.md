@@ -1,0 +1,1 @@
+A Stand-Alone version of Eclipse MAT. Comparable to vshor_mat but with a much more up-to-date version
