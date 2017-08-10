@@ -42,12 +42,12 @@ public class HprofIndexBuilder implements IIndexBuilder
         this.prefix = prefix;
 
         this.enhancers = new ArrayList<IParsingEnhancer>();
-        for (EnhancerRegistry.Enhancer enhancer : EnhancerRegistry.instance().delegates())
-        {
-            IParsingEnhancer parsingEnhancer = enhancer.parser();
-            if (parsingEnhancer != null)
-                this.enhancers.add(parsingEnhancer);
-        }
+//        for (EnhancerRegistry.Enhancer enhancer : EnhancerRegistry.instance().delegates())
+//        {
+//            IParsingEnhancer parsingEnhancer = enhancer.parser();
+//            if (parsingEnhancer != null)
+//                this.enhancers.add(parsingEnhancer);
+//        }
 
     }
 

@@ -54,12 +54,12 @@ public class HprofHeapObjectReader implements IObjectReader
                         + "o2hprof.index")); //$NON-NLS-1$
 
         this.enhancers = new ArrayList<IRuntimeEnhancer>();
-        for (EnhancerRegistry.Enhancer enhancer : EnhancerRegistry.instance().delegates())
-        {
-            IRuntimeEnhancer runtime = enhancer.runtime();
-            if (runtime != null)
-                this.enhancers.add(runtime);
-        }
+//        for (EnhancerRegistry.Enhancer enhancer : EnhancerRegistry.instance().delegates())
+//        {
+//            IRuntimeEnhancer runtime = enhancer.runtime();
+//            if (runtime != null)
+//                this.enhancers.add(runtime);
+//        }
     }
 
     public long[] readObjectArrayContent(ObjectArrayImpl array, int offset, int length) throws IOException,

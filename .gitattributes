@@ -17,3 +17,11 @@
 *.jpg binary
 *.gif binary
 *.jar binary
+
+# HeapDumps in test resources for MAT
+*.hprof
+*.zip
+*.sdff
+*.phd
+
+

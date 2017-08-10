@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.mat.hprof.ui;
 
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.mat.hprof.HprofPlugin;
-
 /**
  * Constant definitions for plug-in preferences
  */
@@ -34,9 +31,9 @@ public class HprofPreferences
      */
     public static HprofStrictness getCurrentStrictness()
     {
-        HprofPreferences.HprofStrictness strictnessPreference = HprofPreferences.HprofStrictness.parse(Platform
-                        .getPreferencesService().getString(HprofPlugin.getDefault().getBundle().getSymbolicName(),
-                                        HprofPreferences.STRICTNESS_PREF, "", null));
+		// HprofPreferences.STRICTNESS_PREF
+		HprofPreferences.HprofStrictness strictnessPreference = HprofPreferences.HprofStrictness
+				.parse(System.getProperty("mat.strictness", HprofPreferences.DEFAULT_STRICTNESS.toString()));
 
         // Check if the user overrides on the command line
         for (HprofStrictness strictness : HprofStrictness.values())

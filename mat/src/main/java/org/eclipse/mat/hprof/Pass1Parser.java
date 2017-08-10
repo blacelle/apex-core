@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.mat.SnapshotException;
 import org.eclipse.mat.collect.HashMapLongObject;
 import org.eclipse.mat.hprof.ui.HprofPreferences;
@@ -58,8 +57,7 @@ public class Pass1Parser extends AbstractParser
     private long previousArrayStart;
     private long previousArrayUncompressedEnd;
     private boolean foundCompressed;
-    private final boolean verbose = Platform.inDebugMode() && HprofPlugin.getDefault().isDebugging()
-                    && Boolean.parseBoolean(Platform.getDebugOption("org.eclipse.mat.hprof/debug/parser")); //$NON-NLS-1$
+    private final boolean verbose = Boolean.getBoolean("mat.verbose");
 
     public Pass1Parser(IHprofParserHandler handler, SimpleMonitor.Listener monitor,
                     HprofPreferences.HprofStrictness strictnessPreference)
