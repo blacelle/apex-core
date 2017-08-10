@@ -142,7 +142,8 @@ public class VirtualMachineWithoutToolsJar {
 		try {
 			return AgentLoaderApexSpy.getVirtualMachineClass();
 		} catch (Throwable e) {
-			LOGGER.warn("Issue while getting VirtualMachine class", e);
+			// We log in trace to prevent showing this alarming stack too often
+			LOGGER.trace("Issue while getting VirtualMachine class", e);
 			return Optional.absent();
 		}
 	}

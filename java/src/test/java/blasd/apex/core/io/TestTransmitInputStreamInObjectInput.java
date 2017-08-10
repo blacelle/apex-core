@@ -252,9 +252,8 @@ public class TestTransmitInputStreamInObjectInput {
 			InputStream readIS = (InputStream) nextToRead;
 
 			// ERROR BLOCK: we read the underlying IS: it will corrupt the flow
-			{
-				pis.read();
-			}
+			// TODO: this call sometimes fails, leading to an infinity-wait in .read
+			Awaitility.await().until(() -> pis.read() >= -1);
 
 			// Check we have read some byte BEFORE having done reading the pis
 			Assert.assertTrue(objectInput.pipedOutputStreamIsOpen.get());
