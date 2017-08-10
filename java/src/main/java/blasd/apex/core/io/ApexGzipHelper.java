@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.zip.GZIPInputStream;
@@ -107,8 +108,12 @@ public class ApexGzipHelper {
 	}
 
 	public static String inflate(byte[] inflated) throws IOException {
+		return inflate(inflated, StandardCharsets.UTF_8);
+	}
+
+	public static String inflate(byte[] inflated, Charset charset) throws IOException {
 		try (GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(inflated));
-				InputStreamReader osw = new InputStreamReader(gzipInputStream, StandardCharsets.UTF_8)) {
+				InputStreamReader osw = new InputStreamReader(gzipInputStream, charset)) {
 			return CharStreams.toString(osw);
 		}
 	}
@@ -123,32 +128,30 @@ public class ApexGzipHelper {
 	 */
 	public static void packToZip(final File folder, final File zipFilePath) throws IOException {
 		try (FileOutputStream fos = new FileOutputStream(zipFilePath); ZipOutputStream zos = new ZipOutputStream(fos)) {
-			try {
-				// https://stackoverflow.com/questions/15968883/how-to-zip-a-folder-itself-using-java
-				Iterator<File> iterator = Files.fileTreeTraverser().preOrderTraversal(folder).iterator();
+			// https://stackoverflow.com/questions/15968883/how-to-zip-a-folder-itself-using-java
+			Iterator<File> iterator = Files.fileTreeTraverser().preOrderTraversal(folder).iterator();
 
-				while (iterator.hasNext()) {
-					File next = iterator.next();
+			while (iterator.hasNext()) {
+				File next = iterator.next();
 
-					if (next.isDirectory()) {
-						// https://stackoverflow.com/questions/204784/how-to-construct-a-relative-path-in-java-from-two-absolute-paths-or-urls
-						zos.putNextEntry(new ZipEntry(folder.toURI().relativize(next.toURI()).getPath() + "/"));
-						zos.closeEntry();
-					} else if (next.isFile()) {
-						LOGGER.debug("Adding {} in {}", next, zipFilePath);
-						zos.putNextEntry(new ZipEntry(folder.toURI().relativize(next.toURI()).getPath()));
-						Files.copy(next, zos);
-						zos.closeEntry();
-					}
+				if (next.isDirectory()) {
+					// https://stackoverflow.com/questions/204784/how-to-construct-a-relative-path-in-java-from-two-absolute-paths-or-urls
+					zos.putNextEntry(new ZipEntry(folder.toURI().relativize(next.toURI()).getPath() + "/"));
+					zos.closeEntry();
+				} else if (next.isFile()) {
+					LOGGER.debug("Adding {} in {}", next, zipFilePath);
+					zos.putNextEntry(new ZipEntry(folder.toURI().relativize(next.toURI()).getPath()));
+					Files.copy(next, zos);
+					zos.closeEntry();
 				}
-			} catch (IOException e) {
-				// Delete this tmp file
-				if (zipFilePath.isFile() && !zipFilePath.delete()) {
-					LOGGER.debug("For some reason, we failed deleting {}", zipFilePath);
-				}
-
-				throw new IOException("Issue while writing in " + zipFilePath, e);
 			}
+		} catch (IOException e) {
+			// Delete this tmp file
+			if (zipFilePath.isFile() && !zipFilePath.delete()) {
+				LOGGER.debug("For some reason, we failed deleting {}", zipFilePath);
+			}
+
+			throw new IOException("Issue while writing in " + zipFilePath, e);
 		}
 	}
 
