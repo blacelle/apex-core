@@ -102,6 +102,9 @@
 
 		<!-- Beta: zero-copy CSV reader -->
 		<module>csv</module>
+		
+		<!-- Port Eclipse MAT in an autonomous module -->
+		<module>mat</module>
 
 		<!-- a JConsole plugin to facilitate tracking of off-heap -->
 		<!-- Excluded as it is an experimental project -->

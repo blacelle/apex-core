@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.eclipse.mat.parser.internal.util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.mat.hprof.HprofHeapObjectReader;
 import org.eclipse.mat.hprof.HprofIndexBuilder;
@@ -37,16 +36,16 @@ public class ParserRegistry
 
     public static class Parser
     {
-        private String id;
-        private SnapshotFormat snapshotFormat;
+        private final String id;
+        private final SnapshotFormat snapshotFormat;
 
-	    	private IObjectReader objectReader;
-	    	private IIndexBuilder indexBuilder;
+	    	private final IObjectReader objectReader;
+	    	private final IIndexBuilder indexBuilder;
 
         public Parser(String id,
 				SnapshotFormat snapshotFormat,
-				HprofHeapObjectReader hprofHeapObjectReader,
-				HprofIndexBuilder hprofIndexBuilder) {
+				HprofHeapObjectReader objectReader,
+				HprofIndexBuilder indexBuilder) {
             this.id = id;
             this.snapshotFormat = snapshotFormat;
 
@@ -87,14 +86,13 @@ public class ParserRegistry
         return null;
     }
 
-	public static List<Parser> matchParser(String name2) {
-		// TODO Auto-generated method stub
-		return null;
+	public static List<Parser> matchParser(String name) {
+		// TODO: Need to match
+		return parsers;
 	}
 
 	public static List<SnapshotFormat> getSupportedFormats() {
-		// TODO Auto-generated method stub
-		return null;
+		return parsers.stream().map(parser -> parser.snapshotFormat).collect(Collectors.toList());
 	}
 
 }
