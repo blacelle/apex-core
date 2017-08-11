@@ -243,7 +243,7 @@ public class TestIndex1to1 {
 	@Test
 	public void intIdentifier1() {
 		assumeTrue(N < MAXELEMENTS2);
-		Identifier id = new Identifier();
+		Identifier id = IndexWriter.newIdentifier();
 		for (int i = 0; 0 <= i && i < N; ++i) {
 			id.add(i + 0l);
 		}
@@ -255,7 +255,7 @@ public class TestIndex1to1 {
 	@Test
 	public void intIdentifier2() {
 		assumeTrue(N < MAXELEMENTS2);
-		Identifier id = new Identifier();
+		Identifier id = IndexWriter.newIdentifier();
 		Random r = new Random(N);
 		for (int i = 0; 0 <= i && i < N; ++i) {
 			id.add(r.nextLong());
@@ -271,7 +271,7 @@ public class TestIndex1to1 {
 	@Test
 	public void intIdentifier3() {
 		assumeTrue(N < MAXELEMENTS2);
-		Identifier id = new Identifier();
+		Identifier id = IndexWriter.newIdentifier();
 		Random r = new Random(N);
 		for (int i = 0; 0 <= i && i < N; ++i) {
 			id.add(r.nextLong());
@@ -286,7 +286,7 @@ public class TestIndex1to1 {
 	public void intIdentifier4() {
 		assumeTrue(N < MAXELEMENTS2);
 		assumeTrue(N > 0);
-		Identifier id = new Identifier();
+		Identifier id = IndexWriter.newIdentifier();
 		Random r = new Random(N);
 		for (int i = 0; 0 <= i && i < N; ++i) {
 			long l1 = r.nextLong();

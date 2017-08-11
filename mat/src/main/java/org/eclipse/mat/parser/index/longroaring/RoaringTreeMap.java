@@ -52,10 +52,11 @@ public class RoaringTreeMap {
 			MutableRoaringBitmap bitmap = entry.getValue();
 
 			int cardinality = bitmap.getCardinality();
-			if (cardinality > j) {
-				indexLeft -= cardinality;
-			} else {
+			if (indexLeft < cardinality) {
+				// We have spot the bitmap holding this value
 				return pack(entry.getIntKey(), bitmap.select(indexLeft));
+			} else {
+				indexLeft -= cardinality;
 			}
 		}
 
@@ -131,7 +132,8 @@ public class RoaringTreeMap {
 				rank += e.getValue().getCardinality();
 			} else if (e.getIntKey() == x) {
 				int y = (int) id;
-				rank += e.getValue().rank(y);
+				int localRank = e.getValue().rank(y);
+				rank += localRank;
 			} else {
 				assert e.getIntKey() > x;
 				break;

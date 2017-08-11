@@ -82,16 +82,15 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 
 	public void beforePass1(XSnapshotInfo snapshotInfo) throws IOException {
 		this.info = snapshotInfo;
-		this.identifiers = new IndexWriter.Identifier();
+		this.identifiers = IndexWriter.newIdentifier();
 	}
 
 	public void beforePass2(IProgressListener monitor) throws IOException, SnapshotException {
 		// add dummy address for system class loader object
 		identifiers.add(0);
 
-		// RoaringBitmap is already sorted
 		// sort and assign preliminary object ids
-		//		identifiers.sort();
+		identifiers.sort();
 
 		// See what the actual object alignment is
 		calculateAlignment();
@@ -314,8 +313,7 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 		}
 		requiredClassIDs = null;
 
-		// RoaringBitmap is already sorted
-		//		identifiers.sort();
+		identifiers.sort();
 	}
 
 	private int calculateInstanceSize(ClassImpl clazz) {

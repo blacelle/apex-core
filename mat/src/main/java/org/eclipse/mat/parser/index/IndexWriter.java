@@ -53,6 +53,8 @@ import org.eclipse.mat.parser.io.BitInputStream;
 import org.eclipse.mat.parser.io.BitOutputStream;
 import org.eclipse.mat.util.IProgressListener;
 import org.eclipse.mat.util.MessageUtil;
+import org.junit.Assert;
+import org.roaringbitmap.RoaringBitmap;
 
 public abstract class IndexWriter {
 	public static final int PAGE_SIZE_INT = 1000000;
@@ -72,67 +74,87 @@ public abstract class IndexWriter {
 		public void storeKey(int index, Serializable key);
 	}
 
+	public static interface Identifier extends IIndexReader.IOne2LongIndex {
+
+		void add(long objectAddress);
+
+		IteratorLong iterator();
+
+		void sort();
+
+	}
+
 	// //////////////////////////////////////////////////////////////
 	// integer based indices
 	// //////////////////////////////////////////////////////////////
-
-	public static class Identifier implements IIndexReader.IOne2LongIndex {
-		// Replace a long[] by this Bitmap
-		RoaringTreeMap identifiers;
+	public static class RawIdentifier implements Identifier {
+		long[] identifiers;
+		int size;
 
 		public void add(long id) {
 			if (identifiers == null) {
-				identifiers = new RoaringTreeMap();
+				identifiers = new long[10000];
+				size = 0;
 			}
 
-			identifiers.addLong(id);
+			if (size + 1 > identifiers.length) {
+				int minCapacity = size + 1;
+				int newCapacity = newCapacity(identifiers.length, minCapacity);
+				if (newCapacity < minCapacity) {
+					// Avoid strange exceptions later
+					throw new OutOfMemoryError(
+							MessageUtil.format(Messages.IndexWriter_Error_ArrayLength, minCapacity, newCapacity));
+				}
+				identifiers = copyOf(identifiers, newCapacity);
+			}
+
+			identifiers[size++] = id;
+		}
+
+		public void sort() {
+			Arrays.sort(identifiers, 0, size);
 		}
 
 		public int size() {
-			return identifiers.getCardinality();
+			return size;
 		}
 
 		public long get(int index) {
-			return identifiers.select(index);
+			if (index < 0 || index >= size)
+				throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size); //$NON-NLS-1$//$NON-NLS-2$
+
+			return identifiers[index];
 		}
 
 		public int reverse(long val) {
-			int rank = identifiers.rankLong(val);
-			if (rank >= 0) {
-				return rank;
-			} else {
-				// int a, c;
-				// for (a = 0, c = size; a < c;) {
-				// // Avoid overflow problems by using unsigned divide by 2
-				// int b = (a + c) >>> 1;
-				// long probeVal = get(b);
-				// if (val < probeVal) {
-				// c = b;
-				// } else if (probeVal < val) {
-				// a = b + 1;
-				// } else {
-				// return b;
-				// }
-				// }
-				// Negative index indicates not found (and where to insert)
-				// return -1 - a;
-
-				// TODO: what is doing MAT here?
-				throw new IllegalStateException("TODO");
+			int a, c;
+			for (a = 0, c = size; a < c;) {
+				// Avoid overflow problems by using unsigned divide by 2
+				int b = (a + c) >>> 1;
+				long probeVal = get(b);
+				if (val < probeVal) {
+					c = b;
+				} else if (probeVal < val) {
+					a = b + 1;
+				} else {
+					return b;
+				}
 			}
+			// Negative index indicates not found (and where to insert)
+			return -1 - a;
 		}
 
 		public IteratorLong iterator() {
-			LongIterator it = identifiers.iterator();
-
 			return new IteratorLong() {
 
+				int index = 0;
+
 				public boolean hasNext() {
-					return it.hasNext();
+					return index < size;
 				}
 
 				public long next() {
-					return it.next();
+					return identifiers[index++];
 				}
 
 			};
@@ -140,10 +162,8 @@ public abstract class IndexWriter {
 
 		public long[] getNext(int index, int length) {
 			long answer[] = new long[length];
-			for (int ii = 0; ii < length; ii++) {
-				// TODO use Guava checked sum
-				answer[ii] = identifiers.select(index + ii);
-			}
+			for (int ii = 0; ii < length; ii++)
+				answer[ii] = identifiers[index + ii];
 			return answer;
 		}
 
@@ -159,11 +179,136 @@ public abstract class IndexWriter {
 		}
 	}
 
+	public static class RoaringIdentifier implements Identifier {
+		// Replace a long[] by this Bitmap
+		RoaringTreeMap identifiers;
+
+		RawIdentifier guarantee;
+
+		public void add(long id) {
+			if (identifiers == null) {
+				identifiers = new RoaringTreeMap();
+				if (Boolean.getBoolean("mat.debug")) {
+					guarantee = new RawIdentifier();
+				}
+			}
+
+			identifiers.addLong(id);
+
+			if (guarantee != null) {
+				guarantee.add(id);
+			}
+		}
+
+		public int size() {
+			int cardinality = identifiers.getCardinality();
+			if (guarantee != null) {
+				assert guarantee.size() == cardinality;
+			}
+			return cardinality;
+		}
+
+		public long get(int index) {
+			long get = identifiers.select(index);
+			if (guarantee != null) {
+				assert guarantee.get(index) == get;
+			}
+			return get;
+		}
+
+		public int reverse(long val) {
+			int rank = identifiers.rankLong(val);
+
+			// Roaring rank is 1-based: if only a '0', its rank is 1, we select 'rank(=1)-1' hoping to find back 0
+			long selectBack = identifiers.select(rank - 1);
+
+			if (selectBack == val) {
+				int rank0Based = rank - 1;
+
+				if (guarantee != null) {
+					assert guarantee.reverse(val) == rank0Based;
+				}
+
+				return rank0Based;
+			} else {
+				int minusNext = -1 - rank;
+
+				if (guarantee != null) {
+					assert guarantee.reverse(val) == minusNext;
+				}
+
+				return minusNext;
+			}
+		}
+
+		public IteratorLong iterator() {
+			LongIterator it = identifiers.iterator();
+			IteratorLong guaranteIt;
+			if (guarantee != null) {
+				guaranteIt = guarantee.iterator();
+			} else {
+				guaranteIt = null;
+			}
+
+			return new IteratorLong() {
+
+				public boolean hasNext() {
+					boolean hasNext = it.hasNext();
+					if (guarantee != null) {
+						assert guaranteIt.hasNext() == hasNext;
+					}
+					return hasNext;
+				}
+
+				public long next() {
+					long next = it.next();
+					if (guarantee != null) {
+						assert guaranteIt.next() == next;
+					}
+					return next;
+				}
+
+			};
+		}
+
+		public long[] getNext(int index, int length) {
+			long answer[] = new long[length];
+			for (int ii = 0; ii < length; ii++) {
+				// TODO use Guava checked sum
+				answer[ii] = identifiers.select(index + ii);
+			}
+
+			Assert.assertArrayEquals(answer, guarantee.getNext(index, length));
+
+			return answer;
+		}
+
+		public void close() throws IOException {
+		}
+
+		public void delete() {
+			identifiers = null;
+			guarantee = null;
+		}
+
+		public void unload() throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void sort() {
+			// no-op as Roaring is already sorted
+			if (guarantee != null) {
+				guarantee.sort();
+			}
+		}
+	}
+
 	public static class IntIndexCollectorUncompressed {
 
 		FileChannel fc;
 		private final IntBuffer dataElements;
-		
+
 		public IntIndexCollectorUncompressed(int size) {
 			try {
 				File tmpFile = prepareIntArrayInFile(".IntIndexCollectorUncompressed", size);
@@ -171,7 +316,7 @@ public abstract class IndexWriter {
 				FileChannel fc = new RandomAccessFile(tmpFile, "rw").getChannel();
 
 				dataElements = fc.map(FileChannel.MapMode.READ_WRITE, 0, fc.size()).asIntBuffer();
-//				this.dataElements = IntBuffer.allocate(size);
+				// this.dataElements = IntBuffer.allocate(size);
 			} catch (RuntimeException | IOException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
@@ -678,7 +823,7 @@ public abstract class IndexWriter {
 				FileChannel fc = new RandomAccessFile(tmpFile, "rw").getChannel();
 
 				this.header = fc.map(FileChannel.MapMode.READ_WRITE, 0, fc.size()).asIntBuffer();
-//				this.header = IntBuffer.allocate(size);
+				// this.header = IntBuffer.allocate(size);
 			} catch (RuntimeException | IOException e) {
 				e.printStackTrace();
 				throw e;
@@ -753,7 +898,7 @@ public abstract class IndexWriter {
 
 		private long getHeader(int index) {
 			long header2Value = header2 != null ? (header2.get(index) & 0xffL) << 32 : 0;
-			
+
 			long headerValue = header.get(index) & 0xffffffffL;
 			return header2Value | headerValue;
 		}
@@ -1868,8 +2013,12 @@ public abstract class IndexWriter {
 				return header.hasRemaining();
 			}
 		};
-		
+
 		return it;
+	}
+
+	public static Identifier newIdentifier() {
+		return new RoaringIdentifier();
 	}
 
 }
