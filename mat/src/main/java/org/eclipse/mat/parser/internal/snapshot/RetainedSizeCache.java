@@ -47,7 +47,7 @@ public class RetainedSizeCache implements IIndexReader {
 	 * @param snapshotInfo
 	 */
 	public RetainedSizeCache(XSnapshotInfo snapshotInfo) {
-		this.filename = snapshotInfo.getPrefix() + "i2sv2.index"; //$NON-NLS-1$
+		this.filename = snapshotInfo.getPrefix() + "i2sv2.index";
 		readId2Size(snapshotInfo.getPrefix());
 	}
 
@@ -136,7 +136,7 @@ public class RetainedSizeCache implements IIndexReader {
 		if (file.exists()) {
 			doRead(file, false);
 		} else {
-			File legacyFile = new File(prefix + "i2s.index");//$NON-NLS-1$
+			File legacyFile = new File(prefix + "i2s.index");
 			if (legacyFile.exists()) {
 				doRead(legacyFile, true);
 			} else {

@@ -20,7 +20,6 @@ public final class HTMLUtils {
 	 * @param text
 	 * @return the escaped text
 	 */
-	@SuppressWarnings("nls")
 	public static String escapeText(String text) {
 		final StringBuilder result = new StringBuilder(text.length() * 120 / 100);
 

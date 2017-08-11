@@ -26,13 +26,13 @@ public interface IThreadStack {
 	 *         first element of the array contains the top of the stack, and the
 	 *         last element the bottom of the stack
 	 */
-	public IStackFrame[] getStackFrames();
+	IStackFrame[] getStackFrames();
 
 	/**
 	 * Get the ID of the thread to which this stack belongs
 	 * 
 	 * @return the object ID of the thread owning this stack
 	 */
-	public int getThreadId();
+	int getThreadId();
 
 }

@@ -37,8 +37,8 @@ import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(value = Parameterized.class)
 public class TestInstanceSizes {
-	private static final Pattern PATTERN_OBJ_ARRAY = Pattern.compile("^(\\[+)L(.*);$"); //$NON-NLS-1$
-	private static final Pattern PATTERN_PRIMITIVE_ARRAY = Pattern.compile("^(\\[+)(.)$"); //$NON-NLS-1$
+	private static final Pattern PATTERN_OBJ_ARRAY = Pattern.compile("^(\\[+)L(.*);$");
+	private static final Pattern PATTERN_PRIMITIVE_ARRAY = Pattern.compile("^(\\[+)(.)$");
 
 	@Parameters
 	public static Collection<Object[]> data() {
@@ -91,14 +91,14 @@ public class TestInstanceSizes {
 				int l = matcher.group(1).length();
 				className = matcher.group(2);
 				for (int ii = 0; ii < l; ii++)
-					className += "[]"; //$NON-NLS-1$
+					className += "[]";
 			}
 
 			// primitive arrays
 			matcher = PATTERN_PRIMITIVE_ARRAY.matcher(className);
 			if (matcher.matches()) {
 				int count = matcher.group(1).length() - 1;
-				className = "unknown[]"; //$NON-NLS-1$
+				className = "unknown[]";
 
 				char signature = matcher.group(2).charAt(0);
 				for (int ii = 0; ii < IPrimitiveArray.SIGNATURES.length; ii++) {
@@ -109,7 +109,7 @@ public class TestInstanceSizes {
 				}
 
 				for (int ii = 0; ii < count; ii++)
-					className += "[]"; //$NON-NLS-1$
+					className += "[]";
 			}
 		}
 		return className;

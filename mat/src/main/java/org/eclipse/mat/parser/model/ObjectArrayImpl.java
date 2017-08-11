@@ -120,7 +120,7 @@ public class ObjectArrayImpl extends AbstractArrayImpl implements IObjectArray {
 	public List<NamedReference> getOutboundReferences() {
 		List<NamedReference> answer = new ArrayList<NamedReference>(getLength() + 1);
 
-		answer.add(new PseudoReference(source, classInstance.getObjectAddress(), "<class>"));//$NON-NLS-1$
+		answer.add(new PseudoReference(source, classInstance.getObjectAddress(), "<class>"));
 
 		long refs[] = getReferenceArray();
 		for (int i = 0; i < refs.length; i++) {

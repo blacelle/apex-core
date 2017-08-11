@@ -12,7 +12,7 @@
 package org.eclipse.mat.hprof;
 
 public class Messages {
-	private static final String BUNDLE_NAME = "org.eclipse.mat.hprof.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.mat.hprof.messages";
 
 	public static final String AbstractParser_Error_IllegalType = "Illegal Type:  {0}";
 	public static final String AbstractParser_Error_InvalidHPROFHeader = "Invalid HPROF file header.";

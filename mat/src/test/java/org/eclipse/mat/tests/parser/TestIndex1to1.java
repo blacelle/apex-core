@@ -293,7 +293,9 @@ public class TestIndex1to1 {
 			id.add(l1);
 
 		}
-		id.sort();
+
+		// RoaringBitmap is already sorted
+		//		id.sort();
 		r = new Random(N);
 		for (IteratorLong l = id.iterator(); l.hasNext(); l.next()) {
 			long l1 = r.nextLong();

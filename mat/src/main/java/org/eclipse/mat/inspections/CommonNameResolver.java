@@ -37,13 +37,13 @@ public class CommonNameResolver {
 			"java.lang.StringBuilder" })
 	public static class StringBufferResolver implements IClassSpecificNameResolver {
 		public String resolve(IObject obj) throws SnapshotException {
-			Integer count = (Integer) obj.resolveValue("count"); //$NON-NLS-1$
+			Integer count = (Integer) obj.resolveValue("count");
 			if (count == null)
 				return null;
 			if (count == 0)
-				return ""; //$NON-NLS-1$
+				return "";
 
-			IPrimitiveArray charArray = (IPrimitiveArray) obj.resolveValue("value"); //$NON-NLS-1$
+			IPrimitiveArray charArray = (IPrimitiveArray) obj.resolveValue("value");
 			if (charArray == null)
 				return null;
 
@@ -54,7 +54,7 @@ public class CommonNameResolver {
 	@Subject("java.lang.Thread")
 	public static class ThreadResolver implements IClassSpecificNameResolver {
 		public String resolve(IObject obj) throws SnapshotException {
-			IObject name = (IObject) obj.resolveValue("name"); //$NON-NLS-1$
+			IObject name = (IObject) obj.resolveValue("name");
 			return name != null ? name.getClassSpecificName() : null;
 		}
 	}
@@ -62,7 +62,7 @@ public class CommonNameResolver {
 	@Subject("java.lang.ThreadGroup")
 	public static class ThreadGroupResolver implements IClassSpecificNameResolver {
 		public String resolve(IObject object) throws SnapshotException {
-			IObject nameString = (IObject) object.resolveValue("name"); //$NON-NLS-1$
+			IObject nameString = (IObject) object.resolveValue("name");
 			if (nameString == null)
 				return null;
 			return nameString.getClassSpecificName();
@@ -82,7 +82,7 @@ public class CommonNameResolver {
 	})
 	public static class ValueResolver implements IClassSpecificNameResolver {
 		public String resolve(IObject heapObject) throws SnapshotException {
-			Object value = heapObject.resolveValue("value"); //$NON-NLS-1$
+			Object value = heapObject.resolveValue("value");
 			return value != null ? String.valueOf(value) : null;
 		}
 	}
@@ -90,7 +90,7 @@ public class CommonNameResolver {
 	@Subjects("java.util.concurrent.atomic.AtomicBoolean")
 	public static class AtomicBooleanResolver implements IClassSpecificNameResolver {
 		public String resolve(IObject heapObject) throws SnapshotException {
-			Integer value = (Integer) heapObject.resolveValue("value"); //$NON-NLS-1$
+			Integer value = (Integer) heapObject.resolveValue("value");
 			return value != null ? Boolean.toString(value != 0) : null;
 		}
 	}
@@ -98,7 +98,7 @@ public class CommonNameResolver {
 	@Subjects("java.util.concurrent.atomic.AtomicReference")
 	public static class AtomicReferenceValueResolver implements IClassSpecificNameResolver {
 		public String resolve(IObject heapObject) throws SnapshotException {
-			IObject value = (IObject) heapObject.resolveValue("value"); //$NON-NLS-1$
+			IObject value = (IObject) heapObject.resolveValue("value");
 			return value != null ? ClassSpecificNameResolverRegistry.resolve(value) : null;
 		}
 	}
@@ -106,7 +106,7 @@ public class CommonNameResolver {
 	@Subjects("java.util.concurrent.atomic.AtomicStampedReference")
 	public static class AtomicStampedReferenceValueResolver implements IClassSpecificNameResolver {
 		public String resolve(IObject heapObject) throws SnapshotException {
-			IObject value = (IObject) heapObject.resolveValue("pair.reference"); //$NON-NLS-1$
+			IObject value = (IObject) heapObject.resolveValue("pair.reference");
 			return value != null ? ClassSpecificNameResolverRegistry.resolve(value) : null;
 		}
 	}
@@ -147,27 +147,27 @@ public class CommonNameResolver {
 	public static class URLResolver implements IClassSpecificNameResolver {
 		public String resolve(IObject obj) throws SnapshotException {
 			StringBuilder builder = new StringBuilder();
-			IObject protocol = (IObject) obj.resolveValue("protocol"); //$NON-NLS-1$
+			IObject protocol = (IObject) obj.resolveValue("protocol");
 			if (protocol != null) {
 				builder.append(protocol.getClassSpecificName());
-				builder.append(":"); //$NON-NLS-1$
+				builder.append(":");
 			}
-			IObject authority = (IObject) obj.resolveValue("authority"); //$NON-NLS-1$
+			IObject authority = (IObject) obj.resolveValue("authority");
 			if (authority != null) {
-				builder.append("//"); //$NON-NLS-1$
+				builder.append("//");
 				builder.append(authority.getClassSpecificName());
 			}
-			IObject path = (IObject) obj.resolveValue("path"); //$NON-NLS-1$
+			IObject path = (IObject) obj.resolveValue("path");
 			if (path != null)
 				builder.append(path.getClassSpecificName());
-			IObject query = (IObject) obj.resolveValue("query"); //$NON-NLS-1$
+			IObject query = (IObject) obj.resolveValue("query");
 			if (query != null) {
-				builder.append("?"); //$NON-NLS-1$
+				builder.append("?");
 				builder.append(query.getClassSpecificName());
 			}
-			IObject ref = (IObject) obj.resolveValue("ref"); //$NON-NLS-1$
+			IObject ref = (IObject) obj.resolveValue("ref");
 			if (ref != null) {
-				builder.append("#"); //$NON-NLS-1$
+				builder.append("#");
 				builder.append(ref.getClassSpecificName());
 			}
 			return builder.length() > 0 ? builder.toString() : null;
@@ -183,13 +183,13 @@ public class CommonNameResolver {
 			StringBuilder r = new StringBuilder();
 			ISnapshot snapshot = obj.getSnapshot();
 			IObject ref;
-			Object val = obj.resolveValue("modifiers"); //$NON-NLS-1$
+			Object val = obj.resolveValue("modifiers");
 			if (val instanceof Integer) {
 				r.append(Modifier.toString((Integer) val));
 				if (r.length() > 0)
 					r.append(' ');
 			}
-			ref = (IObject) obj.resolveValue("clazz"); //$NON-NLS-1$
+			ref = (IObject) obj.resolveValue("clazz");
 			if (ref != null) {
 				addClassName(snapshot, ref.getObjectAddress(), r);
 			} else {
@@ -219,23 +219,23 @@ public class CommonNameResolver {
 			StringBuilder r = new StringBuilder();
 			ISnapshot snapshot = obj.getSnapshot();
 			IObject ref;
-			Object val = obj.resolveValue("modifiers"); //$NON-NLS-1$
+			Object val = obj.resolveValue("modifiers");
 			if (val instanceof Integer) {
 				r.append(Modifier.toString((Integer) val));
 				if (r.length() > 0)
 					r.append(' ');
 			}
-			ref = (IObject) obj.resolveValue("type"); //$NON-NLS-1$
+			ref = (IObject) obj.resolveValue("type");
 			if (ref != null) {
 				addClassName(snapshot, ref.getObjectAddress(), r);
 				r.append(' ');
 			}
-			ref = (IObject) obj.resolveValue("clazz"); //$NON-NLS-1$
+			ref = (IObject) obj.resolveValue("clazz");
 			if (ref != null) {
 				addClassName(snapshot, ref.getObjectAddress(), r);
 				r.append('.');
 			}
-			ref = (IObject) obj.resolveValue("name"); //$NON-NLS-1$
+			ref = (IObject) obj.resolveValue("name");
 			if (ref != null) {
 				r.append(ref.getClassSpecificName());
 			} else {
@@ -259,23 +259,23 @@ public class CommonNameResolver {
 			StringBuilder r = new StringBuilder();
 			ISnapshot snapshot = obj.getSnapshot();
 			IObject ref;
-			Object val = obj.resolveValue("modifiers"); //$NON-NLS-1$
+			Object val = obj.resolveValue("modifiers");
 			if (val instanceof Integer) {
 				r.append(Modifier.toString((Integer) val));
 				if (r.length() > 0)
 					r.append(' ');
 			}
-			ref = (IObject) obj.resolveValue("returnType"); //$NON-NLS-1$
+			ref = (IObject) obj.resolveValue("returnType");
 			if (ref != null) {
 				addClassName(snapshot, ref.getObjectAddress(), r);
 				r.append(' ');
 			}
-			ref = (IObject) obj.resolveValue("clazz"); //$NON-NLS-1$
+			ref = (IObject) obj.resolveValue("clazz");
 			if (ref != null) {
 				addClassName(snapshot, ref.getObjectAddress(), r);
 				r.append('.');
 			}
-			ref = (IObject) obj.resolveValue("name"); //$NON-NLS-1$
+			ref = (IObject) obj.resolveValue("name");
 			if (ref != null) {
 				r.append(ref.getClassSpecificName());
 			} else {
@@ -283,7 +283,7 @@ public class CommonNameResolver {
 				return null;
 			}
 			r.append('(');
-			ref = (IObject) obj.resolveValue("parameterTypes"); //$NON-NLS-1$
+			ref = (IObject) obj.resolveValue("parameterTypes");
 			if (ref instanceof IObjectArray) {
 				IObjectArray orefa = (IObjectArray) ref;
 				long refs[] = orefa.getReferenceArray();
@@ -310,13 +310,13 @@ public class CommonNameResolver {
 			StringBuilder r = new StringBuilder();
 			ISnapshot snapshot = obj.getSnapshot();
 			IObject ref;
-			Object val = obj.resolveValue("modifiers"); //$NON-NLS-1$
+			Object val = obj.resolveValue("modifiers");
 			if (val instanceof Integer) {
 				r.append(Modifier.toString((Integer) val));
 				if (r.length() > 0)
 					r.append(' ');
 			}
-			ref = (IObject) obj.resolveValue("clazz"); //$NON-NLS-1$
+			ref = (IObject) obj.resolveValue("clazz");
 			if (ref != null) {
 				addClassName(snapshot, ref.getObjectAddress(), r);
 			} else {
@@ -324,7 +324,7 @@ public class CommonNameResolver {
 				return null;
 			}
 			r.append('(');
-			ref = (IObject) obj.resolveValue("parameterTypes"); //$NON-NLS-1$
+			ref = (IObject) obj.resolveValue("parameterTypes");
 			if (ref instanceof IObjectArray) {
 				IObjectArray orefa = (IObjectArray) ref;
 				long refs[] = orefa.getReferenceArray();

@@ -46,7 +46,6 @@ public interface IPrimitiveArray extends IArray {
 	 * Indexes match the values of {@link IObject.Type}
 	 * @see IObject.Type
 	 */
-	@SuppressWarnings("nls")
 	String[] TYPE = { null,
 			null,
 			null,

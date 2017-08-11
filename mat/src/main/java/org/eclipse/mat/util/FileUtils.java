@@ -58,7 +58,7 @@ public final class FileUtils {
 	 * @throws IOException
 	 */
 	public static File createTempDirectory(String prefix, File parent) throws IOException {
-		File tempFile = File.createTempFile(prefix, "", parent); //$NON-NLS-1$
+		File tempFile = File.createTempFile(prefix, "", parent);
 		if (!tempFile.delete())
 			throw new IOException();
 		if (!tempFile.mkdir())
@@ -68,7 +68,7 @@ public final class FileUtils {
 	}
 
 	public static String toFilename(String name, String extension) {
-		return toFilename(name, "", extension); //$NON-NLS-1$
+		return toFilename(name, "", extension);
 	}
 
 	/**
@@ -88,11 +88,11 @@ public final class FileUtils {
 				if (Character.isLetterOrDigit(c))
 					buf.append(c);
 				else
-					buf.append("_"); //$NON-NLS-1$
+					buf.append("_");
 			}
 		}
 
-		buf.append(".").append(extension); //$NON-NLS-1$
+		buf.append(".").append(extension);
 
 		return buf.toString();
 	}

@@ -233,7 +233,6 @@ public class SnapshotInfo implements Serializable {
 		return usedHeapSize;
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
 		StringBuilder summary = new StringBuilder();

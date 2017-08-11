@@ -38,6 +38,8 @@ import org.eclipse.mat.collect.SetInt;
 import org.eclipse.mat.parser.index.IIndexReader.IOne2LongIndex;
 import org.eclipse.mat.parser.index.IIndexReader.IOne2OneIndex;
 import org.eclipse.mat.parser.index.IndexReader.SizeIndexReader;
+import org.eclipse.mat.parser.index.longroaring.LongIterator;
+import org.eclipse.mat.parser.index.longroaring.RoaringTreeMap;
 import org.eclipse.mat.parser.internal.Messages;
 import org.eclipse.mat.parser.io.BitInputStream;
 import org.eclipse.mat.parser.io.BitOutputStream;
@@ -67,73 +69,62 @@ public abstract class IndexWriter {
 	// //////////////////////////////////////////////////////////////
 
 	public static class Identifier implements IIndexReader.IOne2LongIndex {
-		long[] identifiers;
-		int size;
+		// Replace a long[] by this Bitmap
+		RoaringTreeMap identifiers;
 
 		public void add(long id) {
 			if (identifiers == null) {
-				identifiers = new long[10000];
-				size = 0;
+				identifiers = new RoaringTreeMap();
 			}
 
-			if (size + 1 > identifiers.length) {
-				int minCapacity = size + 1;
-				int newCapacity = newCapacity(identifiers.length, minCapacity);
-				if (newCapacity < minCapacity) {
-					// Avoid strange exceptions later
-					throw new OutOfMemoryError(
-							MessageUtil.format(Messages.IndexWriter_Error_ArrayLength, minCapacity, newCapacity));
-				}
-				identifiers = copyOf(identifiers, newCapacity);
-			}
-
-			identifiers[size++] = id;
-		}
-
-		public void sort() {
-			Arrays.sort(identifiers, 0, size);
+			identifiers.addLong(id);
 		}
 
 		public int size() {
-			return size;
+			return identifiers.getCardinality();
 		}
 
 		public long get(int index) {
-			if (index < 0 || index >= size)
-				throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size); //$NON-NLS-1$//$NON-NLS-2$
-
-			return identifiers[index];
+			return identifiers.select(index);
 		}
 
 		public int reverse(long val) {
-			int a, c;
-			for (a = 0, c = size; a < c;) {
-				// Avoid overflow problems by using unsigned divide by 2
-				int b = (a + c) >>> 1;
-				long probeVal = get(b);
-				if (val < probeVal) {
-					c = b;
-				} else if (probeVal < val) {
-					a = b + 1;
-				} else {
-					return b;
-				}
+			int rank = identifiers.rankLong(val);
+			if (rank >= 0) {
+				return rank;
+			} else {
+				//				int a, c;
+				//				for (a = 0, c = size; a < c;) {
+				//					// Avoid overflow problems by using unsigned divide by 2
+				//					int b = (a + c) >>> 1;
+				//					long probeVal = get(b);
+				//					if (val < probeVal) {
+				//						c = b;
+				//					} else if (probeVal < val) {
+				//						a = b + 1;
+				//					} else {
+				//						return b;
+				//					}
+				//				}
+				// Negative index indicates not found (and where to insert)
+				//				return -1 - a;
+
+				// TODO: what is doing MAT here?
+				throw new IllegalStateException("TODO");
 			}
-			// Negative index indicates not found (and where to insert)
-			return -1 - a;
 		}
 
 		public IteratorLong iterator() {
+			LongIterator it = identifiers.iterator();
+
 			return new IteratorLong() {
 
-				int index = 0;
-
 				public boolean hasNext() {
-					return index < size;
+					return it.hasNext();
 				}
 
 				public long next() {
-					return identifiers[index++];
+					return it.next();
 				}
 
 			};
@@ -141,8 +132,10 @@ public abstract class IndexWriter {
 
 		public long[] getNext(int index, int length) {
 			long answer[] = new long[length];
-			for (int ii = 0; ii < length; ii++)
-				answer[ii] = identifiers[index + ii];
+			for (int ii = 0; ii < length; ii++) {
+				// TODO use Guava checked sum
+				answer[ii] = identifiers.select(index + ii);
+			}
 			return answer;
 		}
 
@@ -814,7 +807,7 @@ public abstract class IndexWriter {
 		public void log(int objectIndex, int refIndex, boolean isPseudo) throws IOException {
 			int segment = objectIndex / pageSize;
 			if (segments[segment] == null) {
-				File segmentFile = new File(this.indexFile.getAbsolutePath() + segment + ".log");//$NON-NLS-1$
+				File segmentFile = new File(this.indexFile.getAbsolutePath() + segment + ".log");
 				segments[segment] = new BitOutputStream(new FileOutputStream(segmentFile));
 			}
 
@@ -858,7 +851,7 @@ public abstract class IndexWriter {
 					if (monitor.isCanceled())
 						throw new IProgressListener.OperationCanceledException();
 
-					File segmentFile = new File(this.indexFile.getAbsolutePath() + segment + ".log");//$NON-NLS-1$
+					File segmentFile = new File(this.indexFile.getAbsolutePath() + segment + ".log");
 					int startIndex = segment * pageSize;
 					processGiantSegmentFile(monitor,
 							keyWriter,
@@ -981,7 +974,7 @@ public abstract class IndexWriter {
 			try {
 				try {
 					for (int ss = 0; ss < subsegs; ++ss) {
-						File subsegmentFile = new File(this.indexFile.getAbsolutePath() + segment + "." + ss + ".log");//$NON-NLS-1$ //$NON-NLS-2$
+						File subsegmentFile = new File(this.indexFile.getAbsolutePath() + segment + "." + ss + ".log");
 						subsegments[ss] = new BitOutputStream(new FileOutputStream(subsegmentFile));
 					}
 
@@ -1023,14 +1016,14 @@ public abstract class IndexWriter {
 
 				// Process the subsegments
 				for (int ss = 0; ss < subsegs; ++ss) {
-					File subsegmentFile = new File(this.indexFile.getAbsolutePath() + segment + "." + ss + ".log");//$NON-NLS-1$ //$NON-NLS-2$
+					File subsegmentFile = new File(this.indexFile.getAbsolutePath() + segment + "." + ss + ".log");
 					processSegmentFile(monitor, keyWriter, body, subsegmentFile, subsegmentSizes[ss], segment);
 				}
 			} finally {
 				// Tidy up in case of cancel
 				// Normal operation will have deleted these files
 				for (int ss = 0; ss < subsegs; ++ss) {
-					File subsegmentFile = new File(this.indexFile.getAbsolutePath() + segment + "." + ss + ".log");//$NON-NLS-1$ //$NON-NLS-2$
+					File subsegmentFile = new File(this.indexFile.getAbsolutePath() + segment + "." + ss + ".log");
 					if (subsegmentFile.exists())
 						subsegmentFile.delete();
 				}
@@ -1188,7 +1181,7 @@ public abstract class IndexWriter {
 
 				if (segments != null) {
 					for (int ii = 0; ii < segments.length; ii++) {
-						new File(this.indexFile.getAbsolutePath() + ii + ".log").delete();//$NON-NLS-1$
+						new File(this.indexFile.getAbsolutePath() + ii + ".log").delete();
 					}
 				}
 			} catch (IOException ignore) {

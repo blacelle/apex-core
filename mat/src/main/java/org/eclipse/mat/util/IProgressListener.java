@@ -56,7 +56,7 @@ public interface IProgressListener {
 	 * Constant which may be used to indicate that the total amount of work
 	 * units is not known.
 	 */
-	final static int UNKNOWN_TOTAL_WORK = -1;
+	int UNKNOWN_TOTAL_WORK = -1;
 
 	/**
 	 * Notifies that the main task is beginning. This must only be called once

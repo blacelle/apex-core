@@ -21,12 +21,12 @@ import org.eclipse.mat.parser.IObjectReader;
 import org.eclipse.mat.snapshot.SnapshotFormat;
 
 public class ParserRegistry {
-	private static final String ID = "id";//$NON-NLS-1$
-	private static final String FILE_EXTENSION = "fileExtension";//$NON-NLS-1$
-	private static final String NAME = "name";//$NON-NLS-1$
-	private static final String DYNAMIC = "dynamic";//$NON-NLS-1$
-	public static final String INDEX_BUILDER = "indexBuilder";//$NON-NLS-1$
-	public static final String OBJECT_READER = "objectReader";//$NON-NLS-1$
+	private static final String ID = "id";
+	private static final String FILE_EXTENSION = "fileExtension";
+	private static final String NAME = "name";
+	private static final String DYNAMIC = "dynamic";
+	public static final String INDEX_BUILDER = "indexBuilder";
+	public static final String OBJECT_READER = "objectReader";
 
 	private static final List<Parser> parsers = Arrays.asList(new Parser("hprof",
 			new SnapshotFormat("hprof", new String[] { "hprof", "bin" }),
@@ -56,7 +56,7 @@ public class ParserRegistry {
 		}
 
 		public String getUniqueIdentifier() {
-			return "mat" + "." + id;//$NON-NLS-1$
+			return "mat" + "." + id;
 		}
 
 		public SnapshotFormat getSnapshotFormat() {

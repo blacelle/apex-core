@@ -33,7 +33,7 @@ import org.eclipse.mat.util.VoidProgressListener;
 public class ClassLoaderImpl extends InstanceImpl implements IClassLoader {
 	private static final long serialVersionUID = 1L;
 
-	public static final String NO_LABEL = "__none__";//$NON-NLS-1$
+	public static final String NO_LABEL = "__none__";
 
 	private volatile transient List<IClass> definedClasses = null;
 

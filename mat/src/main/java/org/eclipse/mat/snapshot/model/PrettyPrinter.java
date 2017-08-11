@@ -25,12 +25,12 @@ public final class PrettyPrinter {
 	 * @throws SnapshotException
 	 */
 	public static String objectAsString(IObject stringObject, int limit) throws SnapshotException {
-		Object valueObj = stringObject.resolveValue("value"); //$NON-NLS-1$
+		Object valueObj = stringObject.resolveValue("value");
 		if (!(valueObj instanceof IPrimitiveArray))
 			return null;
 		IPrimitiveArray charArray = (IPrimitiveArray) valueObj;
 
-		Object countObj = stringObject.resolveValue("count"); //$NON-NLS-1$
+		Object countObj = stringObject.resolveValue("count");
 		// count and offset fields were removed with JDK7u6
 		if (countObj == null) {
 			return arrayAsString(charArray, 0, charArray.getLength(), limit);
@@ -39,9 +39,9 @@ public final class PrettyPrinter {
 				return null;
 			Integer count = (Integer) countObj;
 			if (count.intValue() == 0)
-				return ""; //$NON-NLS-1$
+				return "";
 
-			Object offsetObj = stringObject.resolveValue("offset"); //$NON-NLS-1$
+			Object offsetObj = stringObject.resolveValue("offset");
 			if (!(offsetObj instanceof Integer))
 				return null;
 			Integer offset = (Integer) offsetObj;
@@ -84,10 +84,10 @@ public final class PrettyPrinter {
 			if (val >= 32 && val < 127)
 				result.append(val);
 			else
-				result.append("\\u").append(String.format("%04x", 0xFFFF & val)); //$NON-NLS-1$//$NON-NLS-2$
+				result.append("\\u").append(String.format("%04x", 0xFFFF & val));
 		}
 		if (limit < count)
-			result.append("..."); //$NON-NLS-1$
+			result.append("...");
 		return result.toString();
 	}
 

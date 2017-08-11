@@ -85,7 +85,7 @@ public class ClassImpl extends AbstractObjectImpl implements IClass, Comparable<
 		this.instanceSize = -1;
 
 		this.totalSize = 0;
-		this.isArrayType = name.endsWith("[]");//$NON-NLS-1$
+		this.isArrayType = name.endsWith("[]");
 	}
 
 	/**
@@ -195,16 +195,16 @@ public class ClassImpl extends AbstractObjectImpl implements IClass, Comparable<
 
 	public List<NamedReference> getOutboundReferences() {
 		List<NamedReference> answer = new LinkedList<NamedReference>();
-		answer.add(new PseudoReference(source, classInstance.getObjectAddress(), "<class>"));//$NON-NLS-1$
+		answer.add(new PseudoReference(source, classInstance.getObjectAddress(), "<class>"));
 		if (superClassAddress != 0)
-			answer.add(new PseudoReference(source, superClassAddress, "<super>"));//$NON-NLS-1$
-		answer.add(new PseudoReference(source, classLoaderAddress, "<classloader>"));//$NON-NLS-1$
+			answer.add(new PseudoReference(source, superClassAddress, "<super>"));
+		answer.add(new PseudoReference(source, classLoaderAddress, "<classloader>"));
 
 		for (int ii = 0; ii < staticFields.length; ii++) {
 			if (staticFields[ii].getValue() instanceof ObjectReference) {
 				ObjectReference ref = (ObjectReference) staticFields[ii].getValue();
 				String fieldName = staticFields[ii].getName();
-				if (fieldName.startsWith("<")) //$NON-NLS-1$
+				if (fieldName.startsWith("<"))
 					answer.add(new PseudoReference(source, ref.getObjectAddress(), fieldName));
 				else
 					answer.add(new NamedReference(source, ref.getObjectAddress(), fieldName));
@@ -320,7 +320,7 @@ public class ClassImpl extends AbstractObjectImpl implements IClass, Comparable<
 
 	@Override
 	protected StringBuffer appendFields(StringBuffer buf) {
-		return super.appendFields(buf).append(";name=").append(getName());//$NON-NLS-1$
+		return super.appendFields(buf).append(";name=").append(getName());
 	}
 
 	public boolean isArrayType() {
@@ -329,9 +329,9 @@ public class ClassImpl extends AbstractObjectImpl implements IClass, Comparable<
 
 	public String getTechnicalName() {
 		StringBuilder builder = new StringBuilder(256);
-		builder.append("class ");//$NON-NLS-1$
+		builder.append("class ");
 		builder.append(getName());
-		builder.append(" @ 0x");//$NON-NLS-1$
+		builder.append(" @ 0x");
 		builder.append(Long.toHexString(getObjectAddress()));
 		return builder.toString();
 	}

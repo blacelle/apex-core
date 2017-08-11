@@ -25,13 +25,13 @@ public interface IStackFrame {
 	 * @return int[] an array containing the object Ids. If there are no local
 	 *         objects to the frame, an empty array will be returned
 	 */
-	public int[] getLocalObjectsIds();
+	int[] getLocalObjectsIds();
 
 	/**
 	 * Get the text representation of the stack frame
 	 * 
 	 * @return java.lang.String the text representation of the stack frame - class and method
 	 */
-	public String getText();
+	String getText();
 
 }

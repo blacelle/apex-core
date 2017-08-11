@@ -27,28 +27,28 @@ public class IndexManager {
 	 */
 	public enum Index {
 		/** Inbounds: object id to N outbound object ids */
-		INBOUND("inbound", IndexReader.InboundReader.class), //$NON-NLS-1$
+		INBOUND("inbound", IndexReader.InboundReader.class),
 		/** Outbounds: object id to N inbound object ids */
-		OUTBOUND("outbound", IndexReader.IntIndex1NSortedReader.class), //$NON-NLS-1$
+		OUTBOUND("outbound", IndexReader.IntIndex1NSortedReader.class),
 		/** Object to class: object id to 1 class id */
-		O2CLASS("o2c", IndexReader.IntIndexReader.class), //$NON-NLS-1$
+		O2CLASS("o2c", IndexReader.IntIndexReader.class),
 		/** Index to address: object id to address (as a long) */
-		IDENTIFIER("idx", IndexReader.LongIndexReader.class), //$NON-NLS-1$
+		IDENTIFIER("idx", IndexReader.LongIndexReader.class),
 		/** Array to size: array (or non-default sized object) id to size (as an encoded int) */
-		A2SIZE("a2s", IndexReader.SizeIndexReader.class), //$NON-NLS-1$
+		A2SIZE("a2s", IndexReader.SizeIndexReader.class),
 		/** Dominated: object id to N dominated object ids */
-		DOMINATED("domOut", IndexReader.IntIndex1NReader.class), //$NON-NLS-1$
+		DOMINATED("domOut", IndexReader.IntIndex1NReader.class),
 		/** Object to retained size: object in dominator tree to retained size (as a long) */
-		O2RETAINED("o2ret", IndexReader.LongIndexReader.class), //$NON-NLS-1$
+		O2RETAINED("o2ret", IndexReader.LongIndexReader.class),
 		/** Dominator of: object id to the id of its dominator */
-		DOMINATOR("domIn", IndexReader.IntIndexReader.class), //$NON-NLS-1$
+		DOMINATOR("domIn", IndexReader.IntIndexReader.class),
 		/**
 		 * Retained size cache.
 		 * Retained size cache for a class: class+all instances.
 		 * Retained size cache for a class loader: loader+all classes+all instances. 
 		 * @since 1.2
 		 */
-		I2RETAINED("i2sv2", RetainedSizeCache.class); //$NON-NLS-1$
+		I2RETAINED("i2sv2", RetainedSizeCache.class);
 		/*
 		 * Other indexes:
 		 * i2s
@@ -67,7 +67,7 @@ public class IndexManager {
 		}
 
 		public File getFile(String prefix) {
-			return new File(new StringBuilder(prefix).append(filename).append(".index").toString());//$NON-NLS-1$
+			return new File(new StringBuilder(prefix).append(filename).append(".index").toString());
 		}
 
 	}
@@ -126,9 +126,8 @@ public class IndexManager {
 					throw new RuntimeException(e);
 				} catch (InvocationTargetException e) {
 					Throwable cause = e.getCause();
-					IOException ioe = new IOException(MessageUtil.format("{0}: {1}", //$NON-NLS-1$
-							cause.getClass().getName(),
-							cause.getMessage()));
+					IOException ioe = new IOException(
+							MessageUtil.format("{0}: {1}", cause.getClass().getName(), cause.getMessage()));
 					ioe.initCause(cause);
 					throw ioe;
 				} catch (RuntimeException e) {

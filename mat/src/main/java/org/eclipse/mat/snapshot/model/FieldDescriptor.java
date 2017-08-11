@@ -84,7 +84,7 @@ public class FieldDescriptor implements Serializable {
 	 */
 	public String getVerboseSignature() {
 		if (type == IObject.Type.OBJECT)
-			return "ref"; //$NON-NLS-1$
+			return "ref";
 
 		String t = IPrimitiveArray.TYPE[type];
 		return t.substring(0, t.length() - 2);

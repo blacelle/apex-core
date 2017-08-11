@@ -196,7 +196,7 @@ abstract public class GCRootInfo implements Serializable {
 		for (int i = 0; i < TYPE_STRING.length; i++) {
 			if (((1 << i) & typeSet) != 0) {
 				if (!first) {
-					buf.append(", "); //$NON-NLS-1$
+					buf.append(", ");
 				} else {
 					// Performance optimization - if there is only one bit set
 					// return the type string without building a new string.

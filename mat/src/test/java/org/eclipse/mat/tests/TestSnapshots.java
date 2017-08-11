@@ -150,7 +150,7 @@ public class TestSnapshots {
 				File extraSnapshot = new File(directory, nm);
 				copyFile(extraDump, extraSnapshot);
 			}
-			
+
 			if (snapshot.getName().endsWith(".phd")) {
 				Assume.assumeTrue(".phd files are not handled yet", false);
 			} else if (snapshot.getName().endsWith(".sdff")) {

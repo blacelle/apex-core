@@ -138,9 +138,9 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 	public String toString() {
 		StringBuffer s = new StringBuffer(256);
 		s.append(this.getClazz().getName());
-		s.append(" [");//$NON-NLS-1$
+		s.append(" [");
 		appendFields(s);
-		s.append("]");//$NON-NLS-1$
+		s.append("]");
 		return s.toString();
 	}
 
@@ -150,7 +150,7 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 	 * @return
 	 */
 	protected StringBuffer appendFields(StringBuffer buf) {
-		return buf.append("id=0x").append(Long.toHexString(getObjectAddress()));//$NON-NLS-1$
+		return buf.append("id=0x").append(Long.toHexString(getObjectAddress()));
 	}
 
 	public String getClassSpecificName() {
@@ -160,7 +160,7 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 	public String getTechnicalName() {
 		StringBuilder builder = new StringBuilder(256);
 		builder.append(getClazz().getName());
-		builder.append(" @ 0x");//$NON-NLS-1$
+		builder.append(" @ 0x");
 		builder.append(Long.toHexString(getObjectAddress()));
 		return builder.toString();
 	}
@@ -170,12 +170,12 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 		if (label == null)
 			return getTechnicalName();
 		else {
-			StringBuilder s = new StringBuilder(256).append(getTechnicalName()).append("  "); //$NON-NLS-1$
+			StringBuilder s = new StringBuilder(256).append(getTechnicalName()).append("  ");
 			if (label.length() <= 256) {
 				s.append(label);
 			} else {
 				s.append(label.substring(0, 256));
-				s.append("...");//$NON-NLS-1$
+				s.append("...");
 			}
 			return s.toString();
 		}

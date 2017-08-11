@@ -101,7 +101,7 @@ import org.eclipse.mat.util.SilentProgressListener;
 			// unreachable (keep objects) or store a histogram of unreachable
 			// objects
 			if (newNoOfObjects < oldNoOfObjects) {
-				Object un = idx.getSnapshotInfo().getProperty("keep_unreachable_objects"); //$NON-NLS-1$
+				Object un = idx.getSnapshotInfo().getProperty("keep_unreachable_objects");
 				if (un instanceof Integer) {
 					int newRoot;
 					newRoot = (Integer) un;

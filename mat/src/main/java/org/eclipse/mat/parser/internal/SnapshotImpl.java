@@ -82,7 +82,7 @@ public final class SnapshotImpl implements ISnapshot {
 	// factory methods
 	// //////////////////////////////////////////////////////////////
 
-	private static final String VERSION = "MAT_01";//$NON-NLS-1$
+	private static final String VERSION = "MAT_01";
 
 	@SuppressWarnings("unchecked")
 	public static SnapshotImpl readFromFile(File file, String prefix, IProgressListener listener)
@@ -92,7 +92,7 @@ public final class SnapshotImpl implements ISnapshot {
 		listener.beginTask(Messages.SnapshotImpl_ReopeningParsedHeapDumpFile, 9);
 
 		try {
-			File indexFile = new File(prefix + "index"); //$NON-NLS-1$
+			File indexFile = new File(prefix + "index");
 			fis = new FileInputStream(indexFile);
 			listener.worked(1);
 			ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(fis));
@@ -109,7 +109,7 @@ public final class SnapshotImpl implements ISnapshot {
 			IObjectReader heapObjectReader = parser.createObjectReader();
 
 			XSnapshotInfo snapshotInfo = (XSnapshotInfo) in.readObject();
-			snapshotInfo.setProperty("$heapFormat", parser.getId()); //$NON-NLS-1$
+			snapshotInfo.setProperty("$heapFormat", parser.getId());
 			HashMapIntObject<ClassImpl> classCache = (HashMapIntObject<ClassImpl>) in.readObject();
 
 			if (listener.isCanceled())
@@ -193,7 +193,7 @@ public final class SnapshotImpl implements ISnapshot {
 		ObjectOutputStream out = null;
 
 		try {
-			fos = new FileOutputStream(snapshotInfo.getPrefix() + "index");//$NON-NLS-1$
+			fos = new FileOutputStream(snapshotInfo.getPrefix() + "index");
 			out = new ObjectOutputStream(new BufferedOutputStream(fos));
 			out.writeUTF(VERSION);
 			out.writeUTF(objectReaderUniqueIdentifier);
@@ -314,7 +314,7 @@ public final class SnapshotImpl implements ISnapshot {
 				continue;
 
 			if (classLoaderId == systemClassLoaderId) {
-				label = "<system class loader>";//$NON-NLS-1$
+				label = "<system class loader>";
 			} else {
 				IObject classLoader = getObject(classLoaderId);
 				label = classLoader.getClassSpecificName();
@@ -336,7 +336,7 @@ public final class SnapshotImpl implements ISnapshot {
 						continue;
 
 					if (classLoaderId == systemClassLoaderId) {
-						label = "<system class loader>";//$NON-NLS-1$
+						label = "<system class loader>";
 					} else {
 						IObject classLoader = getObject(classLoaderId);
 						label = classLoader.getClassSpecificName();
@@ -1185,7 +1185,7 @@ public final class SnapshotImpl implements ISnapshot {
 			int dominatorId = dominatorIndex.get(objectId) - 2;
 			if (dominatorId == -1) {
 				clasz = null;
-				domClassName = "<ROOT>";//$NON-NLS-1$
+				domClassName = "<ROOT>";
 				domClassId = -1;
 			} else {
 				domClassId = o2classIndex.get(dominatorId);
@@ -1205,7 +1205,7 @@ public final class SnapshotImpl implements ISnapshot {
 						dominatorId = dominatorIndex.get(dominatorId) - 2;
 						if (dominatorId == -1) {
 							clasz = null;
-							domClassName = "<ROOT>";//$NON-NLS-1$
+							domClassName = "<ROOT>";
 							domClassId = -1;
 						} else {
 							domClassId = o2classIndex.get(dominatorId);
@@ -1356,9 +1356,8 @@ public final class SnapshotImpl implements ISnapshot {
 	public int mapAddressToId(long objectAddress) throws SnapshotException {
 		int objectId = indexManager.o2address().reverse(objectAddress);
 		if (objectId < 0)
-			throw new SnapshotException(
-					MessageUtil.format(Messages.SnapshotImpl_Error_ObjectNotFound, new Object[] { "0x" //$NON-NLS-1$
-							+ Long.toHexString(objectAddress) }));
+			throw new SnapshotException(MessageUtil.format(Messages.SnapshotImpl_Error_ObjectNotFound,
+					new Object[] { "0x" + Long.toHexString(objectAddress) }));
 		return objectId;
 	}
 

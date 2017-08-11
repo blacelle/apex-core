@@ -38,8 +38,8 @@ public class SetLongTest {
 				int v = r.nextInt(KEYS);
 				t += ss.add(v) ? 1 : 0;
 			}
-			assertTrue("At least one item should have been added", t > 0); //$NON-NLS-1$
-			assertEquals("Added items should equal size", t, ss.size()); //$NON-NLS-1$
+			assertTrue("At least one item should have been added", t > 0);
+			assertEquals("Added items should equal size", t, ss.size());
 		}
 	}
 
@@ -60,7 +60,7 @@ public class SetLongTest {
 			ss.add(r.nextInt(KEYS));
 		}
 		for (IteratorLong ii = ss.iterator(); ii.hasNext();) {
-			assertTrue("every key should be contained", ss.contains(ii.next())); //$NON-NLS-1$
+			assertTrue("every key should be contained", ss.contains(ii.next()));
 		}
 	}
 
@@ -84,7 +84,7 @@ public class SetLongTest {
 		for (int k = 0; k < KEYS; ++k) {
 			t += ss.contains(k) ? 1 : 0;
 		}
-		assertEquals("contained items should equals the size", ss.size(), t); //$NON-NLS-1$
+		assertEquals("contained items should equals the size", ss.size(), t);
 	}
 
 	/**
@@ -106,8 +106,8 @@ public class SetLongTest {
 		for (int k = 0; k < KEYS; ++k) {
 			boolean b1 = ss.contains(k);
 			boolean b2 = ss.remove(k);
-			assertEquals("remove should only succeed if key is contained", b1, b2); //$NON-NLS-1$
-			assertFalse("after a remove the key should not be contained", ss.contains(k)); //$NON-NLS-1$
+			assertEquals("remove should only succeed if key is contained", b1, b2);
+			assertFalse("after a remove the key should not be contained", ss.contains(k));
 		}
 	}
 
@@ -130,8 +130,8 @@ public class SetLongTest {
 		for (int k = 0; k < KEYS; ++k) {
 			boolean b1 = ss.contains(k);
 			boolean b2 = ss.add(k);
-			assertEquals("add should not succeed if the key is already there", b1, !b2); //$NON-NLS-1$
-			assertTrue("key should be contained after an add", ss.contains(k)); //$NON-NLS-1$
+			assertEquals("add should not succeed if the key is already there", b1, !b2);
+			assertTrue("key should be contained after an add", ss.contains(k));
 		}
 	}
 

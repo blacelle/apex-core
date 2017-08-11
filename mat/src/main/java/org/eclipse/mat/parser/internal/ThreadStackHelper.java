@@ -28,7 +28,7 @@ import org.eclipse.mat.snapshot.model.IThreadStack;
 /* package */class ThreadStackHelper {
 
 	/* package */static HashMapIntObject<IThreadStack> loadThreadsData(ISnapshot snapshot) throws SnapshotException {
-		String fileName = snapshot.getSnapshotInfo().getPrefix() + "threads"; //$NON-NLS-1$
+		String fileName = snapshot.getSnapshotInfo().getPrefix() + "threads";
 		File f = new File(fileName);
 		if (!f.exists())
 			return null;
@@ -37,30 +37,26 @@ import org.eclipse.mat.snapshot.model.IThreadStack;
 
 		BufferedReader in = null;
 		try {
-			in = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8")); //$NON-NLS-1$
+			in = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
 			String line = in.readLine();
 
 			while (line != null) {
 				line = line.trim();
-				if (line.startsWith("Thread")) //$NON-NLS-1$
-				{
+				if (line.startsWith("Thread")) {
 					long threadAddress = readThreadAddres(line);
 					List<String> lines = new ArrayList<String>();
 					HashMapIntObject<ArrayInt> line2locals = new HashMapIntObject<ArrayInt>();
 
 					line = in.readLine();
-					while (line != null && !line.equals("")) //$NON-NLS-1$
-					{
+					while (line != null && !line.equals("")) {
 						lines.add(line.trim());
 						line = in.readLine();
 					}
 
 					line = in.readLine();
-					if (line != null && line.trim().startsWith("locals")) //$NON-NLS-1$
-					{
+					if (line != null && line.trim().startsWith("locals")) {
 						line = in.readLine();
-						while (line != null && !line.equals("")) //$NON-NLS-1$
-						{
+						while (line != null && !line.equals("")) {
 							int lineNr = readLineNumber(line);
 							if (lineNr >= 0) {
 								int objectId = readLocalId(line, snapshot);
@@ -104,21 +100,21 @@ import org.eclipse.mat.snapshot.model.IThreadStack;
 	}
 
 	private static long readThreadAddres(String line) {
-		int start = line.indexOf("0x"); //$NON-NLS-1$
+		int start = line.indexOf("0x");
 		if (start < 0)
 			return -1;
 		return (new BigInteger(line.substring(start + 2), 16)).longValue();
 	}
 
 	private static int readLocalId(String line, ISnapshot snapshot) throws SnapshotException {
-		int start = line.indexOf("0x"); //$NON-NLS-1$
+		int start = line.indexOf("0x");
 		int end = line.indexOf(',', start);
 		long address = (new BigInteger(line.substring(start + 2, end), 16)).longValue();
 		return snapshot.mapAddressToId(address);
 	}
 
 	private static int readLineNumber(String line) {
-		int start = line.indexOf("line="); //$NON-NLS-1$
+		int start = line.indexOf("line=");
 		return Integer.valueOf(line.substring(start + 5));
 	}
 

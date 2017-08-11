@@ -43,7 +43,7 @@ public class HprofRandomAccessParser extends AbstractParser {
 			int identifierSize,
 			HprofPreferences.HprofStrictness strictnessPreference) throws IOException {
 		super(strictnessPreference);
-		this.in = new PositionInputStream(new BufferedRandomAccessInputStream(new RandomAccessFile(file, "r"), 512)); //$NON-NLS-1$
+		this.in = new PositionInputStream(new BufferedRandomAccessInputStream(new RandomAccessFile(file, "r"), 512));
 		this.version = version;
 		this.idSize = identifierSize;
 	}

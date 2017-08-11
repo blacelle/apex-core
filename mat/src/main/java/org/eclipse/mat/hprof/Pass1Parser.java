@@ -42,8 +42,8 @@ import org.eclipse.mat.util.MessageUtil;
 import org.eclipse.mat.util.SimpleMonitor;
 
 public class Pass1Parser extends AbstractParser {
-	private static final Pattern PATTERN_OBJ_ARRAY = Pattern.compile("^(\\[+)L(.*);$"); //$NON-NLS-1$
-	private static final Pattern PATTERN_PRIMITIVE_ARRAY = Pattern.compile("^(\\[+)(.)$"); //$NON-NLS-1$
+	private static final Pattern PATTERN_OBJ_ARRAY = Pattern.compile("^(\\[+)L(.*);$");
+	private static final Pattern PATTERN_PRIMITIVE_ARRAY = Pattern.compile("^(\\[+)(.)$");
 
 	private HashMapLongObject<String> class2name = new HashMapLongObject<String>();
 	private HashMapLongObject<Long> thread2id = new HashMapLongObject<Long>();
@@ -110,10 +110,10 @@ public class Pass1Parser extends AbstractParser {
 
 				long length = readUnsignedInt();
 				if (verbose)
-					System.out.println("Read record type " + record //$NON-NLS-1$
-							+ ", length " //$NON-NLS-1$
+					System.out.println("Read record type " + record
+							+ ", length "
 							+ length
-							+ " at position 0x" //$NON-NLS-1$
+							+ " at position 0x"
 							+ Long.toHexString(curPos));
 
 				length = updateLengthIfNecessary(fileSize, curPos, record, length, monitor);
@@ -261,7 +261,7 @@ public class Pass1Parser extends AbstractParser {
 		long id = readID();
 		byte[] chars = new byte[(int) (length - idSize)];
 		in.readFully(chars);
-		handler.getConstantPool().put(id, new String(chars, "UTF-8")); //$NON-NLS-1$
+		handler.getConstantPool().put(id, new String(chars, "UTF-8"));
 	}
 
 	private void readLoadClass() throws IOException {
@@ -317,8 +317,8 @@ public class Pass1Parser extends AbstractParser {
 
 			int segmentType = in.readUnsignedByte();
 			if (verbose)
-				System.out.println("    Read heap sub-record type " + segmentType //$NON-NLS-1$
-						+ " at position 0x" //$NON-NLS-1$
+				System.out.println("    Read heap sub-record type " + segmentType
+						+ " at position 0x"
 						+ Long.toHexString(segmentStartPos));
 			switch (segmentType) {
 			case Constants.DumpSegment.ROOT_UNKNOWN:
@@ -369,7 +369,7 @@ public class Pass1Parser extends AbstractParser {
 			segmentStartPos = in.position();
 		}
 		if (verbose)
-			System.out.println("    Finished heap sub-records."); //$NON-NLS-1$
+			System.out.println("    Finished heap sub-records.");
 		if (segmentStartPos != segmentsEndPos) {
 			switch (strictnessPreference) {
 			case STRICTNESS_STOP:
@@ -478,7 +478,7 @@ public class Pass1Parser extends AbstractParser {
 		// get name
 		String className = class2name.get(address);
 		if (className == null)
-			className = "unknown-name@0x" + Long.toHexString(address); //$NON-NLS-1$
+			className = "unknown-name@0x" + Long.toHexString(address);
 
 		if (className.charAt(0) == '[') // quick check if array at hand
 		{
@@ -488,14 +488,14 @@ public class Pass1Parser extends AbstractParser {
 				int l = matcher.group(1).length();
 				className = matcher.group(2);
 				for (int ii = 0; ii < l; ii++)
-					className += "[]"; //$NON-NLS-1$
+					className += "[]";
 			}
 
 			// primitive arrays
 			matcher = PATTERN_PRIMITIVE_ARRAY.matcher(className);
 			if (matcher.matches()) {
 				int count = matcher.group(1).length() - 1;
-				className = "unknown[]"; //$NON-NLS-1$
+				className = "unknown[]";
 
 				char signature = matcher.group(2).charAt(0);
 				for (int ii = 0; ii < IPrimitiveArray.SIGNATURES.length; ii++) {
@@ -506,7 +506,7 @@ public class Pass1Parser extends AbstractParser {
 				}
 
 				for (int ii = 0; ii < count; ii++)
-					className += "[]"; //$NON-NLS-1$
+					className += "[]";
 			}
 		}
 
@@ -542,7 +542,7 @@ public class Pass1Parser extends AbstractParser {
 							Long.toHexString(address),
 							Long.toHexString(previousArrayStart)),
 					null);
-			handler.addProperty(IHprofParserHandler.REFERENCE_SIZE, "4"); //$NON-NLS-1$
+			handler.addProperty(IHprofParserHandler.REFERENCE_SIZE, "4");
 			foundCompressed = true;
 		}
 
@@ -585,7 +585,7 @@ public class Pass1Parser extends AbstractParser {
 
 	private String getStringConstant(long address) {
 		if (address == 0L)
-			return ""; //$NON-NLS-1$
+			return "";
 
 		String result = handler.getConstantPool().get(address);
 		return result == null ? Messages.Pass1Parser_Error_UnresolvedName + Long.toHexString(address) : result;
@@ -598,9 +598,9 @@ public class Pass1Parser extends AbstractParser {
 			return;
 
 		PrintWriter out = null;
-		String outputName = handler.getSnapshotInfo().getPrefix() + "threads"; //$NON-NLS-1$
+		String outputName = handler.getSnapshotInfo().getPrefix() + "threads";
 		try {
-			out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(outputName), "UTF-8")); //$NON-NLS-1$
+			out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(outputName), "UTF-8"));
 
 			Iterator<StackTrace> it = serNum2stackTrace.values();
 			while (it.hasNext()) {
@@ -608,15 +608,15 @@ public class Pass1Parser extends AbstractParser {
 				Long tid = thread2id.get(stack.threadSerialNr);
 				if (tid == null)
 					continue;
-				String threadId = tid == null ? "<unknown>" : "0x" + Long.toHexString(tid); //$NON-NLS-1$ //$NON-NLS-2$
-				out.println("Thread " + threadId); //$NON-NLS-1$
+				String threadId = tid == null ? "<unknown>" : "0x" + Long.toHexString(tid);
+				out.println("Thread " + threadId);
 				out.println(stack);
-				out.println("  locals:"); //$NON-NLS-1$
+				out.println("  locals:");
 				List<JavaLocal> locals = thread2locals.get(stack.threadSerialNr);
 				if (locals != null) {
 					for (JavaLocal javaLocal : locals) {
-						out.println("    objectId=0x" + Long.toHexString(javaLocal.objectId) //$NON-NLS-1$
-								+ ", line=" //$NON-NLS-1$
+						out.println("    objectId=0x" + Long.toHexString(javaLocal.objectId)
+								+ ", line="
 								+ javaLocal.lineNumber);
 
 					}
@@ -676,23 +676,23 @@ public class Pass1Parser extends AbstractParser {
 			String className = null;
 			Long classId = classSerNum2id.get(classSerNum);
 			if (classId == null) {
-				className = "<UNKNOWN CLASS>"; //$NON-NLS-1$
+				className = "<UNKNOWN CLASS>";
 			} else {
 				className = class2name.get(classId);
 			}
 
-			String sourceLocation = ""; //$NON-NLS-1$
+			String sourceLocation = "";
 			if (lineNr > 0) {
-				sourceLocation = "(" + sourceFile + ":" + String.valueOf(lineNr) + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				sourceLocation = "(" + sourceFile + ":" + String.valueOf(lineNr) + ")";
 			} else if (lineNr == 0 || lineNr == -1) {
-				sourceLocation = "(Unknown Source)"; //$NON-NLS-1$
+				sourceLocation = "(Unknown Source)";
 			} else if (lineNr == -2) {
-				sourceLocation = "(Compiled method)"; //$NON-NLS-1$
+				sourceLocation = "(Compiled method)";
 			} else if (lineNr == -3) {
-				sourceLocation = "(Native Method)"; //$NON-NLS-1$
+				sourceLocation = "(Native Method)";
 			}
 
-			return "  at " + className + "." + method + methodSignature + " " + sourceLocation; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return "  at " + className + "." + method + methodSignature + " " + sourceLocation;
 		}
 
 	}
@@ -714,7 +714,7 @@ public class Pass1Parser extends AbstractParser {
 				StackFrame frame = id2frame.get(frameId);
 				if (frame != null) {
 					b.append(frame.toString());
-					b.append("\r\n"); //$NON-NLS-1$
+					b.append("\r\n");
 				}
 
 			}

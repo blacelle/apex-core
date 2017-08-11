@@ -63,7 +63,7 @@ public abstract class AbstractArrayImpl extends AbstractObjectImpl implements IA
 	}
 
 	protected StringBuffer appendFields(StringBuffer buf) {
-		return super.appendFields(buf).append(";length=").append(length);//$NON-NLS-1$
+		return super.appendFields(buf).append(";length=").append(length);
 	}
 
 	public String getTechnicalName() {
@@ -76,7 +76,7 @@ public abstract class AbstractArrayImpl extends AbstractObjectImpl implements IA
 		else
 			builder.append(name.subSequence(0, p + 1)).append(getLength()).append(name.substring(p + 1));
 
-		builder.append(" @ 0x");//$NON-NLS-1$
+		builder.append(" @ 0x");
 		builder.append(Long.toHexString(getObjectAddress()));
 		return builder.toString();
 	}

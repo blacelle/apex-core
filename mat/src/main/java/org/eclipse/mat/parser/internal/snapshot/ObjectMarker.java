@@ -234,7 +234,7 @@ public class ObjectMarker {
 				// Everyone else is waiting, so all must finish
 				notifyAll();
 				if (DEBUG && totalThreads == 0)
-					System.out.println("Total waits " + waits + " " + waitsduration + "ms"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+					System.out.println("Total waits " + waits + " " + waitsduration + "ms");
 			}
 		}
 
@@ -287,7 +287,7 @@ public class ObjectMarker {
 			long t2 = System.currentTimeMillis();
 			waitsduration += (t2 - t);
 			if (DEBUG && t2 - t > 10)
-				System.out.println("Slow wait " + (t2 - t) + "ms " + Thread.currentThread() + " " + size()); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+				System.out.println("Slow wait " + (t2 - t) + "ms " + Thread.currentThread() + " " + size());
 			if (waitingThreads >= totalThreads) {
 				// Everyone is waiting, so all must finish
 				waitingThreads--;
@@ -337,7 +337,7 @@ public class ObjectMarker {
 
 		long l = System.currentTimeMillis();
 		if (DEBUG)
-			System.out.println("Starting threads " + (new Date())); //$NON-NLS-1$
+			System.out.println("Starting threads " + (new Date()));
 		progressListener.beginTask(Messages.ObjectMarker_MarkingObjects, rootsStack.size());
 
 		// Heuristic guess as to a reasonable local range for thread to search
@@ -359,16 +359,16 @@ public class ObjectMarker {
 		// now impose some reasonable limits
 		int locality = Math.min(n, Math.max(MIN_LOCALITY, m));
 		if (DEBUG)
-			System.out.println("maxFree=" + maxFree //$NON-NLS-1$
-					+ " outbound mem=" //$NON-NLS-1$
+			System.out.println("maxFree=" + maxFree
+					+ " outbound mem="
 					+ outboundMem
-					+ " n=" //$NON-NLS-1$
+					+ " n="
 					+ n
-					+ " n1=" //$NON-NLS-1$
+					+ " n1="
 					+ n1
-					+ " m=" //$NON-NLS-1$
+					+ " m="
 					+ m
-					+ " locality=" //$NON-NLS-1$
+					+ " locality="
 					+ locality);
 
 		// create and start as much marker threads as specified
@@ -378,7 +378,7 @@ public class ObjectMarker {
 		for (int i = 0; i < numberOfThreads; i++) {
 			DfsThread dfsthread = USELOCAL ? new LocalDfsThread(rootsStack, locality) : new DfsThread(rootsStack);
 			dfsthreads[i] = dfsthread;
-			Thread thread = new Thread(dfsthread, "ObjectMarkerThread-" + (i + 1));//$NON-NLS-1$
+			Thread thread = new Thread(dfsthread, "ObjectMarkerThread-" + (i + 1));
 			thread.start();
 			threads[i] = thread;
 		}
@@ -393,7 +393,7 @@ public class ObjectMarker {
 
 		progressListener.done();
 		if (DEBUG)
-			System.out.println("Took " + (System.currentTimeMillis() - l) + "ms"); //$NON-NLS-1$//$NON-NLS-2$
+			System.out.println("Took " + (System.currentTimeMillis() - l) + "ms");
 	}
 
 	public class DfsThread implements Runnable {
@@ -646,7 +646,7 @@ public class ObjectMarker {
 		private void calcRange() {
 			if (sr == null) {
 				if (DEBUG)
-					System.out.println("Set local range=" + localRange); //$NON-NLS-1$
+					System.out.println("Set local range=" + localRange);
 				// set trigger
 				sr = new SoftReference<int[]>(new int[1024]);
 			} else if (sr.get() != null) {
@@ -654,7 +654,7 @@ public class ObjectMarker {
 					// Increase slowly
 					localRange = Math.min((int) (localRange * (1.0 + scaleUp)), bits.length);
 					if (DEBUG)
-						System.out.println("Increased local range=" + localRange + " " + scaleUp); //$NON-NLS-1$ //$NON-NLS-2$
+						System.out.println("Increased local range=" + localRange + " " + scaleUp);
 				}
 			} else if (localRange == localRangeLimit && scaleUp == 0.0) {
 				// Already at minimum
@@ -667,7 +667,7 @@ public class ObjectMarker {
 				if (scaleUp * localRange < 1.0)
 					scaleUp = 0.0;
 				if (DEBUG)
-					System.out.println("Decreased local range=" + localRange + " " + scaleUp); //$NON-NLS-1$ //$NON-NLS-2$
+					System.out.println("Decreased local range=" + localRange + " " + scaleUp);
 				// reset trigger
 				sr = new SoftReference<int[]>(new int[1024]);
 			}

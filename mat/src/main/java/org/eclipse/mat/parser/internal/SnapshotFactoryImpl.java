@@ -72,15 +72,15 @@ public class SnapshotFactoryImpl implements SnapshotFactory.Implementation {
 		String name = file.getName();
 
 		int p = name.lastIndexOf('.');
-		name = p >= 0 ? name.substring(0, p + 1) : name + ".";//$NON-NLS-1$
+		name = p >= 0 ? name.substring(0, p + 1) : name + ".";
 		String prefix = new File(file.getParentFile(), name).getAbsolutePath();
-		String snapshot_identifier = args.get("snapshot_identifier"); //$NON-NLS-1$
+		String snapshot_identifier = args.get("snapshot_identifier");
 		if (snapshot_identifier != null) {
-			prefix += snapshot_identifier + "."; //$NON-NLS-1$
+			prefix += snapshot_identifier + ".";
 		}
 
 		try {
-			File indexFile = new File(prefix + "index");//$NON-NLS-1$
+			File indexFile = new File(prefix + "index");
 			if (indexFile.exists()) {
 				// check if hprof file is newer than index file
 				if (file.lastModified() <= indexFile.lastModified()) {
@@ -166,15 +166,14 @@ public class SnapshotFactoryImpl implements SnapshotFactory.Implementation {
 				XSnapshotInfo snapshotInfo = new XSnapshotInfo();
 				snapshotInfo.setPath(file.getAbsolutePath());
 				snapshotInfo.setPrefix(prefix);
-				snapshotInfo.setProperty("$heapFormat", parser.getId());//$NON-NLS-1$
-				if (Boolean.parseBoolean(args.get("keep_unreachable_objects")))//$NON-NLS-1$
-				{
-					snapshotInfo.setProperty("keep_unreachable_objects", GCRootInfo.Type.UNREACHABLE);//$NON-NLS-1$
+				snapshotInfo.setProperty("$heapFormat", parser.getId());
+				if (Boolean.parseBoolean(args.get("keep_unreachable_objects"))) {
+					snapshotInfo.setProperty("keep_unreachable_objects", GCRootInfo.Type.UNREACHABLE);
 				}
 
-				String snapshot_identifier = args.get("snapshot_identifier"); //$NON-NLS-1$
+				String snapshot_identifier = args.get("snapshot_identifier");
 				if (snapshot_identifier != null) {
-					snapshotInfo.setProperty("$runtimeId", snapshot_identifier);//$NON-NLS-1$
+					snapshotInfo.setProperty("$runtimeId", snapshot_identifier);
 				}
 
 				PreliminaryIndexImpl idx = new PreliminaryIndexImpl(snapshotInfo);
@@ -478,7 +477,7 @@ public class SnapshotFactoryImpl implements SnapshotFactory.Implementation {
 	 * @return A string representing the address
 	 */
 	private static String format(long address) {
-		return "0x" + Long.toHexString(address); //$NON-NLS-1$
+		return "0x" + Long.toHexString(address);
 	}
 
 	/**
@@ -509,11 +508,11 @@ public class SnapshotFactoryImpl implements SnapshotFactory.Implementation {
 								MessageUtil.format(Messages.SnapshotFactoryImpl_ObjDescObjTypeAddress, format(clsAddr));
 					}
 				} else {
-					clsInfo = ""; //$NON-NLS-1$
+					clsInfo = "";
 				}
 			}
 		} else {
-			clsInfo = ""; //$NON-NLS-1$
+			clsInfo = "";
 		}
 		return clsInfo;
 	}
@@ -522,13 +521,13 @@ public class SnapshotFactoryImpl implements SnapshotFactory.Implementation {
 		File prefixFile = new File(prefix);
 		File directory = prefixFile.getParentFile();
 		if (directory == null)
-			directory = new File("."); //$NON-NLS-1$
+			directory = new File(".");
 
 		final String fragment = prefixFile.getName();
 
-		final Pattern indexPattern = Pattern.compile("([A-Za-z0-9]+\\.)?index$"); //$NON-NLS-1$
-		final Pattern threadPattern = Pattern.compile("threads$"); //$NON-NLS-1$
-		final Pattern logPattern = Pattern.compile("inbound\\.index.*\\.log$"); //$NON-NLS-1$
+		final Pattern indexPattern = Pattern.compile("([A-Za-z0-9]+\\.)?index$");
+		final Pattern threadPattern = Pattern.compile("threads$");
+		final Pattern logPattern = Pattern.compile("inbound\\.index.*\\.log$");
 
 		File[] files = directory.listFiles(new FileFilter() {
 			public boolean accept(File f) {

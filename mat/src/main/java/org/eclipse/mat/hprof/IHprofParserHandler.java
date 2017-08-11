@@ -25,10 +25,10 @@ import org.eclipse.mat.snapshot.model.IClass;
 import org.eclipse.mat.util.IProgressListener;
 
 public interface IHprofParserHandler {
-	String IDENTIFIER_SIZE = "ID_SIZE"; //$NON-NLS-1$
-	String CREATION_DATE = "CREATION_DATE"; //$NON-NLS-1$
-	String VERSION = "VERSION";//$NON-NLS-1$
-	String REFERENCE_SIZE = "REF_SIZE"; //$NON-NLS-1$
+	String IDENTIFIER_SIZE = "ID_SIZE";
+	String CREATION_DATE = "CREATION_DATE";
+	String VERSION = "VERSION";
+	String REFERENCE_SIZE = "REF_SIZE";
 
 	public class HeapObject {
 		public int objectId;

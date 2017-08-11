@@ -109,7 +109,7 @@ public class HprofIndexBuilder implements IIndexBuilder {
 		// object 2 hprof position
 		// //////////////////////////////////////////////////////////////
 
-		File indexFile = new File(prefix + "o2hprof.index"); //$NON-NLS-1$
+		File indexFile = new File(prefix + "o2hprof.index");
 		listener.subTask(
 				MessageUtil.format(Messages.HprofIndexBuilder_Writing, new Object[] { indexFile.getAbsolutePath() }));
 		IOne2LongIndex newIndex =

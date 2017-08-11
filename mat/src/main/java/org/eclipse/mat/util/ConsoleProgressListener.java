@@ -36,8 +36,8 @@ public class ConsoleProgressListener implements IProgressListener {
 	}
 
 	public void beginTask(String name, int totalWork) {
-		out.write(Messages.ConsoleProgressListener_Label_Task + " " + name + "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		out.write("["); //$NON-NLS-1$
+		out.write(Messages.ConsoleProgressListener_Label_Task + " " + name + "\n");
+		out.write("[");
 		if (totalWork > 80) {
 			workPerDot = totalWork / 80;
 		} else {
@@ -50,7 +50,7 @@ public class ConsoleProgressListener implements IProgressListener {
 
 	public void done() {
 		if (!isDone) {
-			out.write("]\n"); //$NON-NLS-1$
+			out.write("]\n");
 			out.flush();
 			isDone = true;
 		}
@@ -66,9 +66,9 @@ public class ConsoleProgressListener implements IProgressListener {
 	}
 
 	public void subTask(String name) {
-		out.write("\n" + Messages.ConsoleProgressListener_Label_Subtask + " " + name + "\n["); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		out.write("\n" + Messages.ConsoleProgressListener_Label_Subtask + " " + name + "\n[");
 		for (int ii = 0; ii < dotsPrinted; ii++)
-			out.write("."); //$NON-NLS-1$
+			out.write(".");
 		out.flush();
 	}
 
@@ -79,7 +79,7 @@ public class ConsoleProgressListener implements IProgressListener {
 		if (dotsToPrint > 0) {
 			dotsPrinted += dotsToPrint;
 			for (int ii = 0; ii < dotsToPrint; ii++) {
-				out.write("."); //$NON-NLS-1$
+				out.write(".");
 			}
 			workAccumulated -= (dotsToPrint * workPerDot);
 			out.flush();
@@ -87,32 +87,32 @@ public class ConsoleProgressListener implements IProgressListener {
 	}
 
 	public void sendUserMessage(Severity severity, String message, Throwable exception) {
-		out.write("\n"); //$NON-NLS-1$
+		out.write("\n");
 
 		switch (severity) {
 		case INFO:
-			out.write("[INFO] "); //$NON-NLS-1$
+			out.write("[INFO] ");
 			break;
 		case WARNING:
-			out.write("[WARNING] "); //$NON-NLS-1$
+			out.write("[WARNING] ");
 			break;
 		case ERROR:
-			out.write("[ERROR] "); //$NON-NLS-1$
+			out.write("[ERROR] ");
 			break;
 		default:
-			out.write("[UNKNOWN] "); //$NON-NLS-1$
+			out.write("[UNKNOWN] ");
 		}
 
 		out.write(message);
 
 		if (exception != null) {
-			out.write("\n"); //$NON-NLS-1$
+			out.write("\n");
 			exception.printStackTrace(out);
 		}
 
-		out.write("\n["); //$NON-NLS-1$
+		out.write("\n[");
 		for (int ii = 0; ii < dotsPrinted; ii++) {
-			out.write("."); //$NON-NLS-1$
+			out.write(".");
 		}
 	}
 

@@ -29,9 +29,7 @@ import org.eclipse.mat.util.SimpleMonitor.Listener;
 
 /* package */abstract class AbstractParser {
 	/* package */enum Version {
-		JDK12BETA3("JAVA PROFILE 1.0"), //$NON-NLS-1$
-		JDK12BETA4("JAVA PROFILE 1.0.1"), //$NON-NLS-1$
-		JDK6("JAVA PROFILE 1.0.2");//$NON-NLS-1$
+		JDK12BETA3("JAVA PROFILE 1.0"), JDK12BETA4("JAVA PROFILE 1.0.1"), JDK6("JAVA PROFILE 1.0.2");
 
 		private String label;
 
@@ -191,12 +189,12 @@ import org.eclipse.mat.util.SimpleMonitor.Listener;
 	 * The returned value is an 0 offset number or 1 offset id, e.g. #1
 	 */
 	protected String determineDumpNumber() {
-		String dumpNr = System.getProperty("MAT_HPROF_DUMP_NR"); //$NON-NLS-1$
+		String dumpNr = System.getProperty("MAT_HPROF_DUMP_NR");
 		return dumpNr;
 	}
 
 	protected String dumpIdentifier(int n) {
-		return "#" + (n + 1); //$NON-NLS-1$
+		return "#" + (n + 1);
 	}
 
 	protected boolean dumpMatches(int n, String match) {

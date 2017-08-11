@@ -66,6 +66,6 @@ public class ObjectReference implements Serializable {
 	 * @return the object address as a hexadecimal number.
 	 */
 	public String toString() {
-		return "0x" + Long.toHexString(address); //$NON-NLS-1$
+		return "0x" + Long.toHexString(address);
 	}
 }

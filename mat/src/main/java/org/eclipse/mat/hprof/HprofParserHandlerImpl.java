@@ -89,8 +89,9 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 		// add dummy address for system class loader object
 		identifiers.add(0);
 
+		// RoaringBitmap is already sorted
 		// sort and assign preliminary object ids
-		identifiers.sort();
+		//		identifiers.sort();
 
 		// See what the actual object alignment is
 		calculateAlignment();
@@ -98,7 +99,7 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 		// Set property to show if compressed oops are used on x64 bit dumps
 		if (pointerSize == 8) // if x64 bit dump
 		{
-			info.setProperty("$useCompressedOops", refSize == 4); //$NON-NLS-1$
+			info.setProperty("$useCompressedOops", refSize == 4);
 		}
 
 		// if necessary, create required classes not contained in the heap
@@ -129,7 +130,7 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 
 		// create index writers
 		outbound = new IndexWriter.IntArray1NWriter(this.identifiers.size(),
-				Index.OUTBOUND.getFile(info.getPrefix() + "temp."));//$NON-NLS-1$
+				Index.OUTBOUND.getFile(info.getPrefix() + "temp."));
 		object2classId =
 				new IndexWriter.IntIndexCollector(this.identifiers.size(), IndexWriter.mostSignificantBit(maxClassId));
 		object2position = new IndexWriter.LongIndexCollector(this.identifiers.size(),
@@ -230,7 +231,7 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 		// For generating the fake class names
 		int clsid = 0;
 		// java.lang.Object for the superclass
-		List<ClassImpl> jlos = classesByName.get("java.lang.Object"); //$NON-NLS-1$
+		List<ClassImpl> jlos = classesByName.get("java.lang.Object");
 		long jlo = jlos.isEmpty() ? 0 : jlos.get(0).getObjectAddress();
 
 		// create required (fake) classes for arrays
@@ -246,7 +247,7 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 					}
 
 					arrayType = new ClassImpl(arrayClassID,
-							"unknown-class-" + clsid + "[]", //$NON-NLS-1$
+							"unknown-class-" + clsid + "[]",
 							jlo,
 							0,
 							new Field[0],
@@ -305,7 +306,7 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 						fds[i] = new FieldDescriptor("unknown-field-" + i, IObject.Type.BYTE);
 						++i;
 					}
-					type = new ClassImpl(classID, "unknown-class-" + clsid, jlo, 0, new Field[0], fds); //$NON-NLS-1$
+					type = new ClassImpl(classID, "unknown-class-" + clsid, jlo, 0, new Field[0], fds);
 					++clsid;
 					addClass((ClassImpl) type, -1);
 				}
@@ -313,7 +314,8 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 		}
 		requiredClassIDs = null;
 
-		identifiers.sort();
+		// RoaringBitmap is already sorted
+		//		identifiers.sort();
 	}
 
 	private int calculateInstanceSize(ClassImpl clazz) {
@@ -406,13 +408,13 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 
 		index.setIdentifiers(identifiers);
 
-		index.setArray2size(array2size.writeTo(Index.A2SIZE.getFile(info.getPrefix() + "temp."))); //$NON-NLS-1$
+		index.setArray2size(array2size.writeTo(Index.A2SIZE.getFile(info.getPrefix() + "temp.")));
 
 		index.setObject2classId(object2classId);
 
 		index.setOutbound(outbound.flush());
 
-		return object2position.writeTo(new File(info.getPrefix() + "temp.o2hprof.index")); //$NON-NLS-1$
+		return object2position.writeTo(new File(info.getPrefix() + "temp.o2hprof.index"));
 	}
 
 	private HashMapIntObject<List<XGCRootInfo>> map2ids(HashMapLongObject<List<XGCRootInfo>> source) {

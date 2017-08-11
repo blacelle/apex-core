@@ -101,7 +101,7 @@ public final class DominatorsSummary {
 					clr.setId(record.getClassloaderId());
 
 					if (clr.getId() == -1) {
-						clr.name = "<ROOT>"; //$NON-NLS-1$
+						clr.name = "<ROOT>";
 					} else {
 						IObject object = snapshot.getObject(clr.id);
 						clr.name = object.getClassSpecificName();

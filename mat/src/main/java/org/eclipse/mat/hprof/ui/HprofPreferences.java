@@ -15,7 +15,7 @@ package org.eclipse.mat.hprof.ui;
  */
 public class HprofPreferences {
 	/** Strictness of the HPROF parser */
-	public static final String STRICTNESS_PREF = "hprofStrictness"; //$NON-NLS-1$
+	public static final String STRICTNESS_PREF = "hprofStrictness";
 
 	/** Default strictness for preferences and value parsing */
 	public static final HprofStrictness DEFAULT_STRICTNESS = HprofStrictness.STRICTNESS_STOP;
@@ -51,17 +51,17 @@ public class HprofPreferences {
 		/**
 		 * Throw an error and stop processing the dump.
 		 */
-		STRICTNESS_STOP("hprofStrictnessStop"), //$NON-NLS-1$
+		STRICTNESS_STOP("hprofStrictnessStop"),
 
 		/**
 		 * Raise a warning and continue.
 		 */
-		STRICTNESS_WARNING("hprofStrictnessWarning"), //$NON-NLS-1$
+		STRICTNESS_WARNING("hprofStrictnessWarning"),
 
 		/**
 		 * Raise a warning and try to "fix" the dump.
 		 */
-		STRICTNESS_PERMISSIVE("hprofStrictnessPermissive"); //$NON-NLS-1$
+		STRICTNESS_PERMISSIVE("hprofStrictnessPermissive");
 
 		private final String name;
 

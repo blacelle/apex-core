@@ -92,7 +92,7 @@ public abstract class IndexReader {
 		}
 
 		public IntIndexReader(File indexFile) throws IOException {
-			this(new SimpleBufferedRandomAccessInputStream(new RandomAccessFile(indexFile, "r")), //$NON-NLS-1$
+			this(new SimpleBufferedRandomAccessInputStream(new RandomAccessFile(indexFile, "r")),
 					0,
 					indexFile.length());
 			this.indexFile = indexFile;
@@ -133,7 +133,7 @@ public abstract class IndexReader {
 				if (indexFile == null)
 					throw new IOException(Messages.IndexReader_Error_IndexIsEmbedded);
 
-				in = new SimpleBufferedRandomAccessInputStream(new RandomAccessFile(this.indexFile, "r"));//$NON-NLS-1$
+				in = new SimpleBufferedRandomAccessInputStream(new RandomAccessFile(this.indexFile, "r"));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -379,7 +379,7 @@ public abstract class IndexReader {
 			try {
 				if (in == null) {
 
-					in = new SimpleBufferedRandomAccessInputStream(new RandomAccessFile(this.indexFile, "r"));//$NON-NLS-1$
+					in = new SimpleBufferedRandomAccessInputStream(new RandomAccessFile(this.indexFile, "r"));
 
 					if (this.header != null)
 						this.header.in = in;
@@ -551,7 +551,7 @@ public abstract class IndexReader {
 		}
 
 		public LongIndexReader(File indexFile) throws IOException {
-			this(new SimpleBufferedRandomAccessInputStream(new RandomAccessFile(indexFile, "r")), //$NON-NLS-1$
+			this(new SimpleBufferedRandomAccessInputStream(new RandomAccessFile(indexFile, "r")),
 					0,
 					indexFile.length());
 			this.indexFile = indexFile;
@@ -584,7 +584,7 @@ public abstract class IndexReader {
 			if (indexFile == null)
 				throw new IOException(Messages.IndexReader_Error_IndexIsEmbedded);
 
-			in = new SimpleBufferedRandomAccessInputStream(new RandomAccessFile(this.indexFile, "r"));//$NON-NLS-1$
+			in = new SimpleBufferedRandomAccessInputStream(new RandomAccessFile(this.indexFile, "r"));
 		}
 
 		public synchronized void close() {
@@ -680,7 +680,7 @@ public abstract class IndexReader {
 			try {
 				if (in == null) {
 
-					in = new SimpleBufferedRandomAccessInputStream(new RandomAccessFile(this.indexFile, "r"));//$NON-NLS-1$
+					in = new SimpleBufferedRandomAccessInputStream(new RandomAccessFile(this.indexFile, "r"));
 
 					if (this.header != null)
 						this.header.in = in;

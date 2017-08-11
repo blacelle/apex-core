@@ -12,7 +12,7 @@
 package org.eclipse.mat.internal;
 
 public class Messages {
-	private static final String BUNDLE_NAME = "org.eclipse.mat.internal.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.mat.internal.messages";
 
 	public static final String ArgumentParser_ErrorMsg_ParsingError = "Error parsing ''{0}'': {1}";
 	public static final String ArgumentParser_ErrorMsg_Unparsed = "Remaining unparsed line: {0}";

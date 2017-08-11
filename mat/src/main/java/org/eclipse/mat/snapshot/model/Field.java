@@ -84,6 +84,6 @@ public final class Field extends FieldDescriptor implements Serializable {
 	 * @return a description of this field.
 	 */
 	public String toString() {
-		return type + " " + name + ": \t" + value; //$NON-NLS-1$//$NON-NLS-2$
+		return type + " " + name + ": \t" + value;
 	}
 }
