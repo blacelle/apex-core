@@ -17,126 +17,111 @@ import java.io.OutputStream;
 
 import org.eclipse.mat.parser.internal.Messages;
 
-public class BitOutputStream implements Flushable, Closeable
-{
+public class BitOutputStream implements Flushable, Closeable {
 
-    public final static int DEFAULT_BUFFER_SIZE = 16 * 1024;
+	public final static int DEFAULT_BUFFER_SIZE = 16 * 1024;
 
-    private OutputStream os;
-    private int current;
-    private byte[] buffer;
-    private int free;
-    private int pos;
-    private int avail;
+	private OutputStream os;
+	private int current;
+	private byte[] buffer;
+	private int free;
+	private int pos;
+	private int avail;
 
-    final static int TEMP_BUFFER_SIZE = 128;
-    private byte[] tempBuffer = new byte[TEMP_BUFFER_SIZE];
+	final static int TEMP_BUFFER_SIZE = 128;
+	private byte[] tempBuffer = new byte[TEMP_BUFFER_SIZE];
 
-    public BitOutputStream(final OutputStream os)
-    {
-        this.os = os;
-        this.buffer = new byte[DEFAULT_BUFFER_SIZE];
-        avail = DEFAULT_BUFFER_SIZE;
-        free = 8;
-    }
+	public BitOutputStream(final OutputStream os) {
+		this.os = os;
+		this.buffer = new byte[DEFAULT_BUFFER_SIZE];
+		avail = DEFAULT_BUFFER_SIZE;
+		free = 8;
+	}
 
-    public void flush() throws IOException
-    {
-        align();
+	public void flush() throws IOException {
+		align();
 
-        os.write(buffer, 0, pos);
-        pos = 0;
-        avail = buffer.length;
+		os.write(buffer, 0, pos);
+		pos = 0;
+		avail = buffer.length;
 
-        os.flush();
-    }
+		os.flush();
+	}
 
-    public void close() throws IOException
-    {
-        flush();
-        os.close();
-        os = null;
-        buffer = null;
-        tempBuffer = null;
-    }
+	public void close() throws IOException {
+		flush();
+		os.close();
+		os = null;
+		buffer = null;
+		tempBuffer = null;
+	}
 
-    private void write(final int b) throws IOException
-    {
-        if (avail-- == 0)
-        {
-            if (os == null)
-            {
-                avail = 0;
-                throw new IOException(Messages.BitOutputStream_Error_ArrayFull);
-            }
+	private void write(final int b) throws IOException {
+		if (avail-- == 0) {
+			if (os == null) {
+				avail = 0;
+				throw new IOException(Messages.BitOutputStream_Error_ArrayFull);
+			}
 
-            if (buffer == null)
-            {
-                os.write(b);
-                avail = 0;
-                return;
-            }
-            os.write(buffer);
-            avail = buffer.length - 1;
-            pos = 0;
-        }
+			if (buffer == null) {
+				os.write(b);
+				avail = 0;
+				return;
+			}
+			os.write(buffer);
+			avail = buffer.length - 1;
+			pos = 0;
+		}
 
-        buffer[pos++] = (byte) b;
-    }
+		buffer[pos++] = (byte) b;
+	}
 
-    private int writeInCurrent(final int b, final int len) throws IOException
-    {
-        current |= (b & ((1 << len) - 1)) << (free -= len);
-        if (free == 0)
-        {
-            write(current);
-            free = 8;
-            current = 0;
-        }
+	private int writeInCurrent(final int b, final int len) throws IOException {
+		current |= (b & ((1 << len) - 1)) << (free -= len);
+		if (free == 0) {
+			write(current);
+			free = 8;
+			current = 0;
+		}
 
-        return len;
-    }
+		return len;
+	}
 
-    private int align() throws IOException
-    {
-        if (free != 8)
-            return writeInCurrent(0, free);
-        else
-            return 0;
-    }
+	private int align() throws IOException {
+		if (free != 8)
+			return writeInCurrent(0, free);
+		else
+			return 0;
+	}
 
-    public int writeBit(final int bit) throws IOException
-    {
-        return writeInCurrent(bit, 1);
-    }
+	public int writeBit(final int bit) throws IOException {
+		return writeInCurrent(bit, 1);
+	}
 
-    public int writeInt(int x, final int len) throws IOException
-    {
-        if (len <= free)
-            return writeInCurrent(x, len);
+	public int writeInt(int x, final int len) throws IOException {
+		if (len <= free)
+			return writeInCurrent(x, len);
 
-        final int queue = (len - free) & 7, blocks = (len - free) >> 3;
-        int i = blocks;
+		final int queue = (len - free) & 7, blocks = (len - free) >> 3;
+		int i = blocks;
 
-        if (queue != 0)
-        {
-            tempBuffer[blocks] = (byte) x;
-            x >>= queue;
-        }
+		if (queue != 0) {
+			tempBuffer[blocks] = (byte) x;
+			x >>= queue;
+		}
 
-        while (i-- != 0)
-        {
-            tempBuffer[i] = (byte) x;
-            x >>>= 8;
-        }
+		while (i-- != 0) {
+			tempBuffer[i] = (byte) x;
+			x >>>= 8;
+		}
 
-        writeInCurrent(x, free);
-        for (i = 0; i < blocks; i++)
-            write(tempBuffer[i]);
+		writeInCurrent(x, free);
+		for (i = 0; i < blocks; i++)
+			write(tempBuffer[i]);
 
-        if (queue != 0)
-            writeInCurrent(tempBuffer[blocks], queue);
-        return len;
-    }
+		if (queue != 0)
+			writeInCurrent(tempBuffer[blocks], queue);
+		return len;
+	}
 
 }

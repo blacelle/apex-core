@@ -15,11 +15,10 @@ package org.eclipse.mat.snapshot.model;
  * 
  * @noimplement
  */
-public interface IArray extends IObject
-{
-    /**
-     * Returns the length of the array in elements.
-     */
-    public int getLength();
+public interface IArray extends IObject {
+	/**
+	 * Returns the length of the array in elements.
+	 */
+	public int getLength();
 
 }

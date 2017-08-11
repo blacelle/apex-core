@@ -17,48 +17,45 @@ import java.util.HashMap;
  * 
  * @noinstantiate
  */
-public final class PathsFromGCRootsTree
-{
-    private int ownId;
-    private int[] objectIds;
-    private HashMap<Integer, PathsFromGCRootsTree> objectInboundReferers;
+public final class PathsFromGCRootsTree {
+	private int ownId;
+	private int[] objectIds;
+	private HashMap<Integer, PathsFromGCRootsTree> objectInboundReferers;
 
-    public PathsFromGCRootsTree(int ownId, HashMap<Integer, PathsFromGCRootsTree> objectInboundReferers, int[] objectIds)
-    {
-        this.ownId = ownId;
-        this.objectInboundReferers = objectInboundReferers;
-        this.objectIds = objectIds;
-    }
+	public PathsFromGCRootsTree(int ownId,
+			HashMap<Integer, PathsFromGCRootsTree> objectInboundReferers,
+			int[] objectIds) {
+		this.ownId = ownId;
+		this.objectInboundReferers = objectInboundReferers;
+		this.objectIds = objectIds;
+	}
 
-    /**
-     * Get object being the root for this tree.
-     * 
-     * @return object being the root for this tree
-     */
-    public int getOwnId()
-    {
-        return ownId;
-    }
+	/**
+	 * Get object being the root for this tree.
+	 * 
+	 * @return object being the root for this tree
+	 */
+	public int getOwnId() {
+		return ownId;
+	}
 
-    /**
-     * Get referencing objects.
-     * 
-     * @return referencing objects
-     */
-    public int[] getObjectIds()
-    {
-        return objectIds;
-    }
+	/**
+	 * Get referencing objects.
+	 * 
+	 * @return referencing objects
+	 */
+	public int[] getObjectIds() {
+		return objectIds;
+	}
 
-    /**
-     * Get sub tree for a referencing object.
-     * 
-     * @param objId
-     *            referencing object from which on the sub tree is requested
-     * @return sub tree for a referencing object
-     */
-    public PathsFromGCRootsTree getBranch(int objId)
-    {
-        return objectInboundReferers.get(objId);
-    }
+	/**
+	 * Get sub tree for a referencing object.
+	 * 
+	 * @param objId
+	 *            referencing object from which on the sub tree is requested
+	 * @return sub tree for a referencing object
+	 */
+	public PathsFromGCRootsTree getBranch(int objId) {
+		return objectInboundReferers.get(objId);
+	}
 }

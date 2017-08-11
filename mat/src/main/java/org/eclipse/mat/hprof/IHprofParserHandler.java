@@ -24,86 +24,83 @@ import org.eclipse.mat.parser.model.XSnapshotInfo;
 import org.eclipse.mat.snapshot.model.IClass;
 import org.eclipse.mat.util.IProgressListener;
 
-public interface IHprofParserHandler
-{
-    String IDENTIFIER_SIZE = "ID_SIZE"; //$NON-NLS-1$
-    String CREATION_DATE = "CREATION_DATE"; //$NON-NLS-1$
-    String VERSION = "VERSION";//$NON-NLS-1$
-    String REFERENCE_SIZE = "REF_SIZE"; //$NON-NLS-1$
+public interface IHprofParserHandler {
+	String IDENTIFIER_SIZE = "ID_SIZE"; //$NON-NLS-1$
+	String CREATION_DATE = "CREATION_DATE"; //$NON-NLS-1$
+	String VERSION = "VERSION";//$NON-NLS-1$
+	String REFERENCE_SIZE = "REF_SIZE"; //$NON-NLS-1$
 
-    public class HeapObject
-    {
-        public int objectId;
-        public long objectAddress;
-        public ClassImpl clazz;
-        public long usedHeapSize;
-        public ArrayLong references = new ArrayLong();
-        public boolean isArray = false;
+	public class HeapObject {
+		public int objectId;
+		public long objectAddress;
+		public ClassImpl clazz;
+		public long usedHeapSize;
+		public ArrayLong references = new ArrayLong();
+		public boolean isArray = false;
 
-        public HeapObject(int objectId, long objectAddress, ClassImpl clazz, long usedHeapSize)
-        {
-            super();
-            this.objectId = objectId;
-            this.objectAddress = objectAddress;
-            this.clazz = clazz;
-            this.usedHeapSize = usedHeapSize;
-            this.isArray = false;
-        }
-    }
+		public HeapObject(int objectId, long objectAddress, ClassImpl clazz, long usedHeapSize) {
+			super();
+			this.objectId = objectId;
+			this.objectAddress = objectAddress;
+			this.clazz = clazz;
+			this.usedHeapSize = usedHeapSize;
+			this.isArray = false;
+		}
+	}
 
-    // //////////////////////////////////////////////////////////////
-    // lifecycle
-    // //////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////
+	// lifecycle
+	// //////////////////////////////////////////////////////////////
 
-    void beforePass1(XSnapshotInfo snapshotInfo) throws IOException;
+	void beforePass1(XSnapshotInfo snapshotInfo) throws IOException;
 
-    void beforePass2(IProgressListener monitor) throws IOException, SnapshotException;
+	void beforePass2(IProgressListener monitor) throws IOException, SnapshotException;
 
-    IOne2LongIndex fillIn(IPreliminaryIndex index) throws IOException;
+	IOne2LongIndex fillIn(IPreliminaryIndex index) throws IOException;
 
-    void cancel();
+	void cancel();
 
-    // //////////////////////////////////////////////////////////////
-    // report parsed entities
-    // //////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////
+	// report parsed entities
+	// //////////////////////////////////////////////////////////////
 
-    void addProperty(String name, String value) throws IOException;
+	void addProperty(String name, String value) throws IOException;
 
-    void addGCRoot(long id, long referrer, int rootType) throws IOException;
+	void addGCRoot(long id, long referrer, int rootType) throws IOException;
 
-    void addClass(ClassImpl clazz, long filePosition) throws IOException;
+	void addClass(ClassImpl clazz, long filePosition) throws IOException;
 
-    void addObject(HeapObject object, long filePosition) throws IOException;
+	void addObject(HeapObject object, long filePosition) throws IOException;
 
-    void reportInstance(long id, long filePosition);
+	void reportInstance(long id, long filePosition);
 
-    void reportRequiredObjectArray(long arrayClassID);
+	void reportRequiredObjectArray(long arrayClassID);
 
-    void reportRequiredPrimitiveArray(int arrayType);
-    
-    void reportRequiredClass(long classID, int size);
+	void reportRequiredPrimitiveArray(int arrayType);
 
-    // //////////////////////////////////////////////////////////////
-    // lookup heap infos
-    // //////////////////////////////////////////////////////////////
+	void reportRequiredClass(long classID, int size);
 
-    int getIdentifierSize();
+	// //////////////////////////////////////////////////////////////
+	// lookup heap infos
+	// //////////////////////////////////////////////////////////////
 
-    HashMapLongObject<String> getConstantPool();
+	int getIdentifierSize();
 
-    IClass lookupClass(long classId);
+	HashMapLongObject<String> getConstantPool();
 
-    IClass lookupClassByName(String name, boolean failOnMultipleInstances);
+	IClass lookupClass(long classId);
 
-    IClass lookupClassByIndex(int objIndex);
+	IClass lookupClassByName(String name, boolean failOnMultipleInstances);
 
-    List<IClass> resolveClassHierarchy(long classId);
+	IClass lookupClassByIndex(int objIndex);
 
-    int mapAddressToId(long address);
+	List<IClass> resolveClassHierarchy(long classId);
 
-    XSnapshotInfo getSnapshotInfo();
+	int mapAddressToId(long address);
 
-    long getObjectArrayHeapSize(ClassImpl arrayType, int size);
+	XSnapshotInfo getSnapshotInfo();
 
-    long getPrimitiveArrayHeapSize(byte elementType, int size);
+	long getObjectArrayHeapSize(ClassImpl arrayType, int size);
+
+	long getPrimitiveArrayHeapSize(byte elementType, int size);
 }

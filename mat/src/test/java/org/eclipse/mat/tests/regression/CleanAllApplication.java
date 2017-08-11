@@ -12,36 +12,28 @@ package org.eclipse.mat.tests.regression;
 
 import java.io.File;
 
-public class CleanAllApplication
-{
-    private File dumpDir;
+public class CleanAllApplication {
+	private File dumpDir;
 
-    public CleanAllApplication(File dumpDir)
-    {
-        this.dumpDir = dumpDir;
-    }
+	public CleanAllApplication(File dumpDir) {
+		this.dumpDir = dumpDir;
+	}
 
-    public void run() throws Exception
-    {
-        remove(dumpDir);
-    }
+	public void run() throws Exception {
+		remove(dumpDir);
+	}
 
-    private void remove(File dir)
-    {
-        File[] filesToRemove = dir.listFiles(RegTestUtils.cleanupFilter);
-        for (File file : filesToRemove)
-        {
-            if (file.isDirectory())
-            {
-                remove(file);
-                if (file.listFiles().length == 0)
-                    RegTestUtils.removeFile(file);
-            }
-            else
-            {
-                RegTestUtils.removeFile(file);
-            }
-        }
-    }
+	private void remove(File dir) {
+		File[] filesToRemove = dir.listFiles(RegTestUtils.cleanupFilter);
+		for (File file : filesToRemove) {
+			if (file.isDirectory()) {
+				remove(file);
+				if (file.listFiles().length == 0)
+					RegTestUtils.removeFile(file);
+			} else {
+				RegTestUtils.removeFile(file);
+			}
+		}
+	}
 
 }

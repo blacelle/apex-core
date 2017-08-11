@@ -24,8 +24,7 @@ import org.eclipse.mat.snapshot.SnapshotInfo;
  * 
  * See the documentation on the org.eclipse.mat.hprof.enhancer extension point
  */
-public interface IParsingEnhancer
-{
+public interface IParsingEnhancer {
 
 	/**
 	 * The method within the process of initially parsing a heap dump, just

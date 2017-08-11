@@ -13,122 +13,105 @@ package org.eclipse.mat.util;
 /**
  * A way of generating several progress monitors.
  */
-public class SimpleMonitor
-{
-    String task;
-    IProgressListener delegate;
-    int currentMonitor;
-    int[] percentages;
+public class SimpleMonitor {
+	String task;
+	IProgressListener delegate;
+	int currentMonitor;
+	int[] percentages;
 
-    public SimpleMonitor(String task, IProgressListener monitor, int[] percentages)
-    {
-        this.task = task;
-        this.delegate = monitor;
-        this.percentages = percentages;
-    }
+	public SimpleMonitor(String task, IProgressListener monitor, int[] percentages) {
+		this.task = task;
+		this.delegate = monitor;
+		this.percentages = percentages;
+	}
 
-    public IProgressListener nextMonitor()
-    {
-        if (currentMonitor == 0)
-        {
-            int total = 0;
-            for (int ii : percentages)
-                total += ii;
-            delegate.beginTask(task, total);
-        }
+	public IProgressListener nextMonitor() {
+		if (currentMonitor == 0) {
+			int total = 0;
+			for (int ii : percentages)
+				total += ii;
+			delegate.beginTask(task, total);
+		}
 
-        return new Listener(percentages[currentMonitor++]);
-    }
+		return new Listener(percentages[currentMonitor++]);
+	}
 
-    public class Listener implements IProgressListener
-    {
-        long counter;
+	public class Listener implements IProgressListener {
+		long counter;
 
-        int majorUnits;
-        int unitsReported;
-        long workDone;
-        long workPerUnit;
+		int majorUnits;
+		int unitsReported;
+		long workDone;
+		long workPerUnit;
 
-        boolean isSmaller;
+		boolean isSmaller;
 
-        public Listener(int majorUnits)
-        {
-            this.majorUnits = majorUnits;
-        }
+		public Listener(int majorUnits) {
+			this.majorUnits = majorUnits;
+		}
 
-        public void beginTask(String name, int totalWork)
-        {
-            if (name != null)
-                delegate.subTask(name);
+		public void beginTask(String name, int totalWork) {
+			if (name != null)
+				delegate.subTask(name);
 
-            if (totalWork == 0)
-                return;
+			if (totalWork == 0)
+				return;
 
-            isSmaller = totalWork < majorUnits;
-            workPerUnit = isSmaller ? majorUnits / totalWork : totalWork / majorUnits;
-            unitsReported = 0;
-        }
+			isSmaller = totalWork < majorUnits;
+			workPerUnit = isSmaller ? majorUnits / totalWork : totalWork / majorUnits;
+			unitsReported = 0;
+		}
 
-        public void subTask(String name)
-        {
-            delegate.subTask(name);
-        }
+		public void subTask(String name) {
+			delegate.subTask(name);
+		}
 
-        public void done()
-        {
-            if (majorUnits - unitsReported > 0)
-                delegate.worked(majorUnits - unitsReported);
-        }
+		public void done() {
+			if (majorUnits - unitsReported > 0)
+				delegate.worked(majorUnits - unitsReported);
+		}
 
-        public boolean isCanceled()
-        {
-            return delegate.isCanceled();
-        }
+		public boolean isCanceled() {
+			return delegate.isCanceled();
+		}
 
-        public boolean isProbablyCanceled()
-        {
-            return counter++ % 5000 == 0 ? isCanceled() : false;
-        }
+		public boolean isProbablyCanceled() {
+			return counter++ % 5000 == 0 ? isCanceled() : false;
+		}
 
-        public void totalWorkDone(long work)
-        {
-            if (workDone == work)
-                return;
+		public void totalWorkDone(long work) {
+			if (workDone == work)
+				return;
 
-            if (workPerUnit == 0)
-                return;
+			if (workPerUnit == 0)
+				return;
 
-            workDone = work;
-            int unitsWorked = isSmaller ? (int) (work * workPerUnit) : (int) (work / workPerUnit);
-            int unitsToReport = unitsWorked - unitsReported;
+			workDone = work;
+			int unitsWorked = isSmaller ? (int) (work * workPerUnit) : (int) (work / workPerUnit);
+			int unitsToReport = unitsWorked - unitsReported;
 
-            if (unitsToReport > 0)
-            {
-                delegate.worked(unitsToReport);
-                unitsReported += unitsToReport;
-            }
-        }
+			if (unitsToReport > 0) {
+				delegate.worked(unitsToReport);
+				unitsReported += unitsToReport;
+			}
+		}
 
-        public void worked(int work)
-        {
-            totalWorkDone(workDone + work);
-        }
+		public void worked(int work) {
+			totalWorkDone(workDone + work);
+		}
 
-        public void setCanceled(boolean value)
-        {
-            delegate.setCanceled(value);
-        }
+		public void setCanceled(boolean value) {
+			delegate.setCanceled(value);
+		}
 
-        public void sendUserMessage(Severity severity, String message, Throwable exception)
-        {
-            delegate.sendUserMessage(severity, message, exception);
-        }
+		public void sendUserMessage(Severity severity, String message, Throwable exception) {
+			delegate.sendUserMessage(severity, message, exception);
+		}
 
-        public long getWorkDone()
-        {
-            return workDone;
-        }
+		public long getWorkDone() {
+			return workDone;
+		}
 
-    }
+	}
 
 }

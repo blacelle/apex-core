@@ -12,12 +12,10 @@ package org.eclipse.mat.tests.collect;
 
 import org.junit.Test;
 
-public class PrimitiveArrayTests
-{
+public class PrimitiveArrayTests {
 
-    @Test
-    public void testArrayInt()
-    {
+	@Test
+	public void testArrayInt() {
 
-    }
+	}
 }

@@ -34,9 +34,8 @@ import java.lang.annotation.Target;
  * <p>Experimental: can also be used to tag queries which only make sense when at least one the classes
  * is present in the snapshot.
  */
-@Target( { TYPE })
+@Target({ TYPE })
 @Retention(RUNTIME)
-public @interface Subjects
-{
-    String[] value();
+public @interface Subjects {
+	String[] value();
 }

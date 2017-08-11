@@ -18,36 +18,35 @@ import org.eclipse.mat.util.IProgressListener;
  * 
  * @noimplement
  */
-public interface IMultiplePathsFromGCRootsComputer
-{
-    /**
-     * Calculates (if not yet calculated) and returns all the paths. The paths
-     * are grouped by the GC root object, i.e. all paths starting from one and
-     * the same GC root will be packed in one MultiplePathsFromGCRootsRecord.
-     * This record can be used to get the objects at the next level in the path,
-     * etc...
-     * 
-     * @param progressListener
-     *            - used to track the progress of the computation
-     * @return MultiplePathsFromGCRootsRecord[] one record for each group of
-     *         paths starting from the same GC root
-     * @throws SnapshotException
-     */
-    public MultiplePathsFromGCRootsRecord[] getPathsByGCRoot(IProgressListener progressListener)
-                    throws SnapshotException;
+public interface IMultiplePathsFromGCRootsComputer {
+	/**
+	 * Calculates (if not yet calculated) and returns all the paths. The paths
+	 * are grouped by the GC root object, i.e. all paths starting from one and
+	 * the same GC root will be packed in one MultiplePathsFromGCRootsRecord.
+	 * This record can be used to get the objects at the next level in the path,
+	 * etc...
+	 * 
+	 * @param progressListener
+	 *            - used to track the progress of the computation
+	 * @return MultiplePathsFromGCRootsRecord[] one record for each group of
+	 *         paths starting from the same GC root
+	 * @throws SnapshotException
+	 */
+	public MultiplePathsFromGCRootsRecord[] getPathsByGCRoot(IProgressListener progressListener)
+			throws SnapshotException;
 
-    /**
-     * Calculates (if not yet calculated) and returns all the paths. Each
-     * element in the Object[] is an int[] representing the path. The first
-     * element in the int[] is the specified object, and the last is the GC root
-     * object
-     * 
-     * @param progressListener
-     *            - used to track the progress of the computation
-     * @return Object[] - each element in the array is an int[] representing a
-     *         path
-     * @throws SnapshotException
-     */
-    public Object[] getAllPaths(IProgressListener progressListener) throws SnapshotException;
+	/**
+	 * Calculates (if not yet calculated) and returns all the paths. Each
+	 * element in the Object[] is an int[] representing the path. The first
+	 * element in the int[] is the specified object, and the last is the GC root
+	 * object
+	 * 
+	 * @param progressListener
+	 *            - used to track the progress of the computation
+	 * @return Object[] - each element in the array is an int[] representing a
+	 *         path
+	 * @throws SnapshotException
+	 */
+	public Object[] getAllPaths(IProgressListener progressListener) throws SnapshotException;
 
 }

@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Strings;
 
 /**
  * Various utilities related to URL
@@ -69,7 +70,7 @@ public class ApexURLHelper {
 	 * @return an URL associated to given String, adding the protocol "http://" by default
 	 */
 	public static URL toHttpURL(String asString) {
-		if (asString == null) {
+		if (Strings.isNullOrEmpty(asString)) {
 			throw new IllegalArgumentException("Should not be null");
 		}
 

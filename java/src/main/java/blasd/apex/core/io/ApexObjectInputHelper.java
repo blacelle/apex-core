@@ -36,19 +36,19 @@ import com.google.common.io.ByteStreams;
 import blasd.apex.core.memory.IApexMemoryConstants;
 
 /**
- * Various helpers related to Object stream
+ * Various helpers related to ObjectInput
  * 
  * @author Benoit Lacelle
  *
  */
-public class ApexObjectStreamHelper {
+public class ApexObjectInputHelper {
 
-	protected static final Logger LOGGER = LoggerFactory.getLogger(ApexObjectStreamHelper.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(ApexObjectInputHelper.class);
 
 	@VisibleForTesting
 	static final int DEFAULT_CHUNK_SIZE = IApexMemoryConstants.KB_INT;
 
-	protected ApexObjectStreamHelper() {
+	protected ApexObjectInputHelper() {
 		// hidden
 	}
 

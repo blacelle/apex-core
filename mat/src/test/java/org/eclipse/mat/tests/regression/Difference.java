@@ -10,43 +10,36 @@
  *******************************************************************************/
 package org.eclipse.mat.tests.regression;
 
-public class Difference
-{
-    private String lineNumber;
-    private String baseline;
-    private String testLine;
-    private String problem;
+public class Difference {
+	private String lineNumber;
+	private String baseline;
+	private String testLine;
+	private String problem;
 
-    public Difference(String lineNumber, String baseline, String testLine)
-    {
-        this.lineNumber = lineNumber;
-        this.baseline = baseline;
-        this.testLine = testLine;
-    }
+	public Difference(String lineNumber, String baseline, String testLine) {
+		this.lineNumber = lineNumber;
+		this.baseline = baseline;
+		this.testLine = testLine;
+	}
 
-    public Difference(String problem)
-    {
-        this.problem = problem;
-    }
+	public Difference(String problem) {
+		this.problem = problem;
+	}
 
-    public String getProblem()
-    {
-        return problem;
-    }
+	public String getProblem() {
+		return problem;
+	}
 
-    public String getLineNumber()
-    {
-        return lineNumber;
-    }
+	public String getLineNumber() {
+		return lineNumber;
+	}
 
-    public String getBaseline()
-    {
-        return baseline;
-    }
+	public String getBaseline() {
+		return baseline;
+	}
 
-    public String getTestLine()
-    {
-        return testLine;
-    }
+	public String getTestLine() {
+		return testLine;
+	}
 
 }

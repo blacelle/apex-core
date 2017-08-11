@@ -20,415 +20,365 @@ import java.util.NoSuchElementException;
  * More efficient than a general map
  * null not allowed as key.
  */
-public final class HashMapObjectLong<E> implements Serializable
-{
-    /**
-     * An entry from the map
-     */
-    public interface Entry<E>
-    {
-       /**
-         * Get the key.
-         * @return the key
-         */
-        E getKey();
+public final class HashMapObjectLong<E> implements Serializable {
+	/**
+	 * An entry from the map
+	 */
+	public interface Entry<E> {
+		/**
+		 * Get the key.
+		 * @return the key
+		 */
+		E getKey();
 
-        /**
-         * Get the corresponding value.
-         * @return the value
-         */
-        long getValue();
-    }
+		/**
+		 * Get the corresponding value.
+		 * @return the value
+		 */
+		long getValue();
+	}
 
-    private static final NoSuchElementException noSuchElementException = new NoSuchElementException(
-                    "This is static exception, there is no stack trace available. It is thrown by get() method."); //$NON-NLS-1$
+	private static final NoSuchElementException noSuchElementException = new NoSuchElementException(
+			"This is static exception, there is no stack trace available. It is thrown by get() method."); //$NON-NLS-1$
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * Largest requested size that can be allocated on many VMs.
-     * Size will be rounded up to the next prime, so choose prime - 1.
-     * Biggest primes less than 2^31 are 0x7fffffff and 0x7fffffed,
-     * but JVM limit can be less than Integer.MAX_VALUE.
-     * E.g. ArrayList has a limit of Integer.MAX_VALUE - 8
-     */
-    private static final int BIG_CAPACITY = PrimeFinder.findPrevPrime(Integer.MAX_VALUE - 8 + 1) - 1;
-    
-    private int capacity;
-    private int step;
-    private int limit;
-    private int size;
-    private boolean[] used;
-    private Object[] keys;
-    private long[] values;
+	/**
+	 * Largest requested size that can be allocated on many VMs.
+	 * Size will be rounded up to the next prime, so choose prime - 1.
+	 * Biggest primes less than 2^31 are 0x7fffffff and 0x7fffffed,
+	 * but JVM limit can be less than Integer.MAX_VALUE.
+	 * E.g. ArrayList has a limit of Integer.MAX_VALUE - 8
+	 */
+	private static final int BIG_CAPACITY = PrimeFinder.findPrevPrime(Integer.MAX_VALUE - 8 + 1) - 1;
 
-    /**
-     * Create a map of default size
-     */
-    public HashMapObjectLong()
-    {
-        this(10);
-    }
+	private int capacity;
+	private int step;
+	private int limit;
+	private int size;
+	private boolean[] used;
+	private Object[] keys;
+	private long[] values;
 
-    /**
-     * Create a map of given size
-     * @param initialCapacity
-     */
-    public HashMapObjectLong(int initialCapacity)
-    {
-        init(initialCapacity);
-    }
+	/**
+	 * Create a map of default size
+	 */
+	public HashMapObjectLong() {
+		this(10);
+	}
 
-    /**
-     * Add a mapping
-     * @param key the key
-     * @param value the corresponding value
-     * @return true if an entry with the key already exists
-     */
-    public boolean put(E key, long value)
-    {
-        if (size == limit)
-        {
-            // Double in size but avoid overflow or JVM limits
-            resize(capacity <= BIG_CAPACITY >> 1 ? capacity << 1 : capacity < BIG_CAPACITY ? BIG_CAPACITY : capacity + 1);
-        }
+	/**
+	 * Create a map of given size
+	 * @param initialCapacity
+	 */
+	public HashMapObjectLong(int initialCapacity) {
+		init(initialCapacity);
+	}
 
-        int hash = hashOf(key) % capacity;
-        while (used[hash])
-        {
-            if (keys[hash].equals(key))
-            {
-                values[hash] = value;
-                return true;
-            }
-            hash = (hash + step) % capacity;
-        }
-        used[hash] = true;
-        keys[hash] = key;
-        values[hash] = value;
-        size++;
+	/**
+	 * Add a mapping
+	 * @param key the key
+	 * @param value the corresponding value
+	 * @return true if an entry with the key already exists
+	 */
+	public boolean put(E key, long value) {
+		if (size == limit) {
+			// Double in size but avoid overflow or JVM limits
+			resize(capacity <= BIG_CAPACITY >> 1 ? capacity << 1
+					: capacity < BIG_CAPACITY ? BIG_CAPACITY : capacity + 1);
+		}
 
-        return false;
-    }
+		int hash = hashOf(key) % capacity;
+		while (used[hash]) {
+			if (keys[hash].equals(key)) {
+				values[hash] = value;
+				return true;
+			}
+			hash = (hash + step) % capacity;
+		}
+		used[hash] = true;
+		keys[hash] = key;
+		values[hash] = value;
+		size++;
 
-    /**
-     * Remove an mapping from the map
-     * @param key the key to remove
-     * @return true if entry was found
-     */
-    public boolean remove(E key)
-    {
-        Object keyObj = key;
+		return false;
+	}
 
-        int hash = hashOf(keyObj) % capacity;
-        while (used[hash])
-        {
-            if (keys[hash].equals(keyObj))
-            {
-                used[hash] = false;
-                size--;
-                // Re-hash all follow-up entries anew; Do not fiddle with the
-                // capacity limit (75 %) otherwise this code may loop forever
-                hash = (hash + step) % capacity;
-                while (used[hash])
-                {
-                    keyObj = keys[hash];
-                    used[hash] = false;
-                    int newHash = hashOf(keyObj) % capacity;
-                    while (used[newHash])
-                    {
-                        newHash = (newHash + step) % capacity;
-                    }
-                    used[newHash] = true;
-                    keys[newHash] = keyObj;
-                    values[newHash] = values[hash];
-                    hash = (hash + step) % capacity;
-                }
-                return true;
-            }
-            hash = (hash + step) % capacity;
-        }
+	/**
+	 * Remove an mapping from the map
+	 * @param key the key to remove
+	 * @return true if entry was found
+	 */
+	public boolean remove(E key) {
+		Object keyObj = key;
 
-        return false;
-    }
+		int hash = hashOf(keyObj) % capacity;
+		while (used[hash]) {
+			if (keys[hash].equals(keyObj)) {
+				used[hash] = false;
+				size--;
+				// Re-hash all follow-up entries anew; Do not fiddle with the
+				// capacity limit (75 %) otherwise this code may loop forever
+				hash = (hash + step) % capacity;
+				while (used[hash]) {
+					keyObj = keys[hash];
+					used[hash] = false;
+					int newHash = hashOf(keyObj) % capacity;
+					while (used[newHash]) {
+						newHash = (newHash + step) % capacity;
+					}
+					used[newHash] = true;
+					keys[newHash] = keyObj;
+					values[newHash] = values[hash];
+					hash = (hash + step) % capacity;
+				}
+				return true;
+			}
+			hash = (hash + step) % capacity;
+		}
 
-    /**
-     * find if key is present in map
-     * @param key the key
-     * @return true if the key was found
-     */
-    public boolean containsKey(E key)
-    {
-        int hash = hashOf(key) % capacity;
-        while (used[hash])
-        {
-            if (keys[hash].equals(key)) { return true; }
-            hash = (hash + step) % capacity;
-        }
-        return false;
-    }
+		return false;
+	}
 
-    /**
-     * Retrieve the value corresponding to the key
-     * @param key the key
-     * @return the value
-     * @throws NosuchElementException if the key is not found
-     */
-    public long get(E key)
-    {
-        int hash = hashOf(key) % capacity;
-        while (used[hash])
-        {
-            if (keys[hash].equals(key)) { return values[hash]; }
-            hash = (hash + step) % capacity;
-        }
+	/**
+	 * find if key is present in map
+	 * @param key the key
+	 * @return true if the key was found
+	 */
+	public boolean containsKey(E key) {
+		int hash = hashOf(key) % capacity;
+		while (used[hash]) {
+			if (keys[hash].equals(key)) {
+				return true;
+			}
+			hash = (hash + step) % capacity;
+		}
+		return false;
+	}
 
-        throw noSuchElementException;
-    }
+	/**
+	 * Retrieve the value corresponding to the key
+	 * @param key the key
+	 * @return the value
+	 * @throws NosuchElementException if the key is not found
+	 */
+	public long get(E key) {
+		int hash = hashOf(key) % capacity;
+		while (used[hash]) {
+			if (keys[hash].equals(key)) {
+				return values[hash];
+			}
+			hash = (hash + step) % capacity;
+		}
 
-    /**
-     * Get all the used keys.
-     * Consider using {@link #getAllKeys(Object[])} for better type safety
-     * @return an array of the used keys
-     */
-    public Object[] getAllKeys()
-    {
-        Object[] array = new Object[size];
-        int j = 0;
-        for (int i = 0; i < used.length; i++)
-        {
-            if (used[i])
-                array[j++] = keys[i];
-        }
-        return array;
-    }
+		throw noSuchElementException;
+	}
 
-    /**
-     * Get all the used keys.
-     * @return an array of the used keys
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T[] getAllKeys(T[] a)
-    {
-        if (a.length < size)
-            a = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
+	/**
+	 * Get all the used keys.
+	 * Consider using {@link #getAllKeys(Object[])} for better type safety
+	 * @return an array of the used keys
+	 */
+	public Object[] getAllKeys() {
+		Object[] array = new Object[size];
+		int j = 0;
+		for (int i = 0; i < used.length; i++) {
+			if (used[i])
+				array[j++] = keys[i];
+		}
+		return array;
+	}
 
-        int j = 0;
-        for (int ii = 0; ii < used.length; ii++)
-        {
-            if (used[ii])
-                a[j++] = (T) keys[ii];
-        }
+	/**
+	 * Get all the used keys.
+	 * @return an array of the used keys
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T[] getAllKeys(T[] a) {
+		if (a.length < size)
+			a = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
 
-        if (a.length > size)
-            a[size] = null;
-        return a;
-    }
+		int j = 0;
+		for (int ii = 0; ii < used.length; ii++) {
+			if (used[ii])
+				a[j++] = (T) keys[ii];
+		}
 
-    /**
-     * The number of mappings
-     * @return the size of the map
-     */
-    public int size()
-    {
-        return size;
-    }
+		if (a.length > size)
+			a[size] = null;
+		return a;
+	}
 
-    /**
-     * Is the map empty 
-     * @return true if no current mappings
-     */
-    public boolean isEmpty()
-    {
-        return size() == 0;
-    }
+	/**
+	 * The number of mappings
+	 * @return the size of the map
+	 */
+	public int size() {
+		return size;
+	}
 
-    /**
-     * Remove all the existing mappings,
-     * leaving the capacity unchanged.
-     */
-    public void clear()
-    {
-        size = 0;
-        used = new boolean[capacity];
-    }
+	/**
+	 * Is the map empty 
+	 * @return true if no current mappings
+	 */
+	public boolean isEmpty() {
+		return size() == 0;
+	}
 
-    /**
-     * Get a way of iterating over the keys
-     * @return an iterator over the keys
-     */
-    public Iterator<E> keys()
-    {
-        return new Iterator<E>()
-        {
-            int n = 0;
-            int i = -1;
+	/**
+	 * Remove all the existing mappings,
+	 * leaving the capacity unchanged.
+	 */
+	public void clear() {
+		size = 0;
+		used = new boolean[capacity];
+	}
 
-            public boolean hasNext()
-            {
-                return n < size;
-            }
+	/**
+	 * Get a way of iterating over the keys
+	 * @return an iterator over the keys
+	 */
+	public Iterator<E> keys() {
+		return new Iterator<E>() {
+			int n = 0;
+			int i = -1;
 
-            @SuppressWarnings("unchecked")
-            public E next() throws NoSuchElementException
-            {
-                while (++i < used.length)
-                {
-                    if (used[i])
-                    {
-                        n++;
-                        return (E) keys[i];
-                    }
-                }
-                throw new NoSuchElementException();
-            }
+			public boolean hasNext() {
+				return n < size;
+			}
 
-            public void remove()
-            {
-                throw new UnsupportedOperationException();
-            }
-        };
-    }
+			@SuppressWarnings("unchecked")
+			public E next() throws NoSuchElementException {
+				while (++i < used.length) {
+					if (used[i]) {
+						n++;
+						return (E) keys[i];
+					}
+				}
+				throw new NoSuchElementException();
+			}
 
-    /**
-     * Get a way of iterating over the values.
-     * @return an iterator over the values
-     */
-    public IteratorLong values()
-    {
-        return new IteratorLong()
-        {
-            int n = 0;
-            int i = -1;
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+		};
+	}
 
-            public boolean hasNext()
-            {
-                return n < size;
-            }
+	/**
+	 * Get a way of iterating over the values.
+	 * @return an iterator over the values
+	 */
+	public IteratorLong values() {
+		return new IteratorLong() {
+			int n = 0;
+			int i = -1;
 
-            public long next() throws NoSuchElementException
-            {
-                while (++i < used.length)
-                {
-                    if (used[i])
-                    {
-                        n++;
-                        return values[i];
-                    }
-                }
-                throw new NoSuchElementException();
-            }
-        };
-    }
+			public boolean hasNext() {
+				return n < size;
+			}
 
-    /**
-     * Iterate over all the map entries
-     * @return the iterator over the entries
-     */
-    public Iterator<Entry<E>> entries()
-    {
-        return new Iterator<Entry<E>>()
-        {
-            int n = 0;
-            int i = -1;
+			public long next() throws NoSuchElementException {
+				while (++i < used.length) {
+					if (used[i]) {
+						n++;
+						return values[i];
+					}
+				}
+				throw new NoSuchElementException();
+			}
+		};
+	}
 
-            public boolean hasNext()
-            {
-                return n < size;
-            }
+	/**
+	 * Iterate over all the map entries
+	 * @return the iterator over the entries
+	 */
+	public Iterator<Entry<E>> entries() {
+		return new Iterator<Entry<E>>() {
+			int n = 0;
+			int i = -1;
 
-            public Entry<E> next() throws NoSuchElementException
-            {
-                while (++i < used.length)
-                {
-                    if (used[i])
-                    {
-                        n++;
-                        return new Entry<E>()
-                        {
-                            @SuppressWarnings("unchecked")
-                            public E getKey()
-                            {
-                                return (E) keys[i];
-                            }
+			public boolean hasNext() {
+				return n < size;
+			}
 
-                            public long getValue()
-                            {
-                                return values[i];
-                            }
-                        };
-                    }
-                }
-                throw new NoSuchElementException();
-            }
+			public Entry<E> next() throws NoSuchElementException {
+				while (++i < used.length) {
+					if (used[i]) {
+						n++;
+						return new Entry<E>() {
+							@SuppressWarnings("unchecked")
+							public E getKey() {
+								return (E) keys[i];
+							}
 
-            public void remove() throws UnsupportedOperationException
-            {
-                throw new UnsupportedOperationException();
-            }
-        };
-    }
+							public long getValue() {
+								return values[i];
+							}
+						};
+					}
+				}
+				throw new NoSuchElementException();
+			}
 
-    /**
-     * Get all the values corresponding to the used keys.
-     * Duplicate values are possible if they correspond to different keys.
-     * @return an array of the used values
-     */
-    public long[] getAllValues()
-    {
-        long[] a = new long[size];
+			public void remove() throws UnsupportedOperationException {
+				throw new UnsupportedOperationException();
+			}
+		};
+	}
 
-        int index = 0;
-        for (int ii = 0; ii < values.length; ii++)
-        {
-            if (used[ii])
-                a[index++] = values[ii];
-        }
+	/**
+	 * Get all the values corresponding to the used keys.
+	 * Duplicate values are possible if they correspond to different keys.
+	 * @return an array of the used values
+	 */
+	public long[] getAllValues() {
+		long[] a = new long[size];
 
-        return a;
-    }
+		int index = 0;
+		for (int ii = 0; ii < values.length; ii++) {
+			if (used[ii])
+				a[index++] = values[ii];
+		}
 
-    private void init(int initialCapacity)
-    {
-        capacity = PrimeFinder.findNextPrime(initialCapacity);
-        step = Math.max(1, PrimeFinder.findPrevPrime(initialCapacity / 3));
-        limit = (int) (capacity * 0.75);
-        clear();
-        keys = new Object[capacity];
-        values = new long[capacity];
-    }
+		return a;
+	}
 
-    private void resize(int newCapacity)
-    {
-        int oldSize = size;
-        boolean[] oldUsed = used;
-        Object[] oldKeys = keys;
-        long[] oldValues = values;
-        init(newCapacity);
-        Object key;
-        int hash;
-        for (int i = 0; i < oldUsed.length; i++)
-        {
-            if (oldUsed[i])
-            {
-                key = oldKeys[i];
-                hash = hashOf(key) % capacity;
-                while (used[hash])
-                {
-                    hash = (hash + step) % capacity;
-                }
-                used[hash] = true;
-                keys[hash] = key;
-                values[hash] = oldValues[i];
-            }
-        }
-        size = oldSize;
-    }
+	private void init(int initialCapacity) {
+		capacity = PrimeFinder.findNextPrime(initialCapacity);
+		step = Math.max(1, PrimeFinder.findPrevPrime(initialCapacity / 3));
+		limit = (int) (capacity * 0.75);
+		clear();
+		keys = new Object[capacity];
+		values = new long[capacity];
+	}
 
-    private int hashOf(Object obj)
-    {
-    	// Math.abs isn't safe for Integer.MIN_VALUE as it returns Integer.MIN_VALUE 
-        return obj.hashCode() & Integer.MAX_VALUE;
-    }
+	private void resize(int newCapacity) {
+		int oldSize = size;
+		boolean[] oldUsed = used;
+		Object[] oldKeys = keys;
+		long[] oldValues = values;
+		init(newCapacity);
+		Object key;
+		int hash;
+		for (int i = 0; i < oldUsed.length; i++) {
+			if (oldUsed[i]) {
+				key = oldKeys[i];
+				hash = hashOf(key) % capacity;
+				while (used[hash]) {
+					hash = (hash + step) % capacity;
+				}
+				used[hash] = true;
+				keys[hash] = key;
+				values[hash] = oldValues[i];
+			}
+		}
+		size = oldSize;
+	}
+
+	private int hashOf(Object obj) {
+		// Math.abs isn't safe for Integer.MIN_VALUE as it returns Integer.MIN_VALUE 
+		return obj.hashCode() & Integer.MAX_VALUE;
+	}
 
 }

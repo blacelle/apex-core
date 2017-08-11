@@ -17,68 +17,65 @@ package org.eclipse.mat.util;
  * 
  * @see IProgressListener
  */
-public class VoidProgressListener implements IProgressListener
-{
-    private boolean cancelled = false;
+public class VoidProgressListener implements IProgressListener {
+	private boolean cancelled = false;
 
-    /**
-     * Does nothing.
-     * 
-     * @see IProgressListener#beginTask(String, int)
-     */
-    public void beginTask(String name, int totalWork)
-    {}
+	/**
+	 * Does nothing.
+	 * 
+	 * @see IProgressListener#beginTask(String, int)
+	 */
+	public void beginTask(String name, int totalWork) {
+	}
 
-    /**
-     * Does nothing.
-     * 
-     * @see IProgressListener#done()
-     */
-    public void done()
-    {}
+	/**
+	 * Does nothing.
+	 * 
+	 * @see IProgressListener#done()
+	 */
+	public void done() {
+	}
 
-    /**
-     * Gets the cancel state.
-     * 
-     * @see IProgressListener#isCanceled()
-     */
-    public boolean isCanceled()
-    {
-        return cancelled;
-    }
+	/**
+	 * Gets the cancel state.
+	 * 
+	 * @see IProgressListener#isCanceled()
+	 */
+	public boolean isCanceled() {
+		return cancelled;
+	}
 
-    /**
-     * Sets the cancel state.
-     * 
-     * @see IProgressListener#setCanceled(boolean)
-     */
-    public void setCanceled(boolean value)
-    {
-        cancelled = value;
-    }
+	/**
+	 * Sets the cancel state.
+	 * 
+	 * @see IProgressListener#setCanceled(boolean)
+	 */
+	public void setCanceled(boolean value) {
+		cancelled = value;
+	}
 
-    /**
-     * Does nothing.
-     * 
-     * @see IProgressListener#subTask(String)
-     */
-    public void subTask(String name)
-    {}
+	/**
+	 * Does nothing.
+	 * 
+	 * @see IProgressListener#subTask(String)
+	 */
+	public void subTask(String name) {
+	}
 
-    /**
-     * Does nothing.
-     * 
-     * @see IProgressListener#worked(int)
-     */
-    public void worked(int work)
-    {}
+	/**
+	 * Does nothing.
+	 * 
+	 * @see IProgressListener#worked(int)
+	 */
+	public void worked(int work) {
+	}
 
-    /**
-     * Does nothing
-     * 
-     * @see IProgressListener#sendUserMessage(Severity, String, Throwable)
-     */
-    public void sendUserMessage(Severity severity, String message, Throwable exception)
-    {}
+	/**
+	 * Does nothing
+	 * 
+	 * @see IProgressListener#sendUserMessage(Severity, String, Throwable)
+	 */
+	public void sendUserMessage(Severity severity, String message, Throwable exception) {
+	}
 
 }

@@ -15,100 +15,78 @@ import com.ibm.icu.text.NumberFormat;
 /**
  * A way of adding units to values.
  */
-public abstract class Units
-{
-    public enum Storage
-    {
-        BYTE("B", 1L), //$NON-NLS-1$
-        KILOBYTE("KB", 1L << 10), //$NON-NLS-1$
-        MEGABYTE("MB", 1L << 20), //$NON-NLS-1$
-        GIGABYTE("GB", 1L << 30); //$NON-NLS-1$
+public abstract class Units {
+	public enum Storage {
+		BYTE("B", 1L), //$NON-NLS-1$
+		KILOBYTE("KB", 1L << 10), //$NON-NLS-1$
+		MEGABYTE("MB", 1L << 20), //$NON-NLS-1$
+		GIGABYTE("GB", 1L << 30); //$NON-NLS-1$
 
-        private final String symbol;
-        private final long divider; // divider of BASE unit
+		private final String symbol;
+		private final long divider; // divider of BASE unit
 
-        Storage(String name, long divider)
-        {
-            this.symbol = name;
-            this.divider = divider;
-        }
+		Storage(String name, long divider) {
+			this.symbol = name;
+			this.divider = divider;
+		}
 
-        public static Storage of(final long number)
-        {
-            final long n = number > 0 ? -number : number;
-            if (n > -(1L << 10))
-            {
-                return BYTE;
-            }
-            else if (n > -(1L << 20))
-            {
-                return KILOBYTE;
-            }
-            else if (n > -(1L << 30))
-            {
-                return MEGABYTE;
-            }
-            else
-            {
-                return GIGABYTE;
-            }
-        }
+		public static Storage of(final long number) {
+			final long n = number > 0 ? -number : number;
+			if (n > -(1L << 10)) {
+				return BYTE;
+			} else if (n > -(1L << 20)) {
+				return KILOBYTE;
+			} else if (n > -(1L << 30)) {
+				return MEGABYTE;
+			} else {
+				return GIGABYTE;
+			}
+		}
 
-        public String format(long number)
-        {
-            return nf.format((double) number / divider) + " " + symbol; //$NON-NLS-1$
-        }
-    }
+		public String format(long number) {
+			return nf.format((double) number / divider) + " " + symbol; //$NON-NLS-1$
+		}
+	}
 
-    public enum Plain
-    {
-        BASE(null, 1L), //
-        THOUSANDS("k", 1000L), //$NON-NLS-1$
-        MILLIONS("m", 1000000L); //$NON-NLS-1$
+	public enum Plain {
+		BASE(null, 1L), //
+		THOUSANDS("k", 1000L), //$NON-NLS-1$
+		MILLIONS("m", 1000000L); //$NON-NLS-1$
 
-        private final String symbol;
-        private final long divider; // divider of BASE unit
+		private final String symbol;
+		private final long divider; // divider of BASE unit
 
-        Plain(String name, long divider)
-        {
-            this.symbol = name;
-            this.divider = divider;
-        }
+		Plain(String name, long divider) {
+			this.symbol = name;
+			this.divider = divider;
+		}
 
-        public static Plain of(final long number)
-        {
-            final long n = number > 0 ? -number : number;
-            if (n > -1000)
-            {
-                return BASE;
-            }
-            else if (n > -1000000)
-            {
-                return THOUSANDS;
-            }
-            else
-            {
-                return MILLIONS;
-            }
-        }
+		public static Plain of(final long number) {
+			final long n = number > 0 ? -number : number;
+			if (n > -1000) {
+				return BASE;
+			} else if (n > -1000000) {
+				return THOUSANDS;
+			} else {
+				return MILLIONS;
+			}
+		}
 
-        public String format(long number)
-        {
-            String f = nf.format((double) number / divider);
-            return symbol != null ? f + symbol : f;
-        }
-    }
+		public String format(long number) {
+			String f = nf.format((double) number / divider);
+			return symbol != null ? f + symbol : f;
+		}
+	}
 
-    /**
-     * NumberFormat is not thread safe.
-     */
-    private static NumberFormat nf = NumberFormat.getInstance();
+	/**
+	 * NumberFormat is not thread safe.
+	 */
+	private static NumberFormat nf = NumberFormat.getInstance();
 
-    static
-    {
-        nf.setGroupingUsed(false);
-        nf.setMinimumFractionDigits(0);
-        nf.setMaximumFractionDigits(1);
-    }
+	static {
+		nf.setGroupingUsed(false);
+		nf.setMinimumFractionDigits(0);
+		nf.setMaximumFractionDigits(1);
+	}
 
 }

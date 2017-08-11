@@ -23,15 +23,14 @@ import org.eclipse.mat.snapshot.model.IObject;
  * {@link Subjects} annotation to specify the types of objects 
  * in the dump they describe.
  */
-public interface IClassSpecificNameResolver
-{
-    /**
-     * Resolve the name for snapshot object.
-     * 
-     * @param object
-     *            object for which the name should be resolved
-     * @return name for snapshot object
-     * @throws SnapshotException
-     */
-    public String resolve(IObject object) throws SnapshotException;
+public interface IClassSpecificNameResolver {
+	/**
+	 * Resolve the name for snapshot object.
+	 * 
+	 * @param object
+	 *            object for which the name should be resolved
+	 * @return name for snapshot object
+	 * @throws SnapshotException
+	 */
+	public String resolve(IObject object) throws SnapshotException;
 }

@@ -24,8 +24,10 @@ package blasd.apex.core.agent;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 
+import org.ehcache.sizeof.impl.AgentLoaderApexSpy;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -63,5 +65,17 @@ public class TestVirtualMachineWithoutToolsJar {
 	@Test
 	public void testIsVirtualMachineWithoutToolsJar() {
 		VirtualMachineWithoutToolsJar.isVirtualMachineAvailable();
+	}
+
+	@Test
+	public void testSameVMClass()
+			throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException {
+		Assert.assertSame(AgentLoaderApexSpy.getVirtualMachineClass().get(),
+				AgentLoaderApexSpy.getVirtualMachineClass().get());
+	}
+
+	@Test
+	public void testGetVMs() {
+		VirtualMachineWithoutToolsJar.getJvmVirtualMachines();
 	}
 }

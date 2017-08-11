@@ -33,217 +33,180 @@ import org.eclipse.mat.snapshot.model.ThreadToLocalReference;
  * This includes field information.
  * @noextend
  */
-public class InstanceImpl extends AbstractObjectImpl implements IInstance
-{
-    private static final long serialVersionUID = 1L;
+public class InstanceImpl extends AbstractObjectImpl implements IInstance {
+	private static final long serialVersionUID = 1L;
 
-    private volatile List<Field> fields;
-    private volatile Map<String, Field> name2field;
+	private volatile List<Field> fields;
+	private volatile Map<String, Field> name2field;
 
-    /**
-     * Construct a representation of plain java object in the snapshot.
-     * @param objectId the object id
-     * @param address the actual address
-     * @param clazz the type of the object
-     * @param fields the instance fields of the object (the static fields are held in the class)
-     */
-    public InstanceImpl(int objectId, long address, ClassImpl clazz, List<Field> fields)
-    {
-        super(objectId, address, clazz);
-        this.fields = fields;
-    }
+	/**
+	 * Construct a representation of plain java object in the snapshot.
+	 * @param objectId the object id
+	 * @param address the actual address
+	 * @param clazz the type of the object
+	 * @param fields the instance fields of the object (the static fields are held in the class)
+	 */
+	public InstanceImpl(int objectId, long address, ClassImpl clazz, List<Field> fields) {
+		super(objectId, address, clazz);
+		this.fields = fields;
+	}
 
-    @Override
-    public long getObjectAddress()
-    {
-        try
-        {
-            long address = super.getObjectAddress();
+	@Override
+	public long getObjectAddress() {
+		try {
+			long address = super.getObjectAddress();
 
-            if (address == Long.MIN_VALUE)
-            {
-                address = source.mapIdToAddress(getObjectId());
-                setObjectAddress(address);
-            }
+			if (address == Long.MIN_VALUE) {
+				address = source.mapIdToAddress(getObjectId());
+				setObjectAddress(address);
+			}
 
-            return address;
-        }
-        catch (SnapshotException e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
+			return address;
+		} catch (SnapshotException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-    @Override
-    public int getObjectId()
-    {
-        try
-        {
-            int objectId = super.getObjectId();
+	@Override
+	public int getObjectId() {
+		try {
+			int objectId = super.getObjectId();
 
-            if (objectId < 0)
-            {
-                objectId = source.mapAddressToId(getObjectAddress());
-                setObjectId(objectId);
-            }
+			if (objectId < 0) {
+				objectId = source.mapAddressToId(getObjectAddress());
+				setObjectId(objectId);
+			}
 
-            return objectId;
-        }
-        catch (SnapshotException e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
+			return objectId;
+		} catch (SnapshotException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-    public List<Field> getFields()
-    {
-        if (fields == null)
-            readFully();
+	public List<Field> getFields() {
+		if (fields == null)
+			readFully();
 
-        return fields;
-    }
+		return fields;
+	}
 
-    public Field getField(String name)
-    {
-        return internalGetField(name);
-    }
+	public Field getField(String name) {
+		return internalGetField(name);
+	}
 
-    /**
-     * Set the fields of this instance.
-     * The order should match the order of {@link #getFields()}.
-     * @return a list of fields
-     */
-    protected void setFields(List<Field> fields)
-    {
-        this.fields = fields;
-    }
+	/**
+	 * Set the fields of this instance.
+	 * The order should match the order of {@link #getFields()}.
+	 * @return a list of fields
+	 */
+	protected void setFields(List<Field> fields) {
+		this.fields = fields;
+	}
 
-    /**
-     * Fully build information about this object by getting all the field
-     * data from the dump.
-     */
-    protected synchronized void readFully()
-    {
-        // test again after synchronization
-        if (fields != null)
-            return;
+	/**
+	 * Fully build information about this object by getting all the field
+	 * data from the dump.
+	 */
+	protected synchronized void readFully() {
+		// test again after synchronization
+		if (fields != null)
+			return;
 
-        try
-        {
-            int objectId = getObjectId();
+		try {
+			int objectId = getObjectId();
 
-            InstanceImpl fullCopy = (InstanceImpl) source.getHeapObjectReader().read(objectId, source);
-            this.setObjectAddress(fullCopy.getObjectAddress());
-            this.fields = fullCopy.fields;
+			InstanceImpl fullCopy = (InstanceImpl) source.getHeapObjectReader().read(objectId, source);
+			this.setObjectAddress(fullCopy.getObjectAddress());
+			this.fields = fullCopy.fields;
 
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
-        catch (SnapshotException e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} catch (SnapshotException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-    @Override
-    public long getUsedHeapSize()
-    {
-        try {
-            return getSnapshot().getHeapSize(getObjectId());
-        } catch (SnapshotException e) {
-            return classInstance.getHeapSizePerInstance();
-        }
-    }
+	@Override
+	public long getUsedHeapSize() {
+		try {
+			return getSnapshot().getHeapSize(getObjectId());
+		} catch (SnapshotException e) {
+			return classInstance.getHeapSizePerInstance();
+		}
+	}
 
-    public ArrayLong getReferences()
-    {
-        List<Field> fields = getFields();
-        ArrayLong list = new ArrayLong(fields.size() + 1);
+	public ArrayLong getReferences() {
+		List<Field> fields = getFields();
+		ArrayLong list = new ArrayLong(fields.size() + 1);
 
-        list.add(classInstance.getObjectAddress());
+		list.add(classInstance.getObjectAddress());
 
-        HashMapIntObject<HashMapIntObject<XGCRootInfo[]>> threadToLocalVars = source.getRootsPerThread();
-        if (threadToLocalVars != null)
-        {
-            HashMapIntObject<XGCRootInfo[]> localVars = threadToLocalVars.get(getObjectId());
-            if (localVars != null)
-            {
-                IteratorInt localsIds = localVars.keys();
-                while (localsIds.hasNext())
-                {
-                    int localId = localsIds.next();
-                    GCRootInfo[] rootInfo = localVars.get(localId);
-                    list.add(rootInfo[0].getObjectAddress());
-                }
-            }
-        }
+		HashMapIntObject<HashMapIntObject<XGCRootInfo[]>> threadToLocalVars = source.getRootsPerThread();
+		if (threadToLocalVars != null) {
+			HashMapIntObject<XGCRootInfo[]> localVars = threadToLocalVars.get(getObjectId());
+			if (localVars != null) {
+				IteratorInt localsIds = localVars.keys();
+				while (localsIds.hasNext()) {
+					int localId = localsIds.next();
+					GCRootInfo[] rootInfo = localVars.get(localId);
+					list.add(rootInfo[0].getObjectAddress());
+				}
+			}
+		}
 
-        for (Field field : fields)
-        {
-            if (field.getValue() instanceof ObjectReference)
-            {
-                ObjectReference ref = (ObjectReference) field.getValue();
-                list.add(ref.getObjectAddress());
-            }
-        }
+		for (Field field : fields) {
+			if (field.getValue() instanceof ObjectReference) {
+				ObjectReference ref = (ObjectReference) field.getValue();
+				list.add(ref.getObjectAddress());
+			}
+		}
 
-        return list;
-    }
+		return list;
+	}
 
-    public List<NamedReference> getOutboundReferences()
-    {
-        List<NamedReference> list = new ArrayList<NamedReference>();
+	public List<NamedReference> getOutboundReferences() {
+		List<NamedReference> list = new ArrayList<NamedReference>();
 
-        list.add(new PseudoReference(source, classInstance.getObjectAddress(), "<class>"));//$NON-NLS-1$
+		list.add(new PseudoReference(source, classInstance.getObjectAddress(), "<class>"));//$NON-NLS-1$
 
-        HashMapIntObject<HashMapIntObject<XGCRootInfo[]>> threadToLocalVars = source.getRootsPerThread();
-        if (threadToLocalVars != null)
-        {
-            HashMapIntObject<XGCRootInfo[]> localVars = threadToLocalVars.get(getObjectId());
-            if (localVars != null)
-            {
-                IteratorInt localsIds = localVars.keys();
-                while (localsIds.hasNext())
-                {
-                    int localId = localsIds.next();
-                    GCRootInfo[] rootInfo = localVars.get(localId);
-                    ThreadToLocalReference ref = new ThreadToLocalReference(source, rootInfo[0].getObjectAddress(), "<"//$NON-NLS-1$
-                                    + GCRootInfo.getTypeSetAsString(rootInfo) + ">", localId, rootInfo);//$NON-NLS-1$
-                    list.add(ref);
-                }
-            }
-        }
+		HashMapIntObject<HashMapIntObject<XGCRootInfo[]>> threadToLocalVars = source.getRootsPerThread();
+		if (threadToLocalVars != null) {
+			HashMapIntObject<XGCRootInfo[]> localVars = threadToLocalVars.get(getObjectId());
+			if (localVars != null) {
+				IteratorInt localsIds = localVars.keys();
+				while (localsIds.hasNext()) {
+					int localId = localsIds.next();
+					GCRootInfo[] rootInfo = localVars.get(localId);
+					ThreadToLocalReference ref = new ThreadToLocalReference(source, rootInfo[0].getObjectAddress(), "<"//$NON-NLS-1$
+							+ GCRootInfo.getTypeSetAsString(rootInfo) + ">", localId, rootInfo);//$NON-NLS-1$
+					list.add(ref);
+				}
+			}
+		}
 
-        for (Field field : getFields())
-        {
-            if (field.getValue() instanceof ObjectReference)
-            {
-                ObjectReference ref = (ObjectReference) field.getValue();
-                list.add(new NamedReference(source, ref.getObjectAddress(), field.getName()));
-            }
-        }
+		for (Field field : getFields()) {
+			if (field.getValue() instanceof ObjectReference) {
+				ObjectReference ref = (ObjectReference) field.getValue();
+				list.add(new NamedReference(source, ref.getObjectAddress(), field.getName()));
+			}
+		}
 
-        return list;
-    }
+		return list;
+	}
 
-    @Override
-    protected Field internalGetField(String name)
-    {
-        if (name2field == null)
-        {
-            List<Field> fields = getFields();
-            Map<String, Field> n2f = new HashMap<String, Field>(fields.size());
-            for (Field f : fields)
-            {
-                n2f.put(f.getName(), f);
-            }
+	@Override
+	protected Field internalGetField(String name) {
+		if (name2field == null) {
+			List<Field> fields = getFields();
+			Map<String, Field> n2f = new HashMap<String, Field>(fields.size());
+			for (Field f : fields) {
+				n2f.put(f.getName(), f);
+			}
 
-            this.name2field = n2f;
-        }
+			this.name2field = n2f;
+		}
 
-        return name2field.get(name);
-    }
+		return name2field.get(name);
+	}
 
 }

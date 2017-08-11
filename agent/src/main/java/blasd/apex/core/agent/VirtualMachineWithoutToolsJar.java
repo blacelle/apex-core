@@ -28,6 +28,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -36,6 +38,7 @@ import org.ehcache.sizeof.impl.AgentLoaderApexSpy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
@@ -103,6 +106,35 @@ public class VirtualMachineWithoutToolsJar {
 		}
 	}
 
+	@Beta
+	public static synchronized List<?> getJvmVirtualMachines() {
+		final Optional<? extends Class<?>> virtualMachineClass = findVirtualMachineClass();
+
+		if (!virtualMachineClass.isPresent()) {
+			return Collections.emptyList();
+		}
+
+		try {
+			// http://hg.openjdk.java.net/jdk8/jdk8/jdk/file/687fd7c7986d/src/windows/classes/sun/tools/attach/WindowsAttachProvider.java
+			// System.loadLibrary("attach");
+			Method m = virtualMachineClass.get().getDeclaredMethod("list");
+
+			// List of VirtualMachineDescriptor
+			Object list = m.invoke(null);
+
+			if (list == null) {
+				return Collections.emptyList();
+			} else {
+				List<?> vmDescriptions = (List<?>) list;
+
+				return Collections.unmodifiableList(vmDescriptions);
+			}
+		} catch (Throwable e) {
+			LOGGER.trace("Ouch", e);
+			return Collections.emptyList();
+		}
+	}
+
 	public static synchronized Optional<Object> getUnsafeJvmVirtualMachine() throws ClassNotFoundException,
 			MalformedURLException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		if (WILL_NOT_WORK.get()) {
@@ -138,6 +170,11 @@ public class VirtualMachineWithoutToolsJar {
 		return Optional.fromNullable(JVM_VIRTUAL_MACHINE.get());
 	}
 
+	/**
+	 * Soft access to com.sun.tools.attach.VirtualMachine, as it may not be available in the classpath
+	 * 
+	 * @return if available, the Class of the VirtualMachine object
+	 */
 	public static Optional<? extends Class<?>> findVirtualMachineClass() {
 		try {
 			return AgentLoaderApexSpy.getVirtualMachineClass();
@@ -149,10 +186,7 @@ public class VirtualMachineWithoutToolsJar {
 	}
 
 	/**
-	 * Détachement du singleton.
-	 * 
-	 * @throws Exception
-	 *             e
+	 * Force detaching the VirtualMachine object
 	 */
 	public static synchronized void detach() throws Exception {
 		// Ensure VirtualMachine reference will not be used anymore
@@ -165,9 +199,7 @@ public class VirtualMachineWithoutToolsJar {
 	}
 
 	/**
-	 * @return flux contenant l'histogramme mémoire comme retourné par jmap -histo
-	 * @throws Exception
-	 *             e
+	 * @return The output histogram as produced by 'jmap -histo'
 	 */
 	public static Optional<InputStream> heapHisto() {
 		Optional<InputStream> asInputStream = getJvmVirtualMachine().transform(new Function<Object, InputStream>() {

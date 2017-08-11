@@ -20,22 +20,22 @@ import org.eclipse.mat.util.IProgressListener;
  * 
  * @noimplement
  */
-public interface IClassLoader extends IInstance
-{
-    /**
-     * Returns the retained size of all objects and classes loaded by this class
-     * loader.
-     * @param calculateIfNotAvailable if false only return a cached version of the size
-     * @param calculateMinRetainedSize if true then when calculating use an approximation
-     * @param listener to indicate progress and errors
-     * @return the retained size, negative if approximate
-     * @throws SnapshotException
-     */
-    long getRetainedHeapSizeOfObjects(boolean calculateIfNotAvailable, boolean calculateMinRetainedSize,
-                    IProgressListener listener) throws SnapshotException;
+public interface IClassLoader extends IInstance {
+	/**
+	 * Returns the retained size of all objects and classes loaded by this class
+	 * loader.
+	 * @param calculateIfNotAvailable if false only return a cached version of the size
+	 * @param calculateMinRetainedSize if true then when calculating use an approximation
+	 * @param listener to indicate progress and errors
+	 * @return the retained size, negative if approximate
+	 * @throws SnapshotException
+	 */
+	long getRetainedHeapSizeOfObjects(boolean calculateIfNotAvailable,
+			boolean calculateMinRetainedSize,
+			IProgressListener listener) throws SnapshotException;
 
-    /**
-     * Returns the classes defined by this class loader instance.
-     */
-    List<IClass> getDefinedClasses() throws SnapshotException;
+	/**
+	 * Returns the classes defined by this class loader instance.
+	 */
+	List<IClass> getDefinedClasses() throws SnapshotException;
 }

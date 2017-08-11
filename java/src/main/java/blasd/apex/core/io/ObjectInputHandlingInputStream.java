@@ -36,11 +36,23 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.Beta;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import blasd.apex.core.thread.ApexExecutorsHelper;
 
+/**
+ * Decorate an ObjectInput by adding the ability to read InputStream. These InputStream should have been written with
+ * ApexObjectStreamHelper
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+@Beta
 public class ObjectInputHandlingInputStream implements ObjectInput {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ObjectInputHandlingInputStream.class);
@@ -48,7 +60,7 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 	protected final ObjectInput decorated;
 
 	// The main thread will process the objects: we need an async process to read bytes
-	protected final ExecutorService inputStreamFiller;
+	protected final Supplier<? extends ExecutorService> inputStreamFiller;
 	protected final boolean closeESWithInputStream;
 
 	protected final AtomicBoolean pipedOutputStreamIsOpen = new AtomicBoolean(false);
@@ -60,15 +72,28 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 	 * @param decorated
 	 */
 	public ObjectInputHandlingInputStream(ObjectInput decorated) {
-		this(decorated, ApexExecutorsHelper.newSingleThreadExecutor("ObjectInputHandling"), true);
+		this(decorated, defaultSingleThreadExecutorSupplier(), true);
 	}
 
 	public ObjectInputHandlingInputStream(ObjectInput decorated,
 			ExecutorService inputStreamFiller,
 			boolean closeESWithInputStream) {
 		this.decorated = decorated;
+		this.inputStreamFiller = Suppliers.ofInstance(inputStreamFiller);
+		this.closeESWithInputStream = closeESWithInputStream;
+	}
+
+	public ObjectInputHandlingInputStream(ObjectInput decorated,
+			Supplier<? extends ExecutorService> inputStreamFiller,
+			boolean closeESWithInputStream) {
+		this.decorated = decorated;
 		this.inputStreamFiller = inputStreamFiller;
 		this.closeESWithInputStream = closeESWithInputStream;
+	}
+
+	private static Supplier<ExecutorService> defaultSingleThreadExecutorSupplier() {
+		return Suppliers.memoize(() -> ApexExecutorsHelper.newSingleThreadExecutor(
+				ObjectInputHandlingInputStream.class.getSimpleName() + "-" + Thread.currentThread().getName()));
 	}
 
 	@Override
@@ -90,17 +115,14 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 			CountDownLatch connectedCdl = new CountDownLatch(1);
 
 			// DO not auto-close as this inputStream will be consumed out of this loop
-			PipedInputStream pis = new PipedInputStream();
+			PipedInputStream pis = makePipedInputStream();
 
 			// Connect a PipedOutputStream in which we will write the transmitted InputStream
 			if (!pipedOutputStreamIsOpen.compareAndSet(false, true)) {
 				throw new IllegalStateException("Pipe was already open");
 			}
 
-			String mainThreadName = Thread.currentThread().getName();
-			LOGGER.trace("We should add {} in pipe thread name", mainThreadName);
-
-			inputStreamFiller.execute(() -> {
+			inputStreamFiller.get().execute(() -> {
 				// PipedInputStream.read will throw if not connected: PipedOutputStream should be connected before
 				// leaving main thread
 				try (PipedOutputStream pos = new PipedOutputStream(pis)) {
@@ -139,6 +161,11 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 			// There is nothing to do over this object
 			return next;
 		}
+	}
+
+	@VisibleForTesting
+	protected PipedInputStream makePipedInputStream() {
+		return new PipedInputStream();
 	}
 
 	private void pumpBytes(Object next, CountDownLatch connectedCdl, PipedOutputStream pos)
@@ -297,9 +324,12 @@ public class ObjectInputHandlingInputStream implements ObjectInput {
 		decorated.close();
 
 		if (closeESWithInputStream) {
-			// Prevent having too many-threads alive at the same time
-			// TODO: await only if more than N threads are alive
-			MoreExecutors.shutdownAndAwaitTermination(inputStreamFiller, 1, TimeUnit.SECONDS);
+			ExecutorService esToClose = inputStreamFiller.get();
+			if (esToClose != null) {
+				// Prevent having too many-threads alive at the same time
+				// TODO: await only if more than N threads are alive
+				MoreExecutors.shutdownAndAwaitTermination(esToClose, 1, TimeUnit.SECONDS);
+			}
 		}
 	}
 

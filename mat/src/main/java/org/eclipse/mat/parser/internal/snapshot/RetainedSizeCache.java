@@ -26,174 +26,138 @@ import org.eclipse.mat.parser.index.IIndexReader;
 import org.eclipse.mat.parser.internal.Messages;
 import org.eclipse.mat.parser.model.XSnapshotInfo;
 
-public class RetainedSizeCache implements IIndexReader
-{
-    private String filename;
-    private HashMapIntLong id2size;
-    private boolean isDirty = false;
-    
-    /**
-     * File is expected to exist, and is read in the new format.
-     * @param f
-     */
-    public RetainedSizeCache(File f)
-    {
-        this.filename = f.getAbsolutePath();
-        doRead(f, false);
-    }
+public class RetainedSizeCache implements IIndexReader {
+	private String filename;
+	private HashMapIntLong id2size;
+	private boolean isDirty = false;
 
-    /**
-     * Reads file i2sv2.index in new format,
-     * or file i2s.index in the old format,
-     * or creates an empty map.
-     * @param snapshotInfo
-     */
-    public RetainedSizeCache(XSnapshotInfo snapshotInfo)
-    {
-        this.filename = snapshotInfo.getPrefix() + "i2sv2.index"; //$NON-NLS-1$
-        readId2Size(snapshotInfo.getPrefix());
-    }
+	/**
+	 * File is expected to exist, and is read in the new format.
+	 * @param f
+	 */
+	public RetainedSizeCache(File f) {
+		this.filename = f.getAbsolutePath();
+		doRead(f, false);
+	}
 
-    public long get(int key)
-    {
-        try
-        {
-            return id2size.get(key);
-        }
-        catch (NoSuchElementException e)
-        {
-            // $JL-EXC$
-            return 0;
-        }
-    }
+	/**
+	 * Reads file i2sv2.index in new format,
+	 * or file i2s.index in the old format,
+	 * or creates an empty map.
+	 * @param snapshotInfo
+	 */
+	public RetainedSizeCache(XSnapshotInfo snapshotInfo) {
+		this.filename = snapshotInfo.getPrefix() + "i2sv2.index"; //$NON-NLS-1$
+		readId2Size(snapshotInfo.getPrefix());
+	}
 
-    public void put(int key, long value)
-    {
-        id2size.put(key, value);
-        isDirty = true;
-    }
+	public long get(int key) {
+		try {
+			return id2size.get(key);
+		} catch (NoSuchElementException e) {
+			// $JL-EXC$
+			return 0;
+		}
+	}
 
-    public void close()
-    {
-        if (!isDirty)
-            return;
+	public void put(int key, long value) {
+		id2size.put(key, value);
+		isDirty = true;
+	}
 
-        try
-        {
-            File file = new File(filename);
+	public void close() {
+		if (!isDirty)
+			return;
 
-            DataOutputStream out = new DataOutputStream(new FileOutputStream(file));
+		try {
+			File file = new File(filename);
 
-            for (int key : id2size.getAllKeys())
-            {
-                out.writeInt(key);
-                out.writeLong(id2size.get(key));
-            }
+			DataOutputStream out = new DataOutputStream(new FileOutputStream(file));
 
-            out.close();
+			for (int key : id2size.getAllKeys()) {
+				out.writeInt(key);
+				out.writeLong(id2size.get(key));
+			}
 
-            isDirty = false;
-        }
-        catch (IOException e)
-        {
-            Logger.getLogger(RetainedSizeCache.class.getName()).log(Level.WARNING,
-                            Messages.RetainedSizeCache_Warning_IgnoreError, e);
-        }
-    }
+			out.close();
 
-    private void doRead(File file, boolean readOldFormat)
-    {
-        DataInputStream in = null;
-        boolean delete = false;
+			isDirty = false;
+		} catch (IOException e) {
+			Logger.getLogger(RetainedSizeCache.class.getName()).log(Level.WARNING,
+					Messages.RetainedSizeCache_Warning_IgnoreError,
+					e);
+		}
+	}
 
-        try
-        {
-            id2size = new HashMapIntLong((int) file.length() / 8);
+	private void doRead(File file, boolean readOldFormat) {
+		DataInputStream in = null;
+		boolean delete = false;
 
-            in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
+		try {
+			id2size = new HashMapIntLong((int) file.length() / 8);
 
-            while (in.available() > 0)
-            {
-                int key = in.readInt();
-                long value = in.readLong();
-                if (value < 0 && readOldFormat)
-                    value = -(value - (Long.MIN_VALUE + 1));
-                id2size.put(key, value);
-            }
-        }
-        catch (IOException e)
-        {
-            Logger.getLogger(RetainedSizeCache.class.getName()).log(Level.WARNING,
-                            Messages.RetainedSizeCache_ErrorReadingRetainedSizes, e);
+			in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
 
-            // might have read corrupt data
-            id2size.clear();
-            delete = true;
-        }
-        finally
-        {
-            try
-            {
-                if (in != null)
-                {
-                    in.close();
-                }
-            }
-            catch (IOException ignore)
-            {
-                // $JL-EXC$
-            }
-            try
-            {
-                if (delete)
-                {
-                    file.delete();
-                }
-            }
-            catch (RuntimeException ignore)
-            {
-                // $JL-EXC$
-            }
-        }
-    }
+			while (in.available() > 0) {
+				int key = in.readInt();
+				long value = in.readLong();
+				if (value < 0 && readOldFormat)
+					value = -(value - (Long.MIN_VALUE + 1));
+				id2size.put(key, value);
+			}
+		} catch (IOException e) {
+			Logger.getLogger(RetainedSizeCache.class.getName()).log(Level.WARNING,
+					Messages.RetainedSizeCache_ErrorReadingRetainedSizes,
+					e);
 
-    private void readId2Size(String prefix)
-    {
-        File file = new File(filename);
-        if (file.exists())
-        {
-            doRead(file, false);
-        }
-        else
-        {
-            File legacyFile = new File(prefix + "i2s.index");//$NON-NLS-1$
-            if (legacyFile.exists())
-            {
-                doRead(legacyFile, true);
-            }
-            else
-            {
-                id2size = new HashMapIntLong();
-            }
-        }
-    }
+			// might have read corrupt data
+			id2size.clear();
+			delete = true;
+		} finally {
+			try {
+				if (in != null) {
+					in.close();
+				}
+			} catch (IOException ignore) {
+				// $JL-EXC$
+			}
+			try {
+				if (delete) {
+					file.delete();
+				}
+			} catch (RuntimeException ignore) {
+				// $JL-EXC$
+			}
+		}
+	}
 
-    public int size()
-    {
-        return id2size.size();
-    }
+	private void readId2Size(String prefix) {
+		File file = new File(filename);
+		if (file.exists()) {
+			doRead(file, false);
+		} else {
+			File legacyFile = new File(prefix + "i2s.index");//$NON-NLS-1$
+			if (legacyFile.exists()) {
+				doRead(legacyFile, true);
+			} else {
+				id2size = new HashMapIntLong();
+			}
+		}
+	}
 
-    public void unload() throws IOException
-    {
-        close();
-    }
+	public int size() {
+		return id2size.size();
+	}
 
-    public void delete()
-    {
-        close();
+	public void unload() throws IOException {
+		close();
+	}
 
-        File file = new File(filename);
-        file.delete();
-    }
+	public void delete() {
+		close();
+
+		File file = new File(filename);
+		file.delete();
+	}
 
 }

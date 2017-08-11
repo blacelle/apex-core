@@ -14,44 +14,37 @@ package org.eclipse.mat.util;
  * A progress listener that does very little, but passes on the essentials to the delegate.
  * @since 0.8
  */
-public class SilentProgressListener implements IProgressListener
-{
-    IProgressListener delegate;
+public class SilentProgressListener implements IProgressListener {
+	IProgressListener delegate;
 
-    public SilentProgressListener(IProgressListener delegate)
-    {
-        this.delegate = delegate;
-    }
+	public SilentProgressListener(IProgressListener delegate) {
+		this.delegate = delegate;
+	}
 
-    public void beginTask(String name, int totalWork)
-    {
-        delegate.subTask(name);
-    }
+	public void beginTask(String name, int totalWork) {
+		delegate.subTask(name);
+	}
 
-    public void done()
-    {}
+	public void done() {
+	}
 
-    public boolean isCanceled()
-    {
-        return delegate.isCanceled();
-    }
+	public boolean isCanceled() {
+		return delegate.isCanceled();
+	}
 
-    public void sendUserMessage(Severity severity, String message, Throwable exception)
-    {
-        delegate.sendUserMessage(severity, message, exception);
-    }
+	public void sendUserMessage(Severity severity, String message, Throwable exception) {
+		delegate.sendUserMessage(severity, message, exception);
+	}
 
-    public void setCanceled(boolean value)
-    {
-        delegate.setCanceled(value);
-    }
+	public void setCanceled(boolean value) {
+		delegate.setCanceled(value);
+	}
 
-    public void subTask(String name)
-    {
-        delegate.subTask(name);
-    }
+	public void subTask(String name) {
+		delegate.subTask(name);
+	}
 
-    public void worked(int work)
-    {}
+	public void worked(int work) {
+	}
 
 }

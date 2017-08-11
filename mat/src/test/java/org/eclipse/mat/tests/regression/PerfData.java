@@ -11,24 +11,20 @@
 
 package org.eclipse.mat.tests.regression;
 
-/* package */class PerfData
-{
-    private String testName;
-    private String time;
+/* package */class PerfData {
+	private String testName;
+	private String time;
 
-    public PerfData(String testName, String time)
-    {
-        this.testName = testName;
-        this.time = time;
-    }
+	public PerfData(String testName, String time) {
+		this.testName = testName;
+		this.time = time;
+	}
 
-    public String getTestName()
-    {
-        return testName;
-    }
+	public String getTestName() {
+		return testName;
+	}
 
-    public String getTime()
-    {
-        return time;
-    }
+	public String getTime() {
+		return time;
+	}
 }

@@ -31,8 +31,7 @@ import org.eclipse.mat.snapshot.model.IObject;
 import org.eclipse.mat.snapshot.model.NamedReference;
 import org.eclipse.mat.util.IProgressListener;
 
-public class MultiplePathsFromGCRootsComputerImpl implements IMultiplePathsFromGCRootsComputer
-{
+public class MultiplePathsFromGCRootsComputerImpl implements IMultiplePathsFromGCRootsComputer {
 
 	int[] objectIds; // the initial objects
 	Object[] paths; // paths for each of the objects
@@ -48,50 +47,44 @@ public class MultiplePathsFromGCRootsComputerImpl implements IMultiplePathsFromG
 	private static final int NOT_VISITED = -2;
 	private static final int NO_PARENT = -1;
 
-	public MultiplePathsFromGCRootsComputerImpl(int[] objectIds, Map<IClass, Set<String>> excludeMap, SnapshotImpl snapshot) throws SnapshotException
-	{
+	public MultiplePathsFromGCRootsComputerImpl(int[] objectIds,
+			Map<IClass, Set<String>> excludeMap,
+			SnapshotImpl snapshot) throws SnapshotException {
 		this.snapshot = snapshot;
 		this.objectIds = objectIds;
 		this.excludeMap = excludeMap;
 		outboundIndex = snapshot.getIndexManager().outbound;
 
-		if (excludeMap != null)
-		{
+		if (excludeMap != null) {
 			initExcludeInstances();
 		}
 	}
 
-	private void initExcludeInstances() throws SnapshotException
-	{
+	private void initExcludeInstances() throws SnapshotException {
 		excludeInstances = new BitField(snapshot.getIndexManager().o2address().size());
-		for (IClass clazz : excludeMap.keySet())
-		{
+		for (IClass clazz : excludeMap.keySet()) {
 			int[] objects = clazz.getObjectIds();
-			for (int objId : objects)
-			{
+			for (int objId : objects) {
 				excludeInstances.set(objId);
 			}
 		}
 	}
 
-	private void computePaths(IProgressListener progressListener) throws SnapshotException
-	{
+	private void computePaths(IProgressListener progressListener) throws SnapshotException {
 		ArrayList<int[]> pathsList = new ArrayList<int[]>();
 
 		// make a breadth first search for the objects, starting from the roots
 		int[] parent = bfs(progressListener);
 
 		// then get the shortest path per object
-		for (int i = 0; i < objectIds.length; i++)
-		{
+		for (int i = 0; i < objectIds.length; i++) {
 			int[] path = getPathFromBFS(objectIds[i], parent);
 
 			/*
 			 * if there is an exclude filter, for some objects there could be no
 			 * path, i.e. null is expected then
 			 */
-			if (path != null)
-			{
+			if (path != null) {
 				pathsList.add(path);
 			}
 		}
@@ -100,71 +93,63 @@ public class MultiplePathsFromGCRootsComputerImpl implements IMultiplePathsFromG
 		paths = pathsList.toArray();
 	}
 
-	public MultiplePathsFromGCRootsRecord[] getPathsByGCRoot(IProgressListener progressListener) throws SnapshotException
-	{
-		if (!pathsCalculated)
-		{
+	public MultiplePathsFromGCRootsRecord[] getPathsByGCRoot(IProgressListener progressListener)
+			throws SnapshotException {
+		if (!pathsCalculated) {
 			computePaths(progressListener);
 		}
 
 		MultiplePathsFromGCRootsRecord dummy = new MultiplePathsFromGCRootsRecord(-1, -1, snapshot);
-		for (int i = 0; i < paths.length; i++)
-		{
+		for (int i = 0; i < paths.length; i++) {
 			dummy.addPath((int[]) paths[i]);
 		}
 
 		return dummy.nextLevel();
 	}
 
-	public Object[] getAllPaths(IProgressListener progressListener) throws SnapshotException
-	{
-		if (!pathsCalculated)
-		{
+	public Object[] getAllPaths(IProgressListener progressListener) throws SnapshotException {
+		if (!pathsCalculated) {
 			computePaths(progressListener);
 		}
 		return paths;
 	}
 
-	public MultiplePathsFromGCRootsClassRecord[] getPathsGroupedByClass(boolean startFromTheGCRoots, IProgressListener progressListener)
-			throws SnapshotException
-	{
-		if (!pathsCalculated)
-		{
+	public MultiplePathsFromGCRootsClassRecord[] getPathsGroupedByClass(boolean startFromTheGCRoots,
+			IProgressListener progressListener) throws SnapshotException {
+		if (!pathsCalculated) {
 			computePaths(progressListener);
 		}
 
-		MultiplePathsFromGCRootsClassRecord dummy = new MultiplePathsFromGCRootsClassRecord(null, -1, startFromTheGCRoots, snapshot);
-		for (int i = 0; i < paths.length; i++)
-		{
+		MultiplePathsFromGCRootsClassRecord dummy =
+				new MultiplePathsFromGCRootsClassRecord(null, -1, startFromTheGCRoots, snapshot);
+		for (int i = 0; i < paths.length; i++) {
 			dummy.addPath((int[]) paths[i]);
 		}
 
 		return dummy.nextLevel();
 	}
 
-	private boolean refersOnlyThroughExcluded(int referrerId, int referentId) throws SnapshotException
-	{
-		if (!excludeInstances.get(referrerId)) return false;
+	private boolean refersOnlyThroughExcluded(int referrerId, int referentId) throws SnapshotException {
+		if (!excludeInstances.get(referrerId))
+			return false;
 
 		IObject referrerObject = snapshot.getObject(referrerId);
 		Set<String> excludeFields = excludeMap.get(referrerObject.getClazz());
-		if (excludeFields == null) return true; // treat null as all fields
+		if (excludeFields == null)
+			return true; // treat null as all fields
 
 		long referentAddr = snapshot.mapIdToAddress(referentId);
 
 		List<NamedReference> refs = referrerObject.getOutboundReferences();
-		for (NamedReference reference : refs)
-		{
-			if (referentAddr == reference.getObjectAddress() && !excludeFields.contains(reference.getName()))
-			{
+		for (NamedReference reference : refs) {
+			if (referentAddr == reference.getObjectAddress() && !excludeFields.contains(reference.getName())) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	private int[] bfs(IProgressListener progressListener) throws SnapshotException
-	{
+	private int[] bfs(IProgressListener progressListener) throws SnapshotException {
 		// number objects in the heap
 		final int numObjects = snapshot.getSnapshotInfo().getNumberOfObjects();
 		final boolean skipReferences = excludeMap != null; // should some paths
@@ -179,9 +164,9 @@ public class MultiplePathsFromGCRootsComputerImpl implements IMultiplePathsFromG
 
 		int count = 0; // the number of distinct objects whose paths should be
 		// calculated
-		for (int i : objectIds)
-		{
-			if (!toBeChecked[i]) count++;
+		for (int i : objectIds) {
+			if (!toBeChecked[i])
+				count++;
 			toBeChecked[i] = true;
 		}
 
@@ -190,8 +175,7 @@ public class MultiplePathsFromGCRootsComputerImpl implements IMultiplePathsFromG
 
 		// initially queue all GC roots
 		int[] gcRoots = snapshot.getGCRoots();
-		for (int root : gcRoots)
-		{
+		for (int root : gcRoots) {
 			fifo.put(root);
 			parent[root] = NO_PARENT;
 		}
@@ -204,25 +188,21 @@ public class MultiplePathsFromGCRootsComputerImpl implements IMultiplePathsFromG
 		progressListener.beginTask(Messages.MultiplePathsFromGCRootsComputerImpl_FindingPaths, steps);
 
 		// loop until the queue is empty, or all necessary paths are found
-		while (fifo.size() > 0 && count > 0)
-		{
+		while (fifo.size() > 0 && count > 0) {
 			int objectId = fifo.get();
 
 			// was some of the objects of interest reached?
-			if (toBeChecked[objectId])
-			{
+			if (toBeChecked[objectId]) {
 				count--; // reduce the remaining work
 			}
 
 			// queue any unprocessed referenced object
 			int[] outbound = outboundIndex.get(objectId);
-			for (int child : outbound)
-			{
-				if (parent[child] == NOT_VISITED)
-				{
-					if (skipReferences)
-					{
-						if (refersOnlyThroughExcluded(objectId, child)) continue;
+			for (int child : outbound) {
+				if (parent[child] == NOT_VISITED) {
+					if (skipReferences) {
+						if (refersOnlyThroughExcluded(objectId, child))
+							continue;
 					}
 					parent[child] = objectId;
 					fifo.put(child);
@@ -230,9 +210,9 @@ public class MultiplePathsFromGCRootsComputerImpl implements IMultiplePathsFromG
 			}
 
 			countVisitedObjects++;
-			if (countVisitedObjects % reportFrequency == 0)
-			{
-				if (progressListener.isCanceled()) throw new IProgressListener.OperationCanceledException();
+			if (countVisitedObjects % reportFrequency == 0) {
+				if (progressListener.isCanceled())
+					throw new IProgressListener.OperationCanceledException();
 				progressListener.worked(1);
 			}
 		}
@@ -252,15 +232,14 @@ public class MultiplePathsFromGCRootsComputerImpl implements IMultiplePathsFromG
 	 * @return int[] the shortest path from a GC root. The object of interest is
 	 * at index 0, the GC root at index length-1
 	 */
-	private int[] getPathFromBFS(int objectId, int[] parent)
-	{
+	private int[] getPathFromBFS(int objectId, int[] parent) {
 		// check if the object wasn't reached at all. This may happen if some
 		// paths are excluded
-		if (parent[objectId] == NOT_VISITED) return null;
+		if (parent[objectId] == NOT_VISITED)
+			return null;
 
 		ArrayInt path = new ArrayInt();
-		while (objectId != NO_PARENT)
-		{
+		while (objectId != NO_PARENT) {
 			path.add(objectId);
 			objectId = parent[objectId];
 		}

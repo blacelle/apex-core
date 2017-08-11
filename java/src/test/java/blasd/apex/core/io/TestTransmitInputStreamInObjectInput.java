@@ -31,6 +31,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import org.awaitility.Awaitility;
 import org.junit.Assert;
@@ -54,13 +56,13 @@ public class TestTransmitInputStreamInObjectInput {
 		byte[] bytesFrance = ApexSerializationHelper.toBytes(ImmutableMap.of("k1", "v1"));
 		byte[] bytesUs = ApexSerializationHelper.toBytes(ImmutableMap.of("k2", "v2"));
 
-		Assert.assertTrue(bytesFrance.length < ApexObjectStreamHelper.DEFAULT_CHUNK_SIZE);
-		Assert.assertTrue(bytesUs.length < ApexObjectStreamHelper.DEFAULT_CHUNK_SIZE);
+		Assert.assertTrue(bytesFrance.length < ApexObjectInputHelper.DEFAULT_CHUNK_SIZE);
+		Assert.assertTrue(bytesUs.length < ApexObjectInputHelper.DEFAULT_CHUNK_SIZE);
 
 		ObjectInputHandlingInputStream objectInput;
 		try (ObjectOutputStream oos = new ObjectOutputStream(pos)) {
 			// Write an InputStream
-			ApexObjectStreamHelper.writeInputStream(oos, new ByteArrayInputStream(bytesFrance));
+			ApexObjectInputHelper.writeInputStream(oos, new ByteArrayInputStream(bytesFrance));
 
 			// Ensure everything is submitted as we will read the pipe in the same thread
 			oos.flush();
@@ -83,7 +85,7 @@ public class TestTransmitInputStreamInObjectInput {
 
 			// We write a second block, but read it after closing ObjectOutputStream: the inputStream should remain
 			// open
-			ApexObjectStreamHelper.writeInputStream(oos, new ByteArrayInputStream(bytesUs));
+			ApexObjectInputHelper.writeInputStream(oos, new ByteArrayInputStream(bytesUs));
 		}
 
 		// ObjectOutputStream is closed: pipedOutputStreamIsOpen should end being switched to false
@@ -125,7 +127,7 @@ public class TestTransmitInputStreamInObjectInput {
 		ObjectInputHandlingInputStream objectInput;
 		try (ObjectOutputStream oos = new ObjectOutputStream(pos)) {
 			// Write an InputStream
-			ApexObjectStreamHelper.writeInputStream(oos, new ByteArrayInputStream(bytesFrance), chunkSize);
+			ApexObjectInputHelper.writeInputStream(oos, new ByteArrayInputStream(bytesFrance), chunkSize);
 
 			// Ensure everything is submitted as we will read the pipe in the same thread
 			oos.flush();
@@ -146,7 +148,7 @@ public class TestTransmitInputStreamInObjectInput {
 
 			// We write a second block, but read it after closing ObjectOutputStream: the inputStream should remain
 			// open
-			ApexObjectStreamHelper.writeInputStream(oos, new ByteArrayInputStream(bytesUs));
+			ApexObjectInputHelper.writeInputStream(oos, new ByteArrayInputStream(bytesUs));
 		}
 
 		// ObjectOutputStream is closed: pipedOutputStreamIsOpen should end being switched to false
@@ -178,13 +180,13 @@ public class TestTransmitInputStreamInObjectInput {
 		byte[] bytesFrance = ApexSerializationHelper.toBytes(ImmutableMap.of("k1", "v1"));
 		byte[] bytesUs = ApexSerializationHelper.toBytes(ImmutableMap.of("k2", "v2"));
 
-		Assert.assertTrue(bytesFrance.length < ApexObjectStreamHelper.DEFAULT_CHUNK_SIZE);
-		Assert.assertTrue(bytesUs.length < ApexObjectStreamHelper.DEFAULT_CHUNK_SIZE);
+		Assert.assertTrue(bytesFrance.length < ApexObjectInputHelper.DEFAULT_CHUNK_SIZE);
+		Assert.assertTrue(bytesUs.length < ApexObjectInputHelper.DEFAULT_CHUNK_SIZE);
 
 		try (ObjectOutputStream oos = new ObjectOutputStream(pos)) {
 			// Write consecuritvelly @ inputStreams
-			ApexObjectStreamHelper.writeInputStream(oos, new ByteArrayInputStream(bytesFrance));
-			ApexObjectStreamHelper.writeInputStream(oos, new ByteArrayInputStream(bytesUs));
+			ApexObjectInputHelper.writeInputStream(oos, new ByteArrayInputStream(bytesFrance));
+			ApexObjectInputHelper.writeInputStream(oos, new ByteArrayInputStream(bytesUs));
 		}
 
 		try (ObjectInputHandlingInputStream objectInput =
@@ -226,52 +228,52 @@ public class TestTransmitInputStreamInObjectInput {
 	@SuppressWarnings("resource")
 	@Test
 	public void testExceptionInIS() throws IOException, ClassNotFoundException {
-		// We ensure a large buffer as we will have a large overhead because of chunks
-		PipedInputStream pis = new PipedInputStream(IApexMemoryConstants.MB_INT);
-		PipedOutputStream pos = new PipedOutputStream(pis);
-
 		byte[] bytesFrance = ApexSerializationHelper.toBytes(ImmutableMap.of("k1", "v1"));
 
-		// We force very small chunks: very slow but good edge-case to test
-		int chunkSize = 1;
-		Assert.assertTrue(bytesFrance.length > chunkSize);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+			// Write an InputStream: ensure it is split in multiple chunks
+			ApexObjectInputHelper.writeInputStream(oos, new ByteArrayInputStream(bytesFrance), bytesFrance.length / 2);
+		}
 
 		ObjectInputHandlingInputStream objectInput;
-		try (ObjectOutputStream oos = new ObjectOutputStream(pos)) {
-			// Write an InputStream
-			ApexObjectStreamHelper.writeInputStream(oos, new ByteArrayInputStream(bytesFrance), chunkSize);
+		byte[] bytesToTransmit = baos.toByteArray();
+		objectInput =
+				new ObjectInputHandlingInputStream(new ObjectInputStream(new ByteArrayInputStream(bytesToTransmit))) {
+					@Override
+					protected PipedInputStream makePipedInputStream() {
+						// Prevent all chunks to be pumped right away
+						return new PipedInputStream(bytesFrance.length / 2);
+					}
+				};
+		Object nextToRead = objectInput.readObject();
 
-			// Ensure everything is submitted as we will read the pipe in the same thread
-			oos.flush();
+		Assert.assertNotNull(nextToRead);
+		Assert.assertTrue(nextToRead instanceof InputStream);
+		InputStream readIS = (InputStream) nextToRead;
 
-			objectInput = new ObjectInputHandlingInputStream(new ObjectInputStream(pis));
-			Object nextToRead = objectInput.readObject();
-
-			Assert.assertNotNull(nextToRead);
-			Assert.assertTrue(nextToRead instanceof InputStream);
-			InputStream readIS = (InputStream) nextToRead;
-
-			// ERROR BLOCK: we read the underlying IS: it will corrupt the flow
-			// TODO: this call sometimes fails, leading to an infinity-wait in .read
-			Awaitility.await().until(() -> pis.read() >= -1);
-
+		// Here, we have written only the first chunk in the IS
+		{
 			// Check we have read some byte BEFORE having done reading the pis
 			Assert.assertTrue(objectInput.pipedOutputStreamIsOpen.get());
 
-			// Ensure we are retrieving the whole chunk
-			byte[] transmitted = ByteStreams.toByteArray(readIS);
-			Assert.assertTrue(bytesFrance.length > transmitted.length);
-			Awaitility.await().untilFalse(objectInput.pipedOutputStreamIsOpen);
+			// ERROR BLOCK: we corrupt the data, including data not submitted yet to Pipe
+			ByteBuffer.wrap(bytesToTransmit).put(new byte[bytesToTransmit.length]);
+		}
 
-			Exception exceptionToRethrow = objectInput.ouch.get();
-			Assert.assertNotNull(exceptionToRethrow);
+		// Ensure we are retrieving the whole chunk
+		byte[] transmitted = ByteStreams.toByteArray(readIS);
+		Assert.assertTrue(bytesFrance.length > transmitted.length);
+		Awaitility.await().untilFalse(objectInput.pipedOutputStreamIsOpen);
 
-			try {
-				objectInput.readObject();
-				Assert.fail("Should have thrown");
-			} catch (Exception e) {
-				Assert.assertSame(exceptionToRethrow, e.getCause());
-			}
+		Exception exceptionToRethrow = objectInput.ouch.get();
+		Assert.assertNotNull(exceptionToRethrow);
+
+		try {
+			objectInput.readObject();
+			Assert.fail("Should have thrown");
+		} catch (Exception e) {
+			Assert.assertSame(exceptionToRethrow, e.getCause());
 		}
 	}
 
@@ -287,11 +289,11 @@ public class TestTransmitInputStreamInObjectInput {
 		}
 
 		// By default not shutdown
-		Assert.assertFalse(objectInput.inputStreamFiller.isShutdown());
+		Assert.assertFalse(objectInput.inputStreamFiller.get().isShutdown());
 
 		// Closing the OOS has shutdown the ES
 		objectInput.close();
-		Assert.assertTrue(objectInput.inputStreamFiller.isShutdown());
+		Assert.assertTrue(objectInput.inputStreamFiller.get().isShutdown());
 	}
 
 	@Test
@@ -308,11 +310,11 @@ public class TestTransmitInputStreamInObjectInput {
 		}
 
 		// By default not shutdown
-		Assert.assertFalse(objectInput.inputStreamFiller.isShutdown());
+		Assert.assertFalse(objectInput.inputStreamFiller.get().isShutdown());
 
 		// Closing the OOS has NOT shutdown the ES
 		objectInput.close();
-		Assert.assertFalse(objectInput.inputStreamFiller.isShutdown());
+		Assert.assertFalse(objectInput.inputStreamFiller.get().isShutdown());
 	}
 
 	// Ensure we do not leak the ExecutorService used to transfer bytes
@@ -324,7 +326,7 @@ public class TestTransmitInputStreamInObjectInput {
 
 		// The leak is triggered by transmitting InputStream
 		try (ObjectOutputStream o = new ObjectOutputStream(baos)) {
-			ApexObjectStreamHelper.writeInputStream(o,
+			ApexObjectInputHelper.writeInputStream(o,
 					new ByteArrayInputStream(ApexSerializationHelper.toBytes(serializable)));
 		}
 
@@ -332,7 +334,7 @@ public class TestTransmitInputStreamInObjectInput {
 		byte[] byteArray = baos.toByteArray();
 
 		for (int i = 0; i < 100 * 1000; i++) {
-			try (ObjectInput ois = ApexObjectStreamHelper
+			try (ObjectInput ois = ApexObjectInputHelper
 					.wrapToHandleInputStream(new ObjectInputStream(new ByteArrayInputStream(byteArray)))) {
 				InputStream is = (InputStream) ois.readObject();
 

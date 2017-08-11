@@ -19,37 +19,36 @@ import org.eclipse.mat.util.IProgressListener;
 /**
  * Part of the parser which builds the indexes
  */
-public interface IIndexBuilder
-{
-    /**
-     * initialize with file and prefix (needed for naming conventions)
-     * @param file the dump file
-     * @param prefix used to build index files
-     * @throws SnapshotException
-     * @throws IOException
-     */
-    void init(File file, String prefix) throws SnapshotException, IOException;
+public interface IIndexBuilder {
+	/**
+	 * initialize with file and prefix (needed for naming conventions)
+	 * @param file the dump file
+	 * @param prefix used to build index files
+	 * @throws SnapshotException
+	 * @throws IOException
+	 */
+	void init(File file, String prefix) throws SnapshotException, IOException;
 
-    /**
-     * pass1 and pass2 parsing 
-     * @param index
-     * @param listener for progress and error reporting
-     * @throws SnapshotException
-     * @throws IOException
-     */
-    void fill(IPreliminaryIndex index, IProgressListener listener) throws SnapshotException, IOException;
+	/**
+	 * pass1 and pass2 parsing 
+	 * @param index
+	 * @param listener for progress and error reporting
+	 * @throws SnapshotException
+	 * @throws IOException
+	 */
+	void fill(IPreliminaryIndex index, IProgressListener listener) throws SnapshotException, IOException;
 
-    /**
-     * Memory Analyzer has discard unreachable objects, so the parser may need to known
-     * the discarded objects
-     * @param purgedMapping mapping from old id to new id, -1 indicates object has been discarded
-     * @param listener for progress and error reporting
-     * @throws IOException
-     */
-    void clean(final int[] purgedMapping, IProgressListener listener) throws IOException;
+	/**
+	 * Memory Analyzer has discard unreachable objects, so the parser may need to known
+	 * the discarded objects
+	 * @param purgedMapping mapping from old id to new id, -1 indicates object has been discarded
+	 * @param listener for progress and error reporting
+	 * @throws IOException
+	 */
+	void clean(final int[] purgedMapping, IProgressListener listener) throws IOException;
 
-    /**
-     * called in case of error to delete any files / close any file handles
-     */
-    void cancel();
+	/**
+	 * called in case of error to delete any files / close any file handles
+	 */
+	void cancel();
 }

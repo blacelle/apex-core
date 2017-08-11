@@ -18,25 +18,21 @@ import org.eclipse.mat.snapshot.model.IStackFrame;
  *           be subject of change
  * 
  */
-class StackFrameImpl implements IStackFrame
-{
+class StackFrameImpl implements IStackFrame {
 	private String text;
 
 	private int[] localObjectIds;
 
-	public StackFrameImpl(String text, int[] localObjectIds)
-	{
+	public StackFrameImpl(String text, int[] localObjectIds) {
 		this.text = text;
 		this.localObjectIds = localObjectIds;
 	}
 
-	public int[] getLocalObjectsIds()
-	{
+	public int[] getLocalObjectsIds() {
 		return localObjectIds == null ? new int[0] : localObjectIds;
 	}
 
-	public String getText()
-	{
+	public String getText() {
 		return text;
 	}
 

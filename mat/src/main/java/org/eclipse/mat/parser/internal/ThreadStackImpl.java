@@ -19,24 +19,20 @@ import org.eclipse.mat.snapshot.model.IThreadStack;
  *           be subject of change
  * 
  */
-class ThreadStackImpl implements IThreadStack
-{
+class ThreadStackImpl implements IThreadStack {
 	private int threadId;
 	private IStackFrame[] stackFrames;
 
-	public ThreadStackImpl(int threadId, StackFrameImpl[] stackFrames)
-	{
+	public ThreadStackImpl(int threadId, StackFrameImpl[] stackFrames) {
 		this.threadId = threadId;
 		this.stackFrames = stackFrames;
 	}
 
-	public IStackFrame[] getStackFrames()
-	{
+	public IStackFrame[] getStackFrames() {
 		return stackFrames;
 	}
 
-	public int getThreadId()
-	{
+	public int getThreadId() {
 		return threadId;
 	}
 

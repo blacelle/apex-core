@@ -36,104 +36,95 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(value = Parameterized.class)
-public class TestInstanceSizes
-{
-    private static final Pattern PATTERN_OBJ_ARRAY = Pattern.compile("^(\\[+)L(.*);$"); //$NON-NLS-1$
-    private static final Pattern PATTERN_PRIMITIVE_ARRAY = Pattern.compile("^(\\[+)(.)$"); //$NON-NLS-1$
+public class TestInstanceSizes {
+	private static final Pattern PATTERN_OBJ_ARRAY = Pattern.compile("^(\\[+)L(.*);$"); //$NON-NLS-1$
+	private static final Pattern PATTERN_PRIMITIVE_ARRAY = Pattern.compile("^(\\[+)(.)$"); //$NON-NLS-1$
 
-    @Parameters
-    public static Collection<Object[]> data()
-    {
-        return Arrays.asList(new Object[][] {
-                        {TestSnapshots.HISTOGRAM_SUN_JDK5_13_32BIT, TestSnapshots.SUN_JDK5_13_32BIT, 1},
-                        {TestSnapshots.HISTOGRAM_SUN_JDK6_18_32BIT, TestSnapshots.SUN_JDK6_18_32BIT, 0},
-                        {TestSnapshots.HISTOGRAM_SUN_JDK6_18_64BIT, TestSnapshots.SUN_JDK6_18_64BIT, 0},
-                        {TestSnapshots.HISTOGRAM_SUN_JDK6_30_64BIT_COMPRESSED_OOPS, TestSnapshots.SUN_JDK6_30_64BIT_COMPRESSED_OOPS, 0},
-                        {TestSnapshots.HISTOGRAM_SUN_JDK6_30_64BIT_NOCOMPRESSED_OOPS, TestSnapshots.SUN_JDK6_30_64BIT_NOCOMPRESSED_OOPS, 0},
-        });
-    }
+	@Parameters
+	public static Collection<Object[]> data() {
+		return Arrays.asList(
+				new Object[][] { { TestSnapshots.HISTOGRAM_SUN_JDK5_13_32BIT, TestSnapshots.SUN_JDK5_13_32BIT, 1 },
+						{ TestSnapshots.HISTOGRAM_SUN_JDK6_18_32BIT, TestSnapshots.SUN_JDK6_18_32BIT, 0 },
+						{ TestSnapshots.HISTOGRAM_SUN_JDK6_18_64BIT, TestSnapshots.SUN_JDK6_18_64BIT, 0 },
+						{ TestSnapshots.HISTOGRAM_SUN_JDK6_30_64BIT_COMPRESSED_OOPS,
+								TestSnapshots.SUN_JDK6_30_64BIT_COMPRESSED_OOPS,
+								0 },
+						{ TestSnapshots.HISTOGRAM_SUN_JDK6_30_64BIT_NOCOMPRESSED_OOPS,
+								TestSnapshots.SUN_JDK6_30_64BIT_NOCOMPRESSED_OOPS,
+								0 }, });
+	}
 
-    String hist;
-    String dump;
-    int expectedErrors;
-    private File histogramFile;
-    private ISnapshot snapshot;
+	String hist;
+	String dump;
+	int expectedErrors;
+	private File histogramFile;
+	private ISnapshot snapshot;
 
-    public TestInstanceSizes(String histogram, String fn, int e)
-    {
-        hist = histogram;
-        dump = fn;
-        histogramFile = TestSnapshots.getResourceFile(hist);
-        expectedErrors = e;
-        Map<String, String> options = new HashMap<String, String>();
-        options.put("keep_unreachable_objects", "true");
-        snapshot = TestSnapshots.getSnapshot(dump, options, true);
-    }
+	public TestInstanceSizes(String histogram, String fn, int e) {
+		hist = histogram;
+		dump = fn;
+		histogramFile = TestSnapshots.getResourceFile(hist);
+		expectedErrors = e;
+		Map<String, String> options = new HashMap<String, String>();
+		options.put("keep_unreachable_objects", "true");
+		snapshot = TestSnapshots.getSnapshot(dump, options, true);
+	}
 
-    @Test
-    public void testHistogramSizes() throws Exception
-    {
-        doTest(histogramFile, snapshot);
-    }
+	@Test
+	public void testHistogramSizes() throws Exception {
+		doTest(histogramFile, snapshot);
+	}
 
-    /**
-     * Convert jmap histogram class name to MAT name See
-     * {@link org.eclipse.mat.hprof.Pass1Parser}.
-     * 
-     * @param className
-     * @return
-     */
-    private String fixArrayName(String className)
-    {
-        if (className.charAt(0) == '[') // quick check if array at hand
-        {
-            // fix object class names
-            Matcher matcher = PATTERN_OBJ_ARRAY.matcher(className);
-            if (matcher.matches())
-            {
-                int l = matcher.group(1).length();
-                className = matcher.group(2);
-                for (int ii = 0; ii < l; ii++)
-                    className += "[]"; //$NON-NLS-1$
-            }
-
-            // primitive arrays
-            matcher = PATTERN_PRIMITIVE_ARRAY.matcher(className);
-            if (matcher.matches())
-            {
-                int count = matcher.group(1).length() - 1;
-                className = "unknown[]"; //$NON-NLS-1$
-
-                char signature = matcher.group(2).charAt(0);
-                for (int ii = 0; ii < IPrimitiveArray.SIGNATURES.length; ii++)
-                {
-                    if (IPrimitiveArray.SIGNATURES[ii] == (byte) signature)
-                    {
-                        className = IPrimitiveArray.TYPE[ii];
-                        break;
-                    }
-                }
-
-                for (int ii = 0; ii < count; ii++)
-                    className += "[]"; //$NON-NLS-1$
-            }
-        }
-        return className;
-    }
-
-	private void doTest(File histogramFile, ISnapshot snapshot) throws Exception
-	{
-		BufferedReader in = null;
-		try
+	/**
+	 * Convert jmap histogram class name to MAT name See
+	 * {@link org.eclipse.mat.hprof.Pass1Parser}.
+	 * 
+	 * @param className
+	 * @return
+	 */
+	private String fixArrayName(String className) {
+		if (className.charAt(0) == '[') // quick check if array at hand
 		{
+			// fix object class names
+			Matcher matcher = PATTERN_OBJ_ARRAY.matcher(className);
+			if (matcher.matches()) {
+				int l = matcher.group(1).length();
+				className = matcher.group(2);
+				for (int ii = 0; ii < l; ii++)
+					className += "[]"; //$NON-NLS-1$
+			}
+
+			// primitive arrays
+			matcher = PATTERN_PRIMITIVE_ARRAY.matcher(className);
+			if (matcher.matches()) {
+				int count = matcher.group(1).length() - 1;
+				className = "unknown[]"; //$NON-NLS-1$
+
+				char signature = matcher.group(2).charAt(0);
+				for (int ii = 0; ii < IPrimitiveArray.SIGNATURES.length; ii++) {
+					if (IPrimitiveArray.SIGNATURES[ii] == (byte) signature) {
+						className = IPrimitiveArray.TYPE[ii];
+						break;
+					}
+				}
+
+				for (int ii = 0; ii < count; ii++)
+					className += "[]"; //$NON-NLS-1$
+			}
+		}
+		return className;
+	}
+
+	private void doTest(File histogramFile, ISnapshot snapshot) throws Exception {
+		BufferedReader in = null;
+		try {
 			in = new BufferedReader(new FileReader(histogramFile));
-			
+
 			String line;
 			int errorCount = 0;
 			StringBuilder errorMessage = new StringBuilder();
-			
-			while ((line = in.readLine()) != null)
-			{
+
+			while ((line = in.readLine()) != null) {
 				StringTokenizer tokenizer = new StringTokenizer(line);
 				String firstToken = tokenizer.nextToken();
 				if (firstToken.indexOf(':') != -1)
@@ -142,54 +133,52 @@ public class TestInstanceSizes
 				long shallowSize = Long.parseLong(tokenizer.nextToken());
 				long instanceSize = shallowSize / numObjects;
 				String className = tokenizer.nextToken();
-//				System.out.println(className + " " + instanceSize);
+				//				System.out.println(className + " " + instanceSize);
 				className = fixArrayName(className);
-				
+
 				if (className.startsWith("<") || className.equals("java.lang.Class"))
 					continue;
-				
+
 				Collection<IClass> classes = snapshot.getClassesByName(className, false);
-				if (classes == null || classes.size() == 0)
-				{
+				if (classes == null || classes.size() == 0) {
 					System.out.println(MessageUtil.format("Cannot find class [{0}] in heap dump", className));
 					continue;
 				}
 				IClass clazz = classes.iterator().next();
-				if (clazz.isArrayType())
-				{
-				    if (numObjects == clazz.getNumberOfObjects())
-				    {
-				        int o[] = clazz.getObjectIds();
-				        long actual = snapshot.getHeapSize(o);
-				        if (actual != shallowSize)
-				        {
-				            errorCount++;
-				            errorMessage.append(MessageUtil.format("Array class {0} expected total instances size {1} but got {2}\r\n", className, shallowSize, actual));
-				        }
-				    }
-				}
-				else
-				{
-				    if (clazz.getHeapSizePerInstance() != instanceSize)
-				    {
-				        errorCount++;
-				        errorMessage.append(MessageUtil.format("Class [{0}] expected size {1} but got {2}\r\n", className, instanceSize, clazz.getHeapSizePerInstance()));
-				    }
+				if (clazz.isArrayType()) {
+					if (numObjects == clazz.getNumberOfObjects()) {
+						int o[] = clazz.getObjectIds();
+						long actual = snapshot.getHeapSize(o);
+						if (actual != shallowSize) {
+							errorCount++;
+							errorMessage.append(MessageUtil.format(
+									"Array class {0} expected total instances size {1} but got {2}\r\n",
+									className,
+									shallowSize,
+									actual));
+						}
+					}
+				} else {
+					if (clazz.getHeapSizePerInstance() != instanceSize) {
+						errorCount++;
+						errorMessage.append(MessageUtil.format("Class [{0}] expected size {1} but got {2}\r\n",
+								className,
+								instanceSize,
+								clazz.getHeapSizePerInstance()));
+					}
 				}
 			}
-			
-			Assert.assertEquals("Unexpected number of failures: for the following classes the instance size isn't correct\r\n" + errorMessage.toString(), expectedErrors, errorCount);
-		}
-		finally
-		{
-			if (in != null)
-			{
-				try
-				{
+
+			Assert.assertEquals(
+					"Unexpected number of failures: for the following classes the instance size isn't correct\r\n"
+							+ errorMessage.toString(),
+					expectedErrors,
+					errorCount);
+		} finally {
+			if (in != null) {
+				try {
 					in.close();
-				}
-				catch (IOException ignore)
-				{
+				} catch (IOException ignore) {
 					// ignore
 				}
 			}

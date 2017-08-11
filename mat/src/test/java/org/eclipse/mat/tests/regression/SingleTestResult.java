@@ -13,37 +13,31 @@ package org.eclipse.mat.tests.regression;
 import java.util.ArrayList;
 import java.util.List;
 
-/*package*/class SingleTestResult
-{
-    private String testName;
-    private String result;
-    private List<Difference> differences;
+/*package*/class SingleTestResult {
+	private String testName;
+	private String result;
+	private List<Difference> differences;
 
-    public SingleTestResult(String testName, String result, List<Difference> differences)
-    {
-        this.testName = testName;
-        this.result = result;
-        this.differences = differences;
-    }
+	public SingleTestResult(String testName, String result, List<Difference> differences) {
+		this.testName = testName;
+		this.result = result;
+		this.differences = differences;
+	}
 
-    public String getTestName()
-    {
-        return testName;
-    }
+	public String getTestName() {
+		return testName;
+	}
 
-    public String getResult()
-    {
-        return result;
-    }
+	public String getResult() {
+		return result;
+	}
 
-    public List<Difference> getDifferences()
-    {
-        return differences == null ? new ArrayList<Difference>(0) : differences;
-    }
+	public List<Difference> getDifferences() {
+		return differences == null ? new ArrayList<Difference>(0) : differences;
+	}
 
-    public boolean isSuccessful()
-    {
-        return differences == null || differences.isEmpty();
-    }
+	public boolean isSuccessful() {
+		return differences == null || differences.isEmpty();
+	}
 
 }

@@ -29,114 +29,104 @@ import org.eclipse.mat.util.MessageUtil;
  * or a specific class loader (where the appropriate field holding its name and
  * thereby deployment unit is evaluated).
  */
-public final class ClassSpecificNameResolverRegistry
-{
-    // //////////////////////////////////////////////////////////////
-    // Singleton
-    // //////////////////////////////////////////////////////////////
+public final class ClassSpecificNameResolverRegistry {
+	// //////////////////////////////////////////////////////////////
+	// Singleton
+	// //////////////////////////////////////////////////////////////
 
-    /** inner class because RegistryReader API not public */
-    private static class RegistryImpl
-    {
-        // For registerResolver()
-        private Map<String, IClassSpecificNameResolver> resolvers;
+	/** inner class because RegistryReader API not public */
+	private static class RegistryImpl {
+		// For registerResolver()
+		private Map<String, IClassSpecificNameResolver> resolvers;
 
-        public RegistryImpl()
-        {
-            // For registerResolver()
-            resolvers = new HashMap<String, IClassSpecificNameResolver>();
-        }
+		public RegistryImpl() {
+			// For registerResolver()
+			resolvers = new HashMap<String, IClassSpecificNameResolver>();
+		}
 
-        private String doResolve(IObject object)
-        {
-            try
-            {
-                IClass clazz = object.getClazz();
-                while (clazz != null)
-                {
-                    // For registerResolver()
-                    IClassSpecificNameResolver resolver = resolvers.get(clazz.getName());
-                    if (resolver != null) { return resolver.resolve(object); }
+		private String doResolve(IObject object) {
+			try {
+				IClass clazz = object.getClazz();
+				while (clazz != null) {
+					// For registerResolver()
+					IClassSpecificNameResolver resolver = resolvers.get(clazz.getName());
+					if (resolver != null) {
+						return resolver.resolve(object);
+					}
 
-                    resolver = lookup(clazz.getName());
-                    if (resolver != null) { return resolver.resolve(object); }
-                    clazz = clazz.getSuperClass();
-                }
-                return null;
-            }
-            catch (RuntimeException e)
-            {
-                Logger.getLogger(ClassSpecificNameResolverRegistry.class.getName()).log(
-                                Level.SEVERE,
-                                MessageUtil.format(Messages.ClassSpecificNameResolverRegistry_ErrorMsg_DuringResolving,
-                                                object.getTechnicalName()), e);
-                return null;
-            }
-            catch (SnapshotException e)
-            {
-                Logger.getLogger(ClassSpecificNameResolverRegistry.class.getName()).log(
-                                Level.SEVERE,
-                                MessageUtil.format(Messages.ClassSpecificNameResolverRegistry_ErrorMsg_DuringResolving,
-                                                object.getTechnicalName()), e);
-                return null;
-            }
-        }
+					resolver = lookup(clazz.getName());
+					if (resolver != null) {
+						return resolver.resolve(object);
+					}
+					clazz = clazz.getSuperClass();
+				}
+				return null;
+			} catch (RuntimeException e) {
+				Logger.getLogger(ClassSpecificNameResolverRegistry.class.getName()).log(Level.SEVERE,
+						MessageUtil.format(Messages.ClassSpecificNameResolverRegistry_ErrorMsg_DuringResolving,
+								object.getTechnicalName()),
+						e);
+				return null;
+			} catch (SnapshotException e) {
+				Logger.getLogger(ClassSpecificNameResolverRegistry.class.getName()).log(Level.SEVERE,
+						MessageUtil.format(Messages.ClassSpecificNameResolverRegistry_ErrorMsg_DuringResolving,
+								object.getTechnicalName()),
+						e);
+				return null;
+			}
+		}
 
 		private IClassSpecificNameResolver lookup(String name) {
 			throw new UnsupportedOperationException("Apex MAT: TODO");
 		}
 
-    }
+	}
 
-    private static ClassSpecificNameResolverRegistry instance = new ClassSpecificNameResolverRegistry();
+	private static ClassSpecificNameResolverRegistry instance = new ClassSpecificNameResolverRegistry();
 
-    public static ClassSpecificNameResolverRegistry instance()
-    {
-        return instance;
-    }
+	public static ClassSpecificNameResolverRegistry instance() {
+		return instance;
+	}
 
-    // //////////////////////////////////////////////////////////////
-    // registry methods
-    // //////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////
+	// registry methods
+	// //////////////////////////////////////////////////////////////
 
-    private RegistryImpl registry;
+	private RegistryImpl registry;
 
-    private ClassSpecificNameResolverRegistry()
-    {
-        registry = new RegistryImpl();
-    }
+	private ClassSpecificNameResolverRegistry() {
+		registry = new RegistryImpl();
+	}
 
-    /**
-     * Register class specific name resolver.
-     * 
-     * @param className
-     *            class name for which the class specific name resolver should
-     *            be used
-     * @param resolver
-     *            class specific name resolver
-     * @deprecated Use default extension mechanism: just implement interface and
-     *             register location via UI
-     */
-    @Deprecated
-    public static void registerResolver(String className, IClassSpecificNameResolver resolver)
-    {
-        instance().registry.resolvers.put(className, resolver);
-    }
+	/**
+	 * Register class specific name resolver.
+	 * 
+	 * @param className
+	 *            class name for which the class specific name resolver should
+	 *            be used
+	 * @param resolver
+	 *            class specific name resolver
+	 * @deprecated Use default extension mechanism: just implement interface and
+	 *             register location via UI
+	 */
+	@Deprecated
+	public static void registerResolver(String className, IClassSpecificNameResolver resolver) {
+		instance().registry.resolvers.put(className, resolver);
+	}
 
-    /**
-     * Resolve name of the given snapshot object or return null if it can't be
-     * resolved.
-     * 
-     * @param object
-     *            snapshot object for which the name should be resolved
-     * @return name of the given snapshot object or null if it can't be resolved
-     */
-    public static String resolve(IObject object)
-    {
-        if (object == null)
-            throw new NullPointerException(Messages.ClassSpecificNameResolverRegistry_Error_MissingObject);
+	/**
+	 * Resolve name of the given snapshot object or return null if it can't be
+	 * resolved.
+	 * 
+	 * @param object
+	 *            snapshot object for which the name should be resolved
+	 * @return name of the given snapshot object or null if it can't be resolved
+	 */
+	public static String resolve(IObject object) {
+		if (object == null)
+			throw new NullPointerException(Messages.ClassSpecificNameResolverRegistry_Error_MissingObject);
 
-        return instance().registry.doResolve(object);
-    }
+		return instance().registry.doResolve(object);
+	}
 
 }

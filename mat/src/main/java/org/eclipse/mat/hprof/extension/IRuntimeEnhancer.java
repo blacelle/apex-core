@@ -20,8 +20,7 @@ import org.eclipse.mat.snapshot.ISnapshot;
  * See the documentation on the org.eclipse.mat.hprof.enhancer extension point
  * 
  */
-public interface IRuntimeEnhancer
-{
+public interface IRuntimeEnhancer {
 
 	/**
 	 * Returns addon information of certain type if such information is attached

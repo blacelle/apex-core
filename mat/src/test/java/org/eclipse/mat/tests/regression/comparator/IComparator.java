@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.eclipse.mat.tests.regression.Difference;
 
-public interface IComparator
-{
-    public List<Difference> compare(File baseline, File testFile) throws Exception;
+public interface IComparator {
+	public List<Difference> compare(File baseline, File testFile) throws Exception;
 }

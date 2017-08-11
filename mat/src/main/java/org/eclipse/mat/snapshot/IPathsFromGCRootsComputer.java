@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2008 SAP AG.
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -27,35 +27,34 @@ import org.eclipse.mat.SnapshotException;
  * 
  * @noimplement
  */
-public interface IPathsFromGCRootsComputer
-{
-    /**
-     * Get next shortest path. The computer holds the state of the computation
-     * and allows to continuously ask for the next path. If null is returned no
-     * path is available anymore.
-     * <p>
-     * This method allows you either to ask for all paths (which could take
-     * quite some time and memory but shows you the complete picture) or one by
-     * one (the shortest paths are returned first; more useful in an UI as a
-     * user might find a problem faster among just a few shorter paths).
-     * 
-     * @return int array holding the object ids of the objects forming the path
-     *         from the first element at index 0 (object for which the
-     *         computation was started) to the last element in the int array
-     *         (object identified as GC root)
-     * @throws SnapshotException
-     */
-    public int[] getNextShortestPath() throws SnapshotException;
+public interface IPathsFromGCRootsComputer {
+	/**
+	 * Get next shortest path. The computer holds the state of the computation
+	 * and allows to continuously ask for the next path. If null is returned no
+	 * path is available anymore.
+	 * <p>
+	 * This method allows you either to ask for all paths (which could take
+	 * quite some time and memory but shows you the complete picture) or one by
+	 * one (the shortest paths are returned first; more useful in an UI as a
+	 * user might find a problem faster among just a few shorter paths).
+	 * 
+	 * @return int array holding the object ids of the objects forming the path
+	 *         from the first element at index 0 (object for which the
+	 *         computation was started) to the last element in the int array
+	 *         (object identified as GC root)
+	 * @throws SnapshotException
+	 */
+	int[] getNextShortestPath() throws SnapshotException;
 
-    /**
-     * Helper method constructing a tree like data structure from the given
-     * paths. Either all so far collected paths could be dropped in here or just
-     * the last ones if you want to limit the view.
-     * 
-     * @param paths
-     *            paths from GC roots previously returned by
-     *            {@link #getNextShortestPath}
-     * @return tree like data structure holding the paths from GC roots
-     */
-    public PathsFromGCRootsTree getTree(Collection<int[]> paths);
+	/**
+	 * Helper method constructing a tree like data structure from the given
+	 * paths. Either all so far collected paths could be dropped in here or just
+	 * the last ones if you want to limit the view.
+	 * 
+	 * @param paths
+	 *            paths from GC roots previously returned by
+	 *            {@link #getNextShortestPath}
+	 * @return tree like data structure holding the paths from GC roots
+	 */
+	PathsFromGCRootsTree getTree(Collection<int[]> paths);
 }
