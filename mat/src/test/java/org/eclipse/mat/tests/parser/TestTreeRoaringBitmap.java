@@ -155,7 +155,7 @@ public class TestTreeRoaringBitmap {
 	public void testPerfManyDifferentBuckets() {
 		RoaringTreeMap map = new RoaringTreeMap();
 
-		long problemSize = 1000 * 1000L;
+		long problemSize = 100 * 1000L;
 		for (long i = 1; i <= problemSize; i++) {
 			map.addLong(i * Integer.MAX_VALUE + 1L);
 		}
