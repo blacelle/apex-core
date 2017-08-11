@@ -14,11 +14,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
- * This class simplifies the handling of growing int[] in a very fast and memory
- * efficient manner so that no slow collections must be used. However this class
- * is only fast on big int[] and not on small ones where you collect just a
- * couple of ints. The internal data is never copied during the process of
- * growing. Only with {@link #toArray} the data is copied to the result int[].
+ * This class simplifies the handling of growing int[] in a very fast and memory efficient manner so that no slow
+ * collections must be used. However this class is only fast on big int[] and not on small ones where you collect just a
+ * couple of ints. The internal data is never copied during the process of growing. Only with {@link #toArray} the data
+ * is copied to the result int[].
  */
 public final class ArrayIntBig implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -28,8 +27,7 @@ public final class ArrayIntBig implements Serializable {
 	private int length;
 
 	/**
-	 * Create an <code>IntArray</code>. Memory consumption is equal to creating
-	 * a new <code>ArrayList</code>.
+	 * Create an <code>IntArray</code>. Memory consumption is equal to creating a new <code>ArrayList</code>.
 	 */
 	public ArrayIntBig() {
 		pages = new ArrayList<int[]>();
@@ -57,7 +55,7 @@ public final class ArrayIntBig implements Serializable {
 	 *            int[] which should be added
 	 */
 	public final void addAll(int[] elements) {
-		int free = (length & 0x3FF);
+		int free = length & 0x3FF;
 		int bite = free == 0 ? 0 : Math.min(elements.length, 0x400 - free);
 		if (bite > 0) {
 			System.arraycopy(elements, 0, pages.get(length >> 10), length & 0x3FF, bite);
@@ -116,9 +114,8 @@ public final class ArrayIntBig implements Serializable {
 	}
 
 	/**
-	 * Convert <code>IntArray</code> to int[]. This operation is the only one
-	 * where the internal data is copied. It is directly copied to the int[]
-	 * which is returned, so don't call this method more than once when done.
+	 * Convert <code>IntArray</code> to int[]. This operation is the only one where the internal data is copied. It is
+	 * directly copied to the int[] which is returned, so don't call this method more than once when done.
 	 * 
 	 * @return int[] representing the <code>IntArray</code>
 	 */

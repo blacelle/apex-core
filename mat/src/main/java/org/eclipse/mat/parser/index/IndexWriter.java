@@ -53,8 +53,6 @@ import org.eclipse.mat.parser.io.BitInputStream;
 import org.eclipse.mat.parser.io.BitOutputStream;
 import org.eclipse.mat.util.IProgressListener;
 import org.eclipse.mat.util.MessageUtil;
-import org.junit.Assert;
-import org.roaringbitmap.RoaringBitmap;
 
 public abstract class IndexWriter {
 	public static final int PAGE_SIZE_INT = 1000000;
@@ -201,11 +199,11 @@ public abstract class IndexWriter {
 		}
 
 		public int size() {
-			int cardinality = identifiers.getCardinality();
+			long cardinality = identifiers.getCardinality();
 			if (guarantee != null) {
 				assert guarantee.size() == cardinality;
 			}
-			return cardinality;
+			return (int) cardinality;
 		}
 
 		public long get(int index) {
@@ -217,21 +215,21 @@ public abstract class IndexWriter {
 		}
 
 		public int reverse(long val) {
-			int rank = identifiers.rankLong(val);
+			long rank = identifiers.rankLong(val);
 
-			// Roaring rank is 1-based: if only a '0', its rank is 1, we select 'rank(=1)-1' hoping to find back 0
+			// Roaring rank is 1-based: if only a '0', its rank is 1, we select 'rank-1' hoping to find back 0
 			long selectBack = identifiers.select(rank - 1);
 
 			if (selectBack == val) {
-				int rank0Based = rank - 1;
+				long rank0Based = rank - 1;
 
 				if (guarantee != null) {
 					assert guarantee.reverse(val) == rank0Based;
 				}
 
-				return rank0Based;
+				return (int) rank0Based;
 			} else {
-				int minusNext = -1 - rank;
+				int minusNext = (int) (-1L - rank);
 
 				if (guarantee != null) {
 					assert guarantee.reverse(val) == minusNext;
@@ -242,6 +240,21 @@ public abstract class IndexWriter {
 		}
 
 		public IteratorLong iterator() {
+			if (identifiers == null) {
+				return new IteratorLong() {
+
+					@Override
+					public long next() {
+						throw new IllegalStateException("empty");
+					}
+
+					@Override
+					public boolean hasNext() {
+						return false;
+					}
+				};
+			}
+
 			LongIterator it = identifiers.iterator();
 			IteratorLong guaranteIt;
 			if (guarantee != null) {
@@ -278,7 +291,9 @@ public abstract class IndexWriter {
 				answer[ii] = identifiers.select(index + ii);
 			}
 
-			Assert.assertArrayEquals(answer, guarantee.getNext(index, length));
+			if (guarantee != null) {
+				assert Arrays.equals(answer, guarantee.getNext(index, length));
+			}
 
 			return answer;
 		}

@@ -23,11 +23,15 @@ import org.eclipse.mat.snapshot.model.ObjectReference;
 import org.eclipse.mat.util.IProgressListener.Severity;
 import org.eclipse.mat.util.MessageUtil;
 import org.eclipse.mat.util.SimpleMonitor.Listener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // Hprof binary format as defined here:
 // https://heap-snapshot.dev.java.net/files/documents/4282/31543/hprof-binary-format.html
 
 /* package */abstract class AbstractParser {
+	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractParser.class);
+
 	/* package */enum Version {
 		JDK12BETA3("JAVA PROFILE 1.0"), JDK12BETA4("JAVA PROFILE 1.0.1"), JDK6("JAVA PROFILE 1.0.2");
 
@@ -126,11 +130,11 @@ import org.eclipse.mat.util.SimpleMonitor.Listener;
 	}
 
 	protected long readUnsignedInt() throws IOException {
-		return (0x0FFFFFFFFL & in.readInt());
+		return 0x0FFFFFFFFL & in.readInt();
 	}
 
 	protected long readID() throws IOException {
-		return idSize == 4 ? (0x0FFFFFFFFL & in.readInt()) : in.readLong();
+		return idSize == 4 ? 0x0FFFFFFFFL & in.readInt() : in.readLong();
 	}
 
 	protected Object readValue(ISnapshot snapshot) throws IOException {
@@ -177,16 +181,12 @@ import org.eclipse.mat.util.SimpleMonitor.Listener;
 	}
 
 	/**
-	 * Usually the HPROF file contains exactly one heap dump. However, when
-	 * acquiring heap dumps via the legacy HPROF agent, the dump file can
-	 * possibly contain multiple heap dumps. Currently there is no API and no UI
-	 * to determine which dump to use. As this happens very rarely, we decided
-	 * to go with the following mechanism: use only the first dump unless the
-	 * user provides a dump number via environment variable. Once the dump has
-	 * been parsed, the same dump is reopened regardless of the environment
-	 * variable.
-	 * MAT_HPROF_DUMP_NR is a 0 offset number, or direct id
-	 * The returned value is an 0 offset number or 1 offset id, e.g. #1
+	 * Usually the HPROF file contains exactly one heap dump. However, when acquiring heap dumps via the legacy HPROF
+	 * agent, the dump file can possibly contain multiple heap dumps. Currently there is no API and no UI to determine
+	 * which dump to use. As this happens very rarely, we decided to go with the following mechanism: use only the first
+	 * dump unless the user provides a dump number via environment variable. Once the dump has been parsed, the same
+	 * dump is reopened regardless of the environment variable. MAT_HPROF_DUMP_NR is a 0 offset number, or direct id The
+	 * returned value is an 0 offset number or 1 offset id, e.g. #1
 	 */
 	protected String determineDumpNumber() {
 		String dumpNr = System.getProperty("MAT_HPROF_DUMP_NR");
@@ -206,6 +206,7 @@ import org.eclipse.mat.util.SimpleMonitor.Listener;
 			int nm = Integer.parseInt(match);
 			return nm == n;
 		} catch (NumberFormatException e) {
+			LOGGER.trace("Ouch", e);
 		}
 		return false;
 	}
@@ -216,12 +217,10 @@ import org.eclipse.mat.util.SimpleMonitor.Listener;
 	private final static long MAX_UNSIGNED_4BYTE_INT = 4294967296L;
 
 	/**
-	 * It seems the HPROF spec only allows 4 bytes for record length, so a
-	 * record length greater than 4GB will be overflowed and will be useless and
-	 * throw off the rest of the processing. There's no good way to tell the
-	 * overflow has occurred but if the strictness preference has been set to
-	 * permissive, we can check the most common case of a heap dump record that
-	 * should run to the end of the file.
+	 * It seems the HPROF spec only allows 4 bytes for record length, so a record length greater than 4GB will be
+	 * overflowed and will be useless and throw off the rest of the processing. There's no good way to tell the overflow
+	 * has occurred but if the strictness preference has been set to permissive, we can check the most common case of a
+	 * heap dump record that should run to the end of the file.
 	 * 
 	 * @param fileSize
 	 *            The total file size.

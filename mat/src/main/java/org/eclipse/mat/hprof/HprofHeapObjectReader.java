@@ -28,8 +28,13 @@ import org.eclipse.mat.parser.model.PrimitiveArrayImpl;
 import org.eclipse.mat.snapshot.ISnapshot;
 import org.eclipse.mat.snapshot.model.IObject;
 import org.eclipse.mat.snapshot.model.IPrimitiveArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HprofHeapObjectReader implements IObjectReader {
+
+	protected static final Logger LOGGER = LoggerFactory.getLogger(HprofHeapObjectReader.class);
+
 	public static final String VERSION_PROPERTY = "hprof.version";
 
 	private ISnapshot snapshot;
@@ -53,12 +58,12 @@ public class HprofHeapObjectReader implements IObjectReader {
 				new IndexReader.LongIndexReader(new File(snapshot.getSnapshotInfo().getPrefix() + "o2hprof.index"));
 
 		this.enhancers = new ArrayList<IRuntimeEnhancer>();
-		//        for (EnhancerRegistry.Enhancer enhancer : EnhancerRegistry.instance().delegates())
-		//        {
-		//            IRuntimeEnhancer runtime = enhancer.runtime();
-		//            if (runtime != null)
-		//                this.enhancers.add(runtime);
-		//        }
+		// for (EnhancerRegistry.Enhancer enhancer : EnhancerRegistry.instance().delegates())
+		// {
+		// IRuntimeEnhancer runtime = enhancer.runtime();
+		// if (runtime != null)
+		// this.enhancers.add(runtime);
+		// }
 	}
 
 	public long[] readObjectArrayContent(ObjectArrayImpl array, int offset, int length)
@@ -173,14 +178,12 @@ public class HprofHeapObjectReader implements IObjectReader {
 	}
 
 	/**
-	 * Returns extra data to be provided by
-	 * {@link ISnapshot#getSnapshotAddons(Class addon)}. Also can be returned
-	 * via {@link org.eclipse.mat.query.annotations.Argument}.
+	 * Returns extra data to be provided by {@link ISnapshot#getSnapshotAddons(Class addon)}. Also can be returned via
+	 * {@link org.eclipse.mat.query.annotations.Argument}.
 	 * 
 	 * @see org.eclipse.mat.parser.IObjectReader#getAddon(Class)
 	 * @param addon
-	 *            the type of the extra data required from the dump.
-	 *            HprofHeapObjectReader can be extended using an
+	 *            the type of the extra data required from the dump. HprofHeapObjectReader can be extended using an
 	 *            {@link IRuntimeEnhancer} extension to return extra data.
 	 * @return the extra data
 	 */
@@ -197,11 +200,13 @@ public class HprofHeapObjectReader implements IObjectReader {
 		try {
 			hprofDump.close();
 		} catch (IOException ignore) {
+			LOGGER.trace("Ouch", ignore);
 		}
 
 		try {
 			o2hprof.close();
 		} catch (IOException ignore) {
+			LOGGER.trace("Ouch", ignore);
 		}
 	}
 
@@ -210,14 +215,14 @@ public class HprofHeapObjectReader implements IObjectReader {
 	// //////////////////////////////////////////////////////////////
 
 	private short readShort(byte[] data, int offset) {
-		int b1 = (data[offset] & 0xff);
-		int b2 = (data[offset + 1] & 0xff);
+		int b1 = data[offset] & 0xff;
+		int b2 = data[offset + 1] & 0xff;
 		return (short) ((b1 << 8) + b2);
 	}
 
 	private char readChar(byte[] data, int offset) {
-		int b1 = (data[offset] & 0xff);
-		int b2 = (data[offset + 1] & 0xff);
+		int b1 = data[offset] & 0xff;
+		int b2 = data[offset + 1] & 0xff;
 		return (char) ((b1 << 8) + b2);
 	}
 

@@ -276,6 +276,8 @@ public class Pass1Parser extends AbstractParser {
 	}
 
 	private void readStackFrame(long length) throws IOException {
+		assert length > 0;
+
 		long frameId = readID();
 		long methodName = readID();
 		long methodSig = readID();
@@ -292,6 +294,8 @@ public class Pass1Parser extends AbstractParser {
 	}
 
 	private void readStackTrace(long length) throws IOException {
+		assert length > 0;
+
 		long stackTraceNr = readUnsignedInt();
 		long threadNr = readUnsignedInt();
 		long frameCount = readUnsignedInt();
@@ -651,8 +655,7 @@ public class Pass1Parser extends AbstractParser {
 		long classSerNum;
 
 		/*
-		 * > 0 line number 0 no line info -1 unknown location -2 compiled method
-		 * -3 native method
+		 * > 0 line number 0 no line info -1 unknown location -2 compiled method -3 native method
 		 */
 		int lineNr;
 

@@ -19,80 +19,87 @@ public class ArrayUtils {
 	private static final int USE_RADIX = 1000000;
 
 	/**
-	 * Sorts the keys in an increasing order. Elements key[i] and values[i] are
-	 * always swapped together in the corresponding arrays.
+	 * Sorts the keys in an increasing order. Elements key[i] and values[i] are always swapped together in the
+	 * corresponding arrays.
 	 * <p>
 	 * A mixture of several sorting algorithms is used:
 	 * <p>
-	 * A radix sort performs better on the numeric data we sort, but requires
-	 * additional storage to perform the sorting. Therefore only the
-	 * not-very-large parts produced by a quick sort are sorted with radix sort.
-	 * An insertion sort is used to sort the smallest arrays, where the the
-	 * overhead of the radix sort is also bigger
-	 * @param keys the keys for sorting
-	 * @param values the values to be swapped with the corresponding keys
+	 * A radix sort performs better on the numeric data we sort, but requires additional storage to perform the sorting.
+	 * Therefore only the not-very-large parts produced by a quick sort are sorted with radix sort. An insertion sort is
+	 * used to sort the smallest arrays, where the the overhead of the radix sort is also bigger
+	 * 
+	 * @param keys
+	 *            the keys for sorting
+	 * @param values
+	 *            the values to be swapped with the corresponding keys
 	 */
 	public static void sort(int[] keys, int[] values) {
 		hybridsort(keys, values, 0, keys.length - 1);
 	}
 
 	/**
-	 * Sorts the keys in an decreasing order. Elements key[i] and values[i] are
-	 * always swapped together in the corresponding arrays.
+	 * Sorts the keys in an decreasing order. Elements key[i] and values[i] are always swapped together in the
+	 * corresponding arrays.
 	 * <p>
 	 * A mixture of several sorting algorithms is used:
 	 * <p>
-	 * A radix sort performs better on the numeric data we sort, but requires
-	 * additional storage to perform the sorting. Therefore only the
-	 * not-very-large parts produced by a quick sort are sorted with radix sort.
-	 * An insertion sort is used to sort the smallest arrays, where the the
-	 * overhead of the radix sort is also bigger
-	 * @param keys the keys for sorting
-	 * @param values the values to be swapped with the corresponding keys
+	 * A radix sort performs better on the numeric data we sort, but requires additional storage to perform the sorting.
+	 * Therefore only the not-very-large parts produced by a quick sort are sorted with radix sort. An insertion sort is
+	 * used to sort the smallest arrays, where the the overhead of the radix sort is also bigger
+	 * 
+	 * @param keys
+	 *            the keys for sorting
+	 * @param values
+	 *            the values to be swapped with the corresponding keys
 	 */
 	public static void sortDesc(long[] keys, int[] values) {
 		hybridsortDesc(keys, values, null, null, 0, keys.length - 1);
 	}
 
 	/**
-	 * Sorts the keys in an decreasing order. Elements key[i] and values[i] are
-	 * always swapped together in the corresponding arrays.
+	 * Sorts the keys in an decreasing order. Elements key[i] and values[i] are always swapped together in the
+	 * corresponding arrays.
 	 * <p>
 	 * A mixture of several sorting algorithms is used:
 	 * <p>
-	 * A radix sort performs better on the numeric data we sort, but requires
-	 * additional storage to perform the sorting. Therefore only the
-	 * not-very-large parts produced by a quick sort are sorted with radix sort.
-	 * An insertion sort is used to sort the smallest arrays, where the the
-	 * overhead of the radix sort is also bigger
+	 * A radix sort performs better on the numeric data we sort, but requires additional storage to perform the sorting.
+	 * Therefore only the not-very-large parts produced by a quick sort are sorted with radix sort. An insertion sort is
+	 * used to sort the smallest arrays, where the the overhead of the radix sort is also bigger
 	 * <p>
-	 * This version of the method allows the temporarily needed arrays for the
-	 * radix sort to be provided externally - tempa and tempb. This saves
-	 * unnecessary array creation and cleanup
-	 * @param keys the keys for sorting
-	 * @param values the values to be swapped with the corresponding keys
-	 * @param tmpa a temporary buffer at least as big as the keys
-	 * @param tmpb a temporary buffer at least as big as the keys/values
+	 * This version of the method allows the temporarily needed arrays for the radix sort to be provided externally -
+	 * tempa and tempb. This saves unnecessary array creation and cleanup
+	 * 
+	 * @param keys
+	 *            the keys for sorting
+	 * @param values
+	 *            the values to be swapped with the corresponding keys
+	 * @param tmpa
+	 *            a temporary buffer at least as big as the keys
+	 * @param tmpb
+	 *            a temporary buffer at least as big as the keys/values
 	 */
 	public static void sortDesc(long[] keys, int[] values, long[] tmpa, int[] tmpb) {
 		hybridsortDesc(keys, values, tmpa, tmpb, 0, keys.length - 1);
 	}
 
 	/**
-	 * Sorts a range from the keys in an increasing order. Elements key[i] and
-	 * values[i] are always swapped together in the corresponding arrays.
+	 * Sorts a range from the keys in an increasing order. Elements key[i] and values[i] are always swapped together in
+	 * the corresponding arrays.
 	 * <p>
 	 * A mixture of several sorting algorithms is used:
 	 * <p>
-	 * A radix sort performs better on the numeric data we sort, but requires
-	 * additional storage to perform the sorting. Therefore only the
-	 * not-very-large parts produced by a quick sort are sorted with radix sort.
-	 * An insertion sort is used to sort the smallest arrays, where the the
-	 * overhead of the radix sort is also bigger
-	 * @param keys the keys for sorting
-	 * @param values the values to be swapped with the corresponding keys
-	 * @param offset where in the arrays to start sorting
-	 * @param length how many keys (and values) from the offset to sort
+	 * A radix sort performs better on the numeric data we sort, but requires additional storage to perform the sorting.
+	 * Therefore only the not-very-large parts produced by a quick sort are sorted with radix sort. An insertion sort is
+	 * used to sort the smallest arrays, where the the overhead of the radix sort is also bigger
+	 * 
+	 * @param keys
+	 *            the keys for sorting
+	 * @param values
+	 *            the values to be swapped with the corresponding keys
+	 * @param offset
+	 *            where in the arrays to start sorting
+	 * @param length
+	 *            how many keys (and values) from the offset to sort
 	 */
 	public static void sort(int[] keys, int[] values, int offset, int length) {
 		hybridsort(keys, values, offset, offset + length - 1);
@@ -124,42 +131,6 @@ public class ArrayUtils {
 		int tmpValue = values[a];
 		values[a] = values[b];
 		values[b] = tmpValue;
-	}
-
-	private static int median(int x[], int pos1, int pos2, int pos3) {
-		int v1 = x[pos1];
-		int v2 = x[pos2];
-		int v3 = x[pos3];
-
-		if (v1 < v2)
-			if (v2 <= v3)
-				return pos2;
-			else
-				return v1 < v3 ? pos3 : pos1;
-
-		/* else -> v1 > v2 */
-		if (v1 <= v3)
-			return pos1;
-		else
-			return v2 < v3 ? pos3 : pos2;
-	}
-
-	private static int median(long x[], int pos1, int pos2, int pos3) {
-		long v1 = x[pos1];
-		long v2 = x[pos2];
-		long v3 = x[pos3];
-
-		if (v1 < v2)
-			if (v2 <= v3)
-				return pos2;
-			else
-				return v1 < v3 ? pos3 : pos1;
-
-		/* else -> v1 > v2 */
-		if (v1 <= v3)
-			return pos1;
-		else
-			return v2 < v3 ? pos3 : pos2;
 	}
 
 	private static int[] split(int[] keys, int[] values, int left, int right) {
@@ -244,8 +215,8 @@ public class ArrayUtils {
 	}
 
 	/**
-	 * Semi-random index for pivot.
-	 * Used if median of 3 isn't working well.
+	 * Semi-random index for pivot. Used if median of 3 isn't working well.
+	 * 
 	 * @param left
 	 * @param right
 	 * @return
@@ -257,6 +228,7 @@ public class ArrayUtils {
 
 	/**
 	 * Was the choice of split point successful?
+	 * 
 	 * @param sizeLeft
 	 * @param sizeRight
 	 * @return

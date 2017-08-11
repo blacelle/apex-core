@@ -11,12 +11,10 @@
 package org.eclipse.mat.collect;
 
 /**
- * This class compresses fixed-size long[] in a very fast and memory efficient
- * manner if many leading and/or trailing bits of the stored longs are not used
- * commonly. The internal data is never copied during the process of retrieving
- * or reconstructing objects of this class and allows for fast I/O writing and
- * reading of the underlying byte[]. Furthermore alomst no additinal data is
- * used beside the underlying byte[]. Thereby the memory consumption of this
+ * This class compresses fixed-size long[] in a very fast and memory efficient manner if many leading and/or trailing
+ * bits of the stored longs are not used commonly. The internal data is never copied during the process of retrieving or
+ * reconstructing objects of this class and allows for fast I/O writing and reading of the underlying byte[].
+ * Furthermore alomst no additinal data is used beside the underlying byte[]. Thereby the memory consumption of this
  * data structure is kept at a minmum to build efficient long[] caches.
  */
 public class ArrayLongCompressed {
@@ -27,8 +25,7 @@ public class ArrayLongCompressed {
 	private byte trailingClearBits;
 
 	/**
-	 * Create <code>LongArrayCompressed</code> from bytes formerly got from
-	 * {@link #toByteArray()}.
+	 * Create <code>LongArrayCompressed</code> from bytes formerly got from {@link #toByteArray()}.
 	 * 
 	 * @param bytes
 	 *            bytes formerly got from {@link #toByteArray()}
@@ -41,9 +38,8 @@ public class ArrayLongCompressed {
 	}
 
 	/**
-	 * Create <code>LongArrayCompressed</code> from number of longs to be
-	 * stored, the number of leading and trailing clear bits. Everything else is
-	 * stored in the internal data structure.
+	 * Create <code>LongArrayCompressed</code> from number of longs to be stored, the number of leading and trailing
+	 * clear bits. Everything else is stored in the internal data structure.
 	 * 
 	 * @param size
 	 *            number of longs to be stored
@@ -58,8 +54,7 @@ public class ArrayLongCompressed {
 	}
 
 	/**
-	 * Create <code>LongArrayCompressed</code> from longs representing the data
-	 * to be stored in compressed form.
+	 * Create <code>LongArrayCompressed</code> from longs representing the data to be stored in compressed form.
 	 * 
 	 * @param longs
 	 *            longs representing the data to be stored in compressed form
@@ -70,8 +65,8 @@ public class ArrayLongCompressed {
 	}
 
 	/**
-	 * Create <code>LongArrayCompressed</code> from longs representing the data
-	 * to be stored in compressed form (from offset to offset+length).
+	 * Create <code>LongArrayCompressed</code> from longs representing the data to be stored in compressed form (from
+	 * offset to offset+length).
 	 * 
 	 * @param longs
 	 *            longs representing the data to be stored in compressed form
@@ -88,10 +83,10 @@ public class ArrayLongCompressed {
 		}
 		int leadingClearBits = 0;
 		int trailingClearBits = 0;
-		while (((mask & (1 << (BIT_LENGTH - leadingClearBits - 1))) == 0) && (leadingClearBits < BIT_LENGTH)) {
+		while ((mask & (1 << (BIT_LENGTH - leadingClearBits - 1))) == 0 && leadingClearBits < BIT_LENGTH) {
 			leadingClearBits++;
 		}
-		while (((mask & (1 << trailingClearBits)) == 0) && (trailingClearBits < (BIT_LENGTH - leadingClearBits))) {
+		while ((mask & (1 << trailingClearBits)) == 0 && trailingClearBits < (BIT_LENGTH - leadingClearBits)) {
 			trailingClearBits++;
 		}
 
@@ -122,7 +117,7 @@ public class ArrayLongCompressed {
 	 */
 	public void set(int index, long value) {
 		value >>>= trailingClearBits;
-		final long pos = (long) (index) * varyingBits;
+		final long pos = (long) index * varyingBits;
 		int idx = 2 + (int) (pos >>> 3);
 		int off = ((int) (pos)) & 0x7;
 		off += varyingBits;
@@ -166,11 +161,11 @@ public class ArrayLongCompressed {
 	}
 
 	/**
-	 * Get bytes representing the internal data structure with which an
-	 * <code>LongArrayCompressed</code> can be reconstructed.
+	 * Get bytes representing the internal data structure with which an <code>LongArrayCompressed</code> can be
+	 * reconstructed.
 	 * 
-	 * @return bytes representing the internal data structure with which an
-	 *         <code>LongArrayCompressed</code> can be reconstructed
+	 * @return bytes representing the internal data structure with which an <code>LongArrayCompressed</code> can be
+	 *         reconstructed
 	 */
 	public byte[] toByteArray() {
 		// Return data structure

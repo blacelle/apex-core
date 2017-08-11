@@ -26,6 +26,7 @@ import org.eclipse.mat.parser.index.IIndexReader;
 import org.eclipse.mat.parser.index.IndexReader;
 import org.eclipse.mat.parser.index.IndexWriter;
 import org.eclipse.mat.parser.index.IndexWriter.Identifier;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -249,9 +250,11 @@ public class TestIndex1to1 {
 		}
 		for (int i = 0; 0 <= i && i < N; ++i) {
 			assertEquals(i + 0l, id.get(i));
+			assertEquals(i + 0l, id.getNext(i, 1)[0]);
 		}
 	}
 
+	@Ignore("RoaringIdentifier sorts the longs: can not iterate in the same order as original insertion")
 	@Test
 	public void intIdentifier2() {
 		assumeTrue(N < MAXELEMENTS2);
@@ -268,6 +271,7 @@ public class TestIndex1to1 {
 		}
 	}
 
+	@Ignore("RoaringIdentifier sorts the longs: can not iterate in the same order as original insertion")
 	@Test
 	public void intIdentifier3() {
 		assumeTrue(N < MAXELEMENTS2);
@@ -295,7 +299,7 @@ public class TestIndex1to1 {
 		}
 
 		// RoaringBitmap is already sorted
-		//		id.sort();
+		id.sort();
 		r = new Random(N);
 		for (IteratorLong l = id.iterator(); l.hasNext(); l.next()) {
 			long l1 = r.nextLong();

@@ -1,19 +1,37 @@
 package org.eclipse.mat.parser.index.longroaring;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.roaringbitmap.IntIterator;
 import org.roaringbitmap.buffer.MutableRoaringBitmap;
 
 import it.unimi.dsi.fastutil.ints.AbstractInt2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap.Entry;
+import it.unimi.dsi.fastutil.ints.Int2ObjectRBTreeMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrays;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongArrays;
 
 //@Beta
 public class RoaringTreeMap {
-	protected final Int2ObjectSortedMap<MutableRoaringBitmap> hiToBitmap = new Int2ObjectAVLTreeMap<>();
+	// protected final Int2ObjectSortedMap<MutableRoaringBitmap> hiToBitmap = new Int2ObjectAVLTreeMap<>();
+	protected final Int2ObjectSortedMap<MutableRoaringBitmap> hiToBitmap = new Int2ObjectRBTreeMap<>();
+
+	// Prevent recomputing all cardinalities when requesting consecutive ranks
+	protected boolean allValid = false;
+	protected int firstHiNotValid = Integer.MIN_VALUE;
+
+	protected final LongArrayList sortedCumulatedCardinality = new LongArrayList();
+	protected final IntArrayList sortedHighs = new IntArrayList();
+	protected final List<MutableRoaringBitmap> linkedBitmaps = new ArrayList<>();
+
+	// Prevent indirection when writing consecutive Integers
 	private transient Int2ObjectMap.Entry<MutableRoaringBitmap> latest = null;
 
 	// https://stackoverflow.com/questions/12772939/java-storing-two-ints-in-a-long
@@ -30,6 +48,9 @@ public class RoaringTreeMap {
 			bitmap.add(y);
 			latest = new AbstractInt2ObjectMap.BasicEntry<MutableRoaringBitmap>(x, bitmap);
 		}
+
+		// The cardinalities after this bucket may not be valid anymore
+		firstHiNotValid = Math.min(firstHiNotValid, x);
 	}
 
 	private long pack(int x, int y) {
@@ -37,31 +58,50 @@ public class RoaringTreeMap {
 	}
 
 	// Should be return long?
-	public int getCardinality() {
-		// TODO Does IntStream.sum prevent overflow?
-		return hiToBitmap.values().stream().mapToInt(b -> b.getCardinality()).sum();
-	}
-
-	public long select(final int j) {
-		Iterator<Int2ObjectMap.Entry<MutableRoaringBitmap>> it = hiToBitmap.int2ObjectEntrySet().iterator();
-
-		int indexLeft = j;
-
-		while (it.hasNext()) {
-			Int2ObjectMap.Entry<MutableRoaringBitmap> entry = it.next();
-			MutableRoaringBitmap bitmap = entry.getValue();
-
-			int cardinality = bitmap.getCardinality();
-			if (indexLeft < cardinality) {
-				// We have spot the bitmap holding this value
-				return pack(entry.getIntKey(), bitmap.select(indexLeft));
-			} else {
-				indexLeft -= cardinality;
-			}
+	public long getCardinality() {
+		if (hiToBitmap.isEmpty()) {
+			return 0L;
 		}
 
-		// see org.roaringbitmap.buffer.ImmutableRoaringBitmap.select(int)
-		throw new IllegalArgumentException("select " + j + " when the cardinality is " + this.getCardinality());
+		ensureCumulatives(Integer.MAX_VALUE);
+
+		return sortedCumulatedCardinality.getLong(sortedCumulatedCardinality.size() - 1);
+	}
+
+	public long select(final long j) {
+		ensureCumulatives(Integer.MAX_VALUE);
+
+		int position =
+				LongArrays.binarySearch(sortedCumulatedCardinality.elements(), 0, sortedCumulatedCardinality.size(), j);
+
+		if (position >= 0) {
+			// There is a bucket leading to this cardinality: the j-th element is the first element of next bucket
+			MutableRoaringBitmap nextBitmap = linkedBitmaps.get(position + 1);
+			return pack(sortedHighs.getInt(position + 1), nextBitmap.first());
+		} else {
+			// // see org.roaringbitmap.buffer.ImmutableRoaringBitmap.select(int)
+			// throw new IllegalArgumentException("select " + j + " when the cardinality is " + this.getCardinality());
+			// There is no bucket with this cardinality
+			int insertionPoint = -position - 1;
+
+			final long previousBucketCardinality;
+			if (insertionPoint == 0) {
+				previousBucketCardinality = 0L;
+			} else {
+				previousBucketCardinality = sortedCumulatedCardinality.getLong(insertionPoint - 1);
+			}
+
+			// We get a 'select' query for a single bitmap: should fit in an int
+			final int givenBitmapSelect = (int) (j - previousBucketCardinality);
+
+			MutableRoaringBitmap bitmaps = linkedBitmaps.get(insertionPoint);
+
+			int low = bitmaps.select(givenBitmapSelect);
+
+			int high = sortedHighs.getInt(insertionPoint);
+
+			return pack(high, low);
+		}
 	}
 
 	public LongIterator iterator() {
@@ -113,7 +153,11 @@ public class RoaringTreeMap {
 
 			@Override
 			public long next() {
-				return pack(currentKey, currentIt.next());
+				if (hasNext()) {
+					return pack(currentKey, currentIt.next());
+				} else {
+					throw new IllegalStateException("empty");
+				}
 			}
 
 			@Override
@@ -123,23 +167,100 @@ public class RoaringTreeMap {
 		};
 	}
 
-	public int rankLong(long id) {
+	public long rankLong(long id) {
 		int x = (int) (id >> 32);
+		int y = (int) id;
 
-		int rank = 0;
-		for (Int2ObjectMap.Entry<MutableRoaringBitmap> e : hiToBitmap.int2ObjectEntrySet()) {
-			if (e.getIntKey() < x) {
-				rank += e.getValue().getCardinality();
-			} else if (e.getIntKey() == x) {
-				int y = (int) id;
-				int localRank = e.getValue().rank(y);
-				rank += localRank;
+		ensureCumulatives(x);
+
+		int bitmapPosition = IntArrays.binarySearch(sortedHighs.elements(), 0, sortedHighs.size(), x);
+
+		if (bitmapPosition >= 0) {
+			// There is a bucket holding this item
+
+			final long previousBucketCardinality;
+			if (bitmapPosition == 0) {
+				previousBucketCardinality = 0;
 			} else {
-				assert e.getIntKey() > x;
-				break;
+				previousBucketCardinality = sortedCumulatedCardinality.getLong(bitmapPosition - 1);
+			}
+
+			MutableRoaringBitmap bitmap = linkedBitmaps.get(bitmapPosition);
+
+			// Rank is previous cardinality plus rank in current bitmap
+			return previousBucketCardinality + bitmap.rankLong(y);
+		} else {
+			// There is no bucket holding this item: insertionPoint is previous bitmap
+			int insertionPoint = -bitmapPosition - 1;
+
+			if (insertionPoint == 0) {
+				// this key is before all inserted keys
+				return 0;
+			} else {
+				// The rank is the cardinality of this previous bitmap
+				return sortedCumulatedCardinality.getLong(insertionPoint - 1);
 			}
 		}
+	}
 
-		return rank;
+	protected void ensureCumulatives(int x) {
+		// Check if missing data to handle this rank
+		if (!allValid && firstHiNotValid <= x) {
+			// For each deprecated buckets
+			Int2ObjectSortedMap<MutableRoaringBitmap> tailMap = hiToBitmap.tailMap(firstHiNotValid);
+
+			for (Entry<MutableRoaringBitmap> e : tailMap.int2ObjectEntrySet()) {
+				int currentHigh = e.getIntKey();
+				int index = IntArrays.binarySearch(sortedHighs.elements(), 0, sortedHighs.size(), currentHigh);
+
+				if (index >= 0) {
+					// This bitmap has already been registered
+					MutableRoaringBitmap bitmap = e.getValue();
+					assert bitmap == hiToBitmap.get(index);
+
+					final long previousCardinality;
+					if (currentHigh >= 1) {
+						previousCardinality = sortedCumulatedCardinality.getLong(currentHigh - 1);
+					} else {
+						previousCardinality = 0;
+					}
+					sortedCumulatedCardinality.set(index, previousCardinality + bitmap.getCardinality());
+
+					if (currentHigh == Integer.MAX_VALUE) {
+						allValid = true;
+						firstHiNotValid = currentHigh;
+					} else {
+						firstHiNotValid = currentHigh + 1;
+					}
+					if (e.getIntKey() > x) {
+						// No need to compute more than needed
+						break;
+					}
+				} else {
+					int insertionPosition = -index - 1;
+
+					// This is a new key
+					sortedHighs.add(insertionPosition, currentHigh);
+					linkedBitmaps.add(insertionPosition, e.getValue());
+
+					final long previousCardinality;
+					if (insertionPosition >= 1) {
+						previousCardinality = sortedCumulatedCardinality.getLong(insertionPosition - 1);
+					} else {
+						previousCardinality = 0;
+					}
+
+					sortedCumulatedCardinality.add(insertionPosition,
+							previousCardinality + e.getValue().getLongCardinality());
+
+					if (currentHigh == Integer.MAX_VALUE) {
+						allValid = true;
+						firstHiNotValid = currentHigh;
+					} else {
+						firstHiNotValid = currentHigh + 1;
+					}
+				}
+			}
+		}
 	}
 }

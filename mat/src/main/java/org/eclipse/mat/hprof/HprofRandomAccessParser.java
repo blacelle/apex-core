@@ -147,7 +147,7 @@ public class HprofRandomAccessParser extends AbstractParser {
 		int arraySize = in.readInt();
 
 		long elementType = in.readByte();
-		if ((elementType < IPrimitiveArray.Type.BOOLEAN) || (elementType > IPrimitiveArray.Type.LONG))
+		if (elementType < IPrimitiveArray.Type.BOOLEAN || elementType > IPrimitiveArray.Type.LONG)
 			throw new IOException(Messages.Pass1Parser_Error_IllegalType);
 
 		int elementSize = IPrimitiveArray.ELEMENT_SIZE[(int) elementType];

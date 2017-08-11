@@ -13,12 +13,10 @@ package org.eclipse.mat.collect;
 import java.util.ArrayList;
 
 /**
- * This class simplifies the handling of growing long[] in a very fast and
- * memory efficient manner so that no slow collections must be used. However
- * this class is only fast on big long[] and not on small ones where you collect
- * just a couple of longs. The internal data is never copied during the process
- * of growing. Only with {@link #toArray} the data is copied to the result
- * long[].
+ * This class simplifies the handling of growing long[] in a very fast and memory efficient manner so that no slow
+ * collections must be used. However this class is only fast on big long[] and not on small ones where you collect just
+ * a couple of longs. The internal data is never copied during the process of growing. Only with {@link #toArray} the
+ * data is copied to the result long[].
  */
 public final class ArrayLongBig {
 	private ArrayList<long[]> pages;
@@ -26,8 +24,7 @@ public final class ArrayLongBig {
 	private int length;
 
 	/**
-	 * Create an <code>LongArray</code>. Memory consumption is equal to creating
-	 * a new <code>ArrayList</code>.
+	 * Create an <code>LongArray</code>. Memory consumption is equal to creating a new <code>ArrayList</code>.
 	 */
 	public ArrayLongBig() {
 		pages = new ArrayList<long[]>();
@@ -55,7 +52,7 @@ public final class ArrayLongBig {
 	 *            long[] which should be added
 	 */
 	public final void addAll(long[] elements) {
-		int free = (length & 0x3FF);
+		int free = length & 0x3FF;
 		int bite = free == 0 ? 0 : Math.min(elements.length, 0x400 - free);
 		if (bite > 0) {
 			System.arraycopy(elements, 0, pages.get(length >> 10), length & 0x3FF, bite);
@@ -105,9 +102,8 @@ public final class ArrayLongBig {
 	}
 
 	/**
-	 * Convert <code>LongArray</code> to long[]. This operation is the only one
-	 * where the internal data is copied. It is directly copied to the long[]
-	 * which is returned, so don't call this method more than once when done.
+	 * Convert <code>LongArray</code> to long[]. This operation is the only one where the internal data is copied. It is
+	 * directly copied to the long[] which is returned, so don't call this method more than once when done.
 	 * 
 	 * @return long[] representing the <code>LongArray</code>
 	 */

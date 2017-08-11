@@ -28,8 +28,13 @@ import org.eclipse.mat.parser.index.IndexWriter;
 import org.eclipse.mat.util.IProgressListener;
 import org.eclipse.mat.util.MessageUtil;
 import org.eclipse.mat.util.SimpleMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HprofIndexBuilder implements IIndexBuilder {
+
+	protected static final Logger LOGGER = LoggerFactory.getLogger(HprofIndexBuilder.class);
+
 	private File file;
 	private String prefix;
 	private IOne2LongIndex id2position;
@@ -40,12 +45,12 @@ public class HprofIndexBuilder implements IIndexBuilder {
 		this.prefix = prefix;
 
 		this.enhancers = new ArrayList<IParsingEnhancer>();
-		//        for (EnhancerRegistry.Enhancer enhancer : EnhancerRegistry.instance().delegates())
-		//        {
-		//            IParsingEnhancer parsingEnhancer = enhancer.parser();
-		//            if (parsingEnhancer != null)
-		//                this.enhancers.add(parsingEnhancer);
-		//        }
+		// for (EnhancerRegistry.Enhancer enhancer : EnhancerRegistry.instance().delegates())
+		// {
+		// IParsingEnhancer parsingEnhancer = enhancer.parser();
+		// if (parsingEnhancer != null)
+		// this.enhancers.add(parsingEnhancer);
+		// }
 
 	}
 
@@ -118,11 +123,13 @@ public class HprofIndexBuilder implements IIndexBuilder {
 		try {
 			newIndex.close();
 		} catch (IOException ignore) {
+			LOGGER.trace("Ouch", ignore);
 		}
 
 		try {
 			id2position.close();
 		} catch (IOException ignore) {
+			LOGGER.trace("Ouch", ignore);
 		}
 
 		id2position.delete();

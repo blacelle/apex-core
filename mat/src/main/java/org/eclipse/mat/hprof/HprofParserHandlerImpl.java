@@ -42,8 +42,13 @@ import org.eclipse.mat.snapshot.model.IObject;
 import org.eclipse.mat.snapshot.model.IPrimitiveArray;
 import org.eclipse.mat.util.IProgressListener;
 import org.eclipse.mat.util.MessageUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HprofParserHandlerImpl implements IHprofParserHandler {
+
+	protected static final Logger LOGGER = LoggerFactory.getLogger(HprofParserHandlerImpl.class);
+
 	// private String prefix;
 	private AbstractParser.Version version;
 
@@ -185,8 +190,8 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 	}
 
 	/**
-	 * Calculate possible restrictions on object alignment by finding the GCD of differences
-	 * between object addresses (ignoring address 0).
+	 * Calculate possible restrictions on object alignment by finding the GCD of differences between object addresses
+	 * (ignoring address 0).
 	 */
 	private void calculateAlignment() {
 		// Minimum alignment of 8 bytes
@@ -264,6 +269,7 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 				IClass clazz = lookupClassByName(name, true);
 				if (clazz == null) {
 					while (identifiers.reverse(++nextObjectAddress) >= 0) {
+						LOGGER.trace("Look for more");
 					}
 
 					clazz = new ClassImpl(nextObjectAddress, name, jlo, 0, new Field[0], new FieldDescriptor[0]);

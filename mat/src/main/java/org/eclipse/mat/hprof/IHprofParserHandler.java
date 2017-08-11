@@ -30,7 +30,7 @@ public interface IHprofParserHandler {
 	String VERSION = "VERSION";
 	String REFERENCE_SIZE = "REF_SIZE";
 
-	public class HeapObject {
+	class HeapObject {
 		public int objectId;
 		public long objectAddress;
 		public ClassImpl clazz;

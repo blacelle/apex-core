@@ -11,12 +11,10 @@
 package org.eclipse.mat.collect;
 
 /**
- * This class compresses fixed-size int[] in a very fast and memory efficient
- * manner if many leading and/or trailing bits of the stored ints are not used
- * commonly. The internal data is never copied during the process of retrieving
- * or reconstructing objects of this class and allows for fast I/O writing and
- * reading of the underlying byte[]. Furthermore almost no additional data is
- * used beside the underlying byte[]. Thereby the memory consumption of this
+ * This class compresses fixed-size int[] in a very fast and memory efficient manner if many leading and/or trailing
+ * bits of the stored ints are not used commonly. The internal data is never copied during the process of retrieving or
+ * reconstructing objects of this class and allows for fast I/O writing and reading of the underlying byte[].
+ * Furthermore almost no additional data is used beside the underlying byte[]. Thereby the memory consumption of this
  * data structure is kept at a minimum to build efficient int[] caches.
  */
 public class ArrayIntCompressed {
@@ -27,8 +25,7 @@ public class ArrayIntCompressed {
 	private byte trailingClearBits;
 
 	/**
-	 * Create <code>IntArrayCompressed</code> from bytes formerly got from
-	 * {@link #toByteArray()}.
+	 * Create <code>IntArrayCompressed</code> from bytes formerly got from {@link #toByteArray()}.
 	 * 
 	 * @param bytes
 	 *            bytes formerly got from {@link #toByteArray()}
@@ -41,9 +38,8 @@ public class ArrayIntCompressed {
 	}
 
 	/**
-	 * Create <code>IntArrayCompressed</code> from number of ints to be stored,
-	 * the number of leading and trailing clear bits. Everything else is stored
-	 * in the internal data structure.
+	 * Create <code>IntArrayCompressed</code> from number of ints to be stored, the number of leading and trailing clear
+	 * bits. Everything else is stored in the internal data structure.
 	 * 
 	 * @param size
 	 *            number of ints to be stored
@@ -58,8 +54,7 @@ public class ArrayIntCompressed {
 	}
 
 	/**
-	 * Create <code>IntArrayCompressed</code> from ints representing the data to
-	 * be stored in compressed form.
+	 * Create <code>IntArrayCompressed</code> from ints representing the data to be stored in compressed form.
 	 * 
 	 * @param ints
 	 *            ints representing the data to be stored in compressed form
@@ -70,8 +65,8 @@ public class ArrayIntCompressed {
 	}
 
 	/**
-	 * Create <code>IntArrayCompressed</code> from ints representing the data to
-	 * be stored in compressed form (from offset to offset+length).
+	 * Create <code>IntArrayCompressed</code> from ints representing the data to be stored in compressed form (from
+	 * offset to offset+length).
 	 * 
 	 * @param ints
 	 *            ints representing the data to be stored in compressed form
@@ -107,7 +102,7 @@ public class ArrayIntCompressed {
 	private void init(int size, int varyingBits, int trailingClearBits) {
 		// Allocate memory for header and data structure and put decompression
 		// information into header
-		data = new byte[2 + (int) (((((long) size) * varyingBits) - 1) / 0x8) + 1];
+		data = new byte[2 + (int) ((((long) size) * varyingBits) - 1) / 0x8 + 1];
 		this.varyingBits = data[0] = (byte) varyingBits;
 		this.trailingClearBits = data[1] = (byte) trailingClearBits;
 	}
@@ -166,11 +161,11 @@ public class ArrayIntCompressed {
 	}
 
 	/**
-	 * Get bytes representing the internal data structure with which an
-	 * <code>IntArrayCompressed</code> can be reconstructed.
+	 * Get bytes representing the internal data structure with which an <code>IntArrayCompressed</code> can be
+	 * reconstructed.
 	 * 
-	 * @return bytes representing the internal data structure with which an
-	 *         <code>IntArrayCompressed</code> can be reconstructed
+	 * @return bytes representing the internal data structure with which an <code>IntArrayCompressed</code> can be
+	 *         reconstructed
 	 */
 	public byte[] toByteArray() {
 		// Return data structure

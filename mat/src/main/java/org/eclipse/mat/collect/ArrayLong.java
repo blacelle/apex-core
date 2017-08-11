@@ -16,8 +16,7 @@ import org.eclipse.mat.report.internal.Messages;
 import org.eclipse.mat.util.MessageUtil;
 
 /**
- * Utility class to hold a list of longs
- * Similar to a list, but efficient for longs
+ * Utility class to hold a list of longs Similar to a list, but efficient for longs
  */
 public final class ArrayLong {
 	long elements[];
@@ -32,6 +31,7 @@ public final class ArrayLong {
 
 	/**
 	 * Create a list of given size
+	 * 
 	 * @param initialCapacity
 	 */
 	public ArrayLong(int initialCapacity) {
@@ -41,7 +41,9 @@ public final class ArrayLong {
 
 	/**
 	 * Create a list based on a supplied array
-	 * @param initialValues a copy is taken of this array
+	 * 
+	 * @param initialValues
+	 *            a copy is taken of this array
 	 */
 	public ArrayLong(long[] initialValues) {
 		this(initialValues.length);
@@ -51,7 +53,9 @@ public final class ArrayLong {
 
 	/**
 	 * Create a list based on an existing ArrayInt, of size of the template
-	 * @param template a copy is taken of these values
+	 * 
+	 * @param template
+	 *            a copy is taken of these values
 	 */
 	public ArrayLong(ArrayLong template) {
 		this(template.size);
@@ -61,7 +65,9 @@ public final class ArrayLong {
 
 	/**
 	 * append one more entry
-	 * @param element the int to add to the end
+	 * 
+	 * @param element
+	 *            the int to add to the end
 	 */
 	public void add(long element) {
 		ensureCapacity(size + 1);
@@ -70,6 +76,7 @@ public final class ArrayLong {
 
 	/**
 	 * append a group of entries
+	 * 
 	 * @param elements
 	 */
 	public void addAll(long[] elements) {
@@ -79,7 +86,8 @@ public final class ArrayLong {
 	}
 
 	/**
-	 * append all of another 
+	 * append all of another
+	 * 
 	 * @param template
 	 */
 	public void addAll(ArrayLong template) {
@@ -90,6 +98,7 @@ public final class ArrayLong {
 
 	/**
 	 * modify one particular entry
+	 * 
 	 * @param index
 	 * @param element
 	 * @return the previous value
@@ -105,6 +114,7 @@ public final class ArrayLong {
 
 	/**
 	 * retrieve one entry
+	 * 
 	 * @param index
 	 * @return the entry
 	 */
@@ -116,14 +126,16 @@ public final class ArrayLong {
 
 	/**
 	 * get the number of used entries
+	 * 
 	 * @return the number of entries
 	 */
 	public int size() {
 		return size;
 	}
 
-	/** 
+	/**
 	 * convert to an array
+	 * 
 	 * @return a copy of the entries
 	 */
 	public long[] toArray() {
@@ -134,6 +146,7 @@ public final class ArrayLong {
 
 	/**
 	 * is the list empty
+	 * 
 	 * @return true if empty
 	 */
 	public boolean isEmpty() {
@@ -142,6 +155,7 @@ public final class ArrayLong {
 
 	/**
 	 * get an iterator to go through the list
+	 * 
 	 * @return the iterator
 	 */
 	public IteratorLong iterator() {
@@ -158,7 +172,7 @@ public final class ArrayLong {
 		};
 	}
 
-	/** 
+	/**
 	 * clear all the entries
 	 */
 	public void clear() {
@@ -166,8 +180,8 @@ public final class ArrayLong {
 	}
 
 	/**
-	 * get the last entry to be written.
-	 * Must be at least one entry.
+	 * get the last entry to be written. Must be at least one entry.
+	 * 
 	 * @return the last element
 	 */
 	public long lastElement() {
@@ -175,8 +189,8 @@ public final class ArrayLong {
 	}
 
 	/**
-	 * get the first entry to be written.
-	 * Must be at least one entry.
+	 * get the first entry to be written. Must be at least one entry.
+	 * 
 	 * @return the first element
 	 */
 	public long firstElement() {
@@ -187,8 +201,8 @@ public final class ArrayLong {
 	}
 
 	/**
-	  * arrange the entries in ascending order
-	  */
+	 * arrange the entries in ascending order
+	 */
 	public void sort() {
 		Arrays.sort(elements, 0, size);
 	}
@@ -214,9 +228,9 @@ public final class ArrayLong {
 
 	private int newCapacity(int oldCapacity, int minCapacity) {
 		// Scale by 1.5 without overflow
-		int newCapacity = (oldCapacity * 3 >>> 1);
+		int newCapacity = oldCapacity * 3 >>> 1;
 		if (newCapacity < minCapacity) {
-			newCapacity = (minCapacity * 3 >>> 1);
+			newCapacity = minCapacity * 3 >>> 1;
 			if (newCapacity < minCapacity) {
 				// Avoid VM limits for final size
 				newCapacity = Integer.MAX_VALUE - 8;
