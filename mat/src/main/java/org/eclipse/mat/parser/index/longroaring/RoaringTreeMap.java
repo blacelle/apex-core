@@ -1,19 +1,20 @@
 package org.eclipse.mat.parser.index.longroaring;
 
-import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.NavigableMap;
-import java.util.TreeMap;
 
 import org.roaringbitmap.IntIterator;
 import org.roaringbitmap.buffer.MutableRoaringBitmap;
 
+import it.unimi.dsi.fastutil.ints.AbstractInt2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
+
 //@Beta
 public class RoaringTreeMap {
-	protected final NavigableMap<Integer, MutableRoaringBitmap> hiToBitmap = new TreeMap<>();
-	private transient Map.Entry<Integer, MutableRoaringBitmap> latest = null;
+	protected final Int2ObjectSortedMap<MutableRoaringBitmap> hiToBitmap = new Int2ObjectAVLTreeMap<>();
+	private transient Int2ObjectMap.Entry<MutableRoaringBitmap> latest = null;
 
 	// https://stackoverflow.com/questions/12772939/java-storing-two-ints-in-a-long
 	public void addLong(long id) {
@@ -27,7 +28,7 @@ public class RoaringTreeMap {
 		} else {
 			MutableRoaringBitmap bitmap = hiToBitmap.computeIfAbsent(x, k -> new MutableRoaringBitmap());
 			bitmap.add(y);
-			latest = new AbstractMap.SimpleImmutableEntry<>(x, bitmap);
+			latest = new AbstractInt2ObjectMap.BasicEntry<MutableRoaringBitmap>(x, bitmap);
 		}
 	}
 
@@ -42,19 +43,19 @@ public class RoaringTreeMap {
 	}
 
 	public long select(final int j) {
-		Iterator<Entry<Integer, MutableRoaringBitmap>> it = hiToBitmap.entrySet().iterator();
+		Iterator<Int2ObjectMap.Entry<MutableRoaringBitmap>> it = hiToBitmap.int2ObjectEntrySet().iterator();
 
 		int indexLeft = j;
 
 		while (it.hasNext()) {
-			Entry<Integer, MutableRoaringBitmap> entry = it.next();
+			Int2ObjectMap.Entry<MutableRoaringBitmap> entry = it.next();
 			MutableRoaringBitmap bitmap = entry.getValue();
 
 			int cardinality = bitmap.getCardinality();
 			if (cardinality > j) {
 				indexLeft -= cardinality;
 			} else {
-				return pack(entry.getKey(), bitmap.select(indexLeft));
+				return pack(entry.getIntKey(), bitmap.select(indexLeft));
 			}
 		}
 
@@ -63,7 +64,7 @@ public class RoaringTreeMap {
 	}
 
 	public LongIterator iterator() {
-		Iterator<Entry<Integer, MutableRoaringBitmap>> it = hiToBitmap.entrySet().iterator();
+		Iterator<Int2ObjectMap.Entry<MutableRoaringBitmap>> it = hiToBitmap.int2ObjectEntrySet().iterator();
 
 		return new LongIterator() {
 
@@ -95,10 +96,10 @@ public class RoaringTreeMap {
 			 * @param it
 			 * @return true if we MAY have more entries. false if there is definitely nothing more
 			 */
-			private boolean moveToNextEntry(Iterator<Entry<Integer, MutableRoaringBitmap>> it) {
+			private boolean moveToNextEntry(Iterator<Int2ObjectMap.Entry<MutableRoaringBitmap>> it) {
 				if (it.hasNext()) {
-					Entry<Integer, MutableRoaringBitmap> next = it.next();
-					currentKey = next.getKey();
+					Int2ObjectMap.Entry<MutableRoaringBitmap> next = it.next();
+					currentKey = next.getIntKey();
 					currentIt = next.getValue().getIntIterator();
 
 					// We may have more long
@@ -125,14 +126,14 @@ public class RoaringTreeMap {
 		int x = (int) (id >> 32);
 
 		int rank = 0;
-		for (Entry<Integer, MutableRoaringBitmap> e : hiToBitmap.entrySet()) {
-			if (e.getKey().intValue() < x) {
+		for (Int2ObjectMap.Entry<MutableRoaringBitmap> e : hiToBitmap.int2ObjectEntrySet()) {
+			if (e.getIntKey() < x) {
 				rank += e.getValue().getCardinality();
-			} else if (e.getKey().intValue() == x) {
+			} else if (e.getIntKey() == x) {
 				int y = (int) id;
 				rank += e.getValue().rank(y);
 			} else {
-				assert e.getKey().intValue() > x;
+				assert e.getIntKey() > x;
 				break;
 			}
 		}

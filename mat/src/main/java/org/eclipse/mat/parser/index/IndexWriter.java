@@ -17,9 +17,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.lang.ref.SoftReference;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -93,21 +101,21 @@ public abstract class IndexWriter {
 			if (rank >= 0) {
 				return rank;
 			} else {
-				//				int a, c;
-				//				for (a = 0, c = size; a < c;) {
-				//					// Avoid overflow problems by using unsigned divide by 2
-				//					int b = (a + c) >>> 1;
-				//					long probeVal = get(b);
-				//					if (val < probeVal) {
-				//						c = b;
-				//					} else if (probeVal < val) {
-				//						a = b + 1;
-				//					} else {
-				//						return b;
-				//					}
-				//				}
+				// int a, c;
+				// for (a = 0, c = size; a < c;) {
+				// // Avoid overflow problems by using unsigned divide by 2
+				// int b = (a + c) >>> 1;
+				// long probeVal = get(b);
+				// if (val < probeVal) {
+				// c = b;
+				// } else if (probeVal < val) {
+				// a = b + 1;
+				// } else {
+				// return b;
+				// }
+				// }
 				// Negative index indicates not found (and where to insert)
-				//				return -1 - a;
+				// return -1 - a;
 
 				// TODO: what is doing MAT here?
 				throw new IllegalStateException("TODO");
@@ -152,28 +160,44 @@ public abstract class IndexWriter {
 	}
 
 	public static class IntIndexCollectorUncompressed {
-		int[] dataElements;
 
+		FileChannel fc;
+		private final IntBuffer dataElements;
+		
 		public IntIndexCollectorUncompressed(int size) {
-			dataElements = new int[size];
+			try {
+				File tmpFile = prepareIntArrayInFile(".IntIndexCollectorUncompressed", size);
+
+				FileChannel fc = new RandomAccessFile(tmpFile, "rw").getChannel();
+
+				dataElements = fc.map(FileChannel.MapMode.READ_WRITE, 0, fc.size()).asIntBuffer();
+//				this.dataElements = IntBuffer.allocate(size);
+			} catch (RuntimeException | IOException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
 		}
 
 		public void set(int index, int value) {
-			dataElements[index] = value;
+			dataElements.put(index, value);
 		}
 
 		public int get(int index) {
-			return dataElements[index];
+			return dataElements.get(index);
 		}
+		//
+		// public IIndexReader.IOne2OneIndex writeTo(File indexFile) throws IOException {
+		// return new IntIndexStreamer().writeTo(indexFile, dataElements);
+		// }
 
-		public IIndexReader.IOne2OneIndex writeTo(File indexFile) throws IOException {
-			return new IntIndexStreamer().writeTo(indexFile, dataElements);
+		protected IteratorInt asIteratorInt() {
+			return asIntIterator(dataElements);
 		}
 	}
 
 	/**
-	 * Store sizes of objects by
-	 * compressing the size to a 32-bit int.
+	 * Store sizes of objects by compressing the size to a 32-bit int.
+	 * 
 	 * @since 1.0
 	 */
 	public static class SizeIndexCollectorUncompressed extends IntIndexCollectorUncompressed {
@@ -183,14 +207,14 @@ public abstract class IndexWriter {
 		}
 
 		/**
-		 * Cope with objects bigger than Integer.MAX_VALUE.
-		 * E.g. double[Integer.MAX_VALUE] 
-		 * The original problem was that the array to size mapping had an integer as the size (IntIndexCollectorUncompressed). 
-		 * This array would be approximately 0x18 + 0x8 * 0x7fffffff = 0x400000010 bytes, too big for an int.
-		 * Expanding the array size array to longs could be overkill.
-		 * Instead we do some simple compression - values 0 - 0x7fffffff convert as now,
-		 * int values 0x80000000 to 0xffffffff convert to <code>(n &amp; 0x7fffffffL)*8 + 0x80000000L</code>.
-		 * @param y the long value in the range -1 to 0x7fffffff, 0x80000000L to 0x400000000L
+		 * Cope with objects bigger than Integer.MAX_VALUE. E.g. double[Integer.MAX_VALUE] The original problem was that
+		 * the array to size mapping had an integer as the size (IntIndexCollectorUncompressed). This array would be
+		 * approximately 0x18 + 0x8 * 0x7fffffff = 0x400000010 bytes, too big for an int. Expanding the array size array
+		 * to longs could be overkill. Instead we do some simple compression - values 0 - 0x7fffffff convert as now, int
+		 * values 0x80000000 to 0xffffffff convert to <code>(n &amp; 0x7fffffffL)*8 + 0x80000000L</code>.
+		 * 
+		 * @param y
+		 *            the long value in the range -1 to 0x7fffffff, 0x80000000L to 0x400000000L
 		 * @return the compressed value as an int
 		 */
 		public static int compress(long y) {
@@ -208,7 +232,9 @@ public abstract class IndexWriter {
 
 		/**
 		 * Expand the result of the compression
-		 * @param x the compressed value
+		 * 
+		 * @param x
+		 *            the compressed value
 		 * @return the expanded value as a long in the range -1 to 0x7fffffff, 0x80000000L to 0x400000000L
 		 */
 		public static long expand(int x) {
@@ -226,13 +252,8 @@ public abstract class IndexWriter {
 			set(index, compress(value));
 		}
 
-		public long getSize(int index) {
-			int v = get(index);
-			return expand(v);
-		}
-
 		public IIndexReader.IOne2SizeIndex writeTo(File indexFile) throws IOException {
-			return new SizeIndexReader(new IntIndexStreamer().writeTo(indexFile, dataElements));
+			return new SizeIndexReader(new IntIndexStreamer().writeTo(indexFile, asIteratorInt()));
 		}
 	}
 
@@ -307,7 +328,7 @@ public abstract class IndexWriter {
 
 		int get(long index) {
 			if (index == (int) index) {
-				// in case get(int) is overridden 
+				// in case get(int) is overridden
 				return get((int) index);
 			} else {
 				return get0(index);
@@ -349,7 +370,7 @@ public abstract class IndexWriter {
 
 		int[] getNext(long index, int length) {
 			if (index == (int) index) {
-				// in case getNext(int, int) is overridden 
+				// in case getNext(int, int) is overridden
 				return getNext((int) index, length);
 			} else {
 				return getNext0(index, length);
@@ -606,17 +627,63 @@ public abstract class IndexWriter {
 
 	}
 
+	private static File prepareIntArrayInFile(String suffix, int size) throws IOException {
+		File tmpFile = File.createTempFile("mat", suffix);
+		// We do not need the file to survive the JVM as the goal is just to spare heap
+		tmpFile.deleteOnExit();
+
+		// Prepare a fill full of zeroes
+		try (SeekableByteChannel outChannel =
+				Files.newByteChannel(tmpFile.toPath(), EnumSet.of(StandardOpenOption.WRITE))) {
+			int leftToAdd = size;
+
+			ByteBuffer bf1024 = ByteBuffer.allocate(1024 * 4);
+			bf1024.asIntBuffer().put(new int[1024]);
+
+			while (leftToAdd > 0) {
+				int writeNow = Math.min(1024, leftToAdd);
+
+				ByteBuffer bf;
+				if (writeNow == 1024) {
+					// Reset before flushing to file
+					bf1024.position(0);
+					bf = bf1024;
+				} else {
+					bf = ByteBuffer.allocate(writeNow * 4);
+					bf.asIntBuffer().put(new int[writeNow]);
+				}
+
+				int nwritten = outChannel.write(bf);
+
+				// Is it legit to write less than the whole ByteBuffer?
+				leftToAdd -= nwritten / 4;
+			}
+		}
+		return tmpFile;
+	}
+
 	public static class IntArray1NWriter {
-		int[] header;
+		IntBuffer header;
 		// Used to expand the range of values stored in the header up to 2^40
-		byte[] header2;
+		ByteBuffer header2;
 		File indexFile;
 
 		DataOutputStream out;
 		IntIndexStreamer body;
 
 		public IntArray1NWriter(int size, File indexFile) throws IOException {
-			this.header = new int[size];
+			try {
+				File tmpFile = prepareIntArrayInFile(".IntArray1NWriter", size);
+
+				FileChannel fc = new RandomAccessFile(tmpFile, "rw").getChannel();
+
+				this.header = fc.map(FileChannel.MapMode.READ_WRITE, 0, fc.size()).asIntBuffer();
+//				this.header = IntBuffer.allocate(size);
+			} catch (RuntimeException | IOException e) {
+				e.printStackTrace();
+				throw e;
+			}
+			// this.header = IntBuffer.allocate(size);
 			// Lazy allocate header2
 			// this.header2 = new byte[size];
 			this.indexFile = indexFile;
@@ -675,17 +742,20 @@ public abstract class IndexWriter {
 		}
 
 		void setHeader(int index, long val) {
-			header[index] = (int) val;
+			header.put(index, (int) val);
 			byte hi = (byte) (val >> 32);
 			if ((hi != 0 || val > IndexWriter.MAX_OLD_HEADER_VALUE) && header2 == null)
-				header2 = new byte[header.length];
+				header2 = ByteBuffer.allocate(header.capacity());
 			// Once we have started, always overwrite
 			if (header2 != null)
-				header2[index] = hi;
+				header2.put(index, hi);
 		}
 
 		private long getHeader(int index) {
-			return (header2 != null ? (header2[index] & 0xffL) << 32 : 0) | (header[index] & 0xffffffffL);
+			long header2Value = header2 != null ? (header2.get(index) & 0xffL) << 32 : 0;
+			
+			long headerValue = header.get(index) & 0xffffffffL;
+			return header2Value | headerValue;
 		}
 
 		protected void set(int index, int[] values, int offset, int length) throws IOException {
@@ -706,7 +776,7 @@ public abstract class IndexWriter {
 					int i;
 
 					public boolean hasNext() {
-						return i < header.length;
+						return i < header.capacity();
 					}
 
 					public long next() {
@@ -716,7 +786,7 @@ public abstract class IndexWriter {
 				});
 
 			} else {
-				headerIndex = new IntIndexStreamer().writeTo(out, divider, header);
+				headerIndex = new IntIndexStreamer().writeTo(out, divider, asIntIterator(header));
 			}
 
 			out.writeLong(divider);
@@ -1782,6 +1852,24 @@ public abstract class IndexWriter {
 	public static int mostSignificantBit(long x) {
 		long lead = x >>> 32;
 		return lead == 0x0 ? mostSignificantBit((int) x) : 32 + mostSignificantBit((int) lead);
+	}
+
+	private static IteratorInt asIntIterator(IntBuffer header) {
+		header.position(0);
+
+		IteratorInt it = new IteratorInt() {
+			@Override
+			public int next() {
+				return header.get();
+			}
+
+			@Override
+			public boolean hasNext() {
+				return header.hasRemaining();
+			}
+		};
+		
+		return it;
 	}
 
 }
