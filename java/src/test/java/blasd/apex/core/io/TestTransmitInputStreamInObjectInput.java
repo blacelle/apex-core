@@ -132,7 +132,13 @@ public class TestTransmitInputStreamInObjectInput {
 			// Ensure everything is submitted as we will read the pipe in the same thread
 			oos.flush();
 
-			objectInput = new ObjectInputHandlingInputStream(new ObjectInputStream(pis));
+			objectInput = new ObjectInputHandlingInputStream(new ObjectInputStream(pis)) {
+				@Override
+				protected PipedInputStream makePipedInputStream() {
+					// Ensure the IS can not be fully read in background pipe
+					return new PipedInputStream(bytesFrance.length / 2);
+				}
+			};
 			Object nextToRead = objectInput.readObject();
 
 			Assert.assertNotNull(nextToRead);
