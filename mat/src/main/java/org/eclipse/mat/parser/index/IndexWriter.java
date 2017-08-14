@@ -47,7 +47,7 @@ import org.eclipse.mat.parser.index.IIndexReader.IOne2LongIndex;
 import org.eclipse.mat.parser.index.IIndexReader.IOne2OneIndex;
 import org.eclipse.mat.parser.index.IndexReader.SizeIndexReader;
 import org.eclipse.mat.parser.index.longroaring.LongIterator;
-import org.eclipse.mat.parser.index.longroaring.RoaringTreeMap;
+import org.eclipse.mat.parser.index.longroaring.MutableTreeRoaringBitmap;
 import org.eclipse.mat.parser.internal.Messages;
 import org.eclipse.mat.parser.io.BitInputStream;
 import org.eclipse.mat.parser.io.BitOutputStream;
@@ -179,13 +179,13 @@ public abstract class IndexWriter {
 
 	public static class RoaringIdentifier implements Identifier {
 		// Replace a long[] by this Bitmap
-		RoaringTreeMap identifiers;
+		MutableTreeRoaringBitmap identifiers;
 
 		RawIdentifier guarantee;
 
 		public void add(long id) {
 			if (identifiers == null) {
-				identifiers = new RoaringTreeMap();
+				identifiers = new MutableTreeRoaringBitmap();
 				if (Boolean.getBoolean("mat.debug")) {
 					guarantee = new RawIdentifier();
 				}

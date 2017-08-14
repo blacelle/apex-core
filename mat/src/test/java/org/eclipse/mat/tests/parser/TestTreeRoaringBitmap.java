@@ -23,7 +23,7 @@
 package org.eclipse.mat.tests.parser;
 
 import org.eclipse.mat.parser.index.longroaring.LongIterator;
-import org.eclipse.mat.parser.index.longroaring.RoaringTreeMap;
+import org.eclipse.mat.parser.index.longroaring.MutableTreeRoaringBitmap;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -31,7 +31,7 @@ import org.junit.Test;
 public class TestTreeRoaringBitmap {
 	@Test
 	public void testEmpty() {
-		RoaringTreeMap map = new RoaringTreeMap();
+		MutableTreeRoaringBitmap map = new MutableTreeRoaringBitmap();
 
 		Assert.assertFalse(map.iterator().hasNext());
 
@@ -48,7 +48,7 @@ public class TestTreeRoaringBitmap {
 
 	@Test
 	public void testZero() {
-		RoaringTreeMap map = new RoaringTreeMap();
+		MutableTreeRoaringBitmap map = new MutableTreeRoaringBitmap();
 
 		map.addLong(0);
 
@@ -73,7 +73,7 @@ public class TestTreeRoaringBitmap {
 
 	@Test
 	public void testIterator_NextWithoutHasNext_Filled() {
-		RoaringTreeMap map = new RoaringTreeMap();
+		MutableTreeRoaringBitmap map = new MutableTreeRoaringBitmap();
 
 		map.addLong(0);
 
@@ -83,14 +83,14 @@ public class TestTreeRoaringBitmap {
 
 	@Test(expected = IllegalStateException.class)
 	public void testIterator_NextWithoutHasNext_Empty() {
-		RoaringTreeMap map = new RoaringTreeMap();
+		MutableTreeRoaringBitmap map = new MutableTreeRoaringBitmap();
 
 		map.iterator().next();
 	}
 
 	@Test
 	public void testLongMaxValue() {
-		RoaringTreeMap map = new RoaringTreeMap();
+		MutableTreeRoaringBitmap map = new MutableTreeRoaringBitmap();
 
 		map.addLong(Long.MAX_VALUE);
 
@@ -115,7 +115,7 @@ public class TestTreeRoaringBitmap {
 
 	@Test
 	public void testLongMinValue() {
-		RoaringTreeMap map = new RoaringTreeMap();
+		MutableTreeRoaringBitmap map = new MutableTreeRoaringBitmap();
 
 		map.addLong(Long.MIN_VALUE);
 
@@ -140,7 +140,7 @@ public class TestTreeRoaringBitmap {
 
 	@Test
 	public void testLongMinValueZeroOneMaxValue() {
-		RoaringTreeMap map = new RoaringTreeMap();
+		MutableTreeRoaringBitmap map = new MutableTreeRoaringBitmap();
 
 		map.addLong(Long.MIN_VALUE);
 		map.addLong(0);
@@ -175,7 +175,7 @@ public class TestTreeRoaringBitmap {
 
 	@Test
 	public void testPerfManyDifferentBuckets() {
-		RoaringTreeMap map = new RoaringTreeMap();
+		MutableTreeRoaringBitmap map = new MutableTreeRoaringBitmap();
 
 		long problemSize = 100 * 1000L;
 		for (long i = 1; i <= problemSize; i++) {
