@@ -287,7 +287,7 @@ public class MutableTreeRoaringBitmap {
 				}
 			}
 		}
-		
+
 		if (x == Integer.MAX_VALUE) {
 			evenHighestIsValid = true;
 		}
