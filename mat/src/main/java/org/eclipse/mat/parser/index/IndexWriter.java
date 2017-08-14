@@ -864,7 +864,7 @@ public abstract class IndexWriter {
 			// remove duplicates and convert to identifiers
 			// keep pseudo reference as first one
 
-			long pseudo = references.firstElement();
+			final long pseudo = references.firstElement();
 
 			references.sort();
 

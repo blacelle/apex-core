@@ -126,7 +126,7 @@ public interface IApexJVMConstants {
 	 * 
 	 * Start from startup. Default conf is in <java_home>\jre\lib\jfr
 	 * 
-	 * -XX:FlightRecorderOptions=defaultrecording=true -XX:FlightRecorderOptions =defaultrecording=true,settings=default
+	 * -XX:FlightRecorderOptions=defaultrecording=true -XX:FlightRecorderOptions=defaultrecording=true,settings=default
 	 * 
 	 * @author Benoit Lacelle
 	 *

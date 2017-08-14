@@ -262,5 +262,9 @@ public class RoaringTreeMap {
 				}
 			}
 		}
+		
+		if (x == Integer.MAX_VALUE) {
+			allValid = true;
+		}
 	}
 }
