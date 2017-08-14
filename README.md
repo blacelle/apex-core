@@ -7,7 +7,6 @@ Various Java utilities
 [![Quality Gate](https://sonarqube.com/api/badges/gate?key=com.github.blasd.apex:apex-core)](https://sonarqube.com/dashboard/index/com.github.blasd.apex:apex-core)
 [![Technical debt ratio](https://sonarqube.com/api/badges/measure?key=com.github.blasd.apex:apex-core&metric=sqale_debt_ratio)](https://sonarqube.com/dashboard/index/com.github.blasd.apex:apex-core)
 [![javadoc.io](https://javadoc-emblem.rhcloud.com/doc/com.github.blasd.apex/apex-core/badge.svg)](http://www.javadoc.io/doc/com.github.blasd.apex/apex-core)
-[![Dependency Status](https://gemnasium.com/badges/github.com/blasd/apex-core.svg)](https://gemnasium.com/github.com/blasd/apex-core)
 
 
 
