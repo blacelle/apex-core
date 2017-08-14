@@ -289,7 +289,7 @@ public class MutableTreeRoaringBitmap {
 		}
 		
 		if (x == Integer.MAX_VALUE) {
-			allValid = true;
+			evenHighestIsValid = true;
 		}
 	}
 }
