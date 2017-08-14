@@ -44,14 +44,14 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 /**
- * Classe d'attachement dynamique utilisée ici pour obtenir l'histogramme de la mémoire. <br/>
- * Cette classe nécessite tools.jar du jdk pour être exécutée (ok dans tomcat), mais pas pour être compilée. <br/>
+ * Gives access to the VirtualMachine object. It may not be available if tools.jar is not made available. Tools.jar is
+ * made available by ensuringf JAVA_HOME targets a jdk
  * 
  * @see <a href=
  *      "http://java.sun.com/javase/6/docs/jdk/api/attach/spec/com/sun/tools/attach/VirtualMachine.html#attach(java.lang.String)"
  *      >VirtualMachine</a>
  * 
- * @author Emeric Vernat
+ * @author Benoit Lacelle
  */
 // https://github.com/javamelody/javamelody/blob/master/javamelody-core/src/main/java/net/bull/javamelody/VirtualMachine.java
 public class VirtualMachineWithoutToolsJar {
@@ -77,6 +77,7 @@ public class VirtualMachineWithoutToolsJar {
 		// pour nodes Hudson/Jenkins, on réévalue sans utiliser de constante
 		final String javaVendor = getJavaVendor();
 		// http://www.oracle.com/technetwork/middleware/jrockit/overview/index.html
+		// https://github.com/openjdk-mirror/jdk7u-jdk/blob/master/make/tools/manifest.mf
 		return javaVendor.contains("Sun") || javaVendor.contains("Oracle")
 				|| javaVendor.contains("Apple")
 				|| isJRockit();
@@ -116,7 +117,6 @@ public class VirtualMachineWithoutToolsJar {
 
 		try {
 			// http://hg.openjdk.java.net/jdk8/jdk8/jdk/file/687fd7c7986d/src/windows/classes/sun/tools/attach/WindowsAttachProvider.java
-			// System.loadLibrary("attach");
 			Method m = virtualMachineClass.get().getDeclaredMethod("list");
 
 			// List of VirtualMachineDescriptor
@@ -141,11 +141,9 @@ public class VirtualMachineWithoutToolsJar {
 			return Optional.absent();
 		}
 
-		// si hotspot retourne une instance de
-		// sun.tools.attach.HotSpotVirtualMachine
-		// cf
-		// http://www.java2s.com/Open-Source/Java-Document/6.0-JDK-Modules-sun/tools/sun/tools/attach/HotSpotVirtualMachine.java.htm
-		// et sous windows : sun.tools.attach.WindowsVirtualMachine
+		// https://github.com/openjdk-mirror/jdk7u-jdk/blob/master/src/share/classes/sun/tools/attach/HotSpotVirtualMachine.java
+		// https://github.com/openjdk-mirror/jdk7u-jdk/blob/master/src/windows/classes/sun/tools/attach/WindowsVirtualMachine.java
+		// http://hg.openjdk.java.net/jdk8/jdk8/jdk/file/687fd7c7986d/src/windows/classes/sun/tools/attach/WindowsVirtualMachine.java
 		if (JVM_VIRTUAL_MACHINE.get() == null) {
 			final Optional<? extends Class<?>> virtualMachineClass = findVirtualMachineClass();
 
@@ -160,7 +158,7 @@ public class VirtualMachineWithoutToolsJar {
 						WILL_NOT_WORK.set(true);
 					} else {
 						Class<? extends Object> vmClass = JVM_VIRTUAL_MACHINE.get().getClass();
-						LOGGER.info("VirtualMachine has been loaded: {}. Available methods: {}",
+						LOGGER.trace("VirtualMachine has been loaded: {}. Available methods: {}",
 								vmClass.getName(),
 								Arrays.asList(vmClass.getMethods()));
 					}
@@ -199,13 +197,23 @@ public class VirtualMachineWithoutToolsJar {
 	}
 
 	/**
+	 * Dump an histogram of the objects in the heap. This could refers Object which are electable for GC, but not GCed
+	 * yet
+	 * 
 	 * @return The output histogram as produced by 'jmap -histo'
 	 */
 	public static Optional<InputStream> heapHisto() {
+		return heapHisto(true);
+	}
+
+	public static Optional<InputStream> heapHisto(final boolean allObjectsElseLive) {
 		Optional<InputStream> asInputStream = getJvmVirtualMachine().transform(new Function<Object, InputStream>() {
 
 			@Override
 			public InputStream apply(Object vm) {
+				if (!allObjectsElseLive) {
+					LOGGER.warn(".heapHisto with allObjectsElseLive=false will trigger a full-GC");
+				}
 				try {
 					return invokeForInputStream(vm, "heapHisto", ALL_OBJECTS_OPTION);
 				} catch (Throwable e) {
@@ -237,6 +245,9 @@ public class VirtualMachineWithoutToolsJar {
 
 			@Override
 			public InputStream apply(Object vm) {
+				if (!allObjectsElseLive) {
+					LOGGER.warn(".heapDump with allObjectsElseLive=false will trigger a full-GC");
+				}
 				String option = getAllorLiveOption(allObjectsElseLive);
 				try {
 					return invokeForInputStream(vm, "dumpHeap", absoluteFile.getPath(), option);
@@ -254,6 +265,13 @@ public class VirtualMachineWithoutToolsJar {
 		return asInputStream;
 	}
 
+	/**
+	 * 
+	 * @param allObjectsElseLive
+	 *            if true, one want jmap to export all objects available in the JVM. If false, jmap shall keep only live
+	 *            object, which will require a full GC
+	 * @return the jmap String option associated to the expected behavior
+	 */
 	protected static String getAllorLiveOption(boolean allObjectsElseLive) {
 		if (allObjectsElseLive) {
 			return ALL_OBJECTS_OPTION;
