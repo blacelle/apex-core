@@ -24,7 +24,6 @@ package blasd.apex.core.agent;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 
 import org.ehcache.sizeof.impl.AgentLoaderApexSpy;
@@ -33,8 +32,6 @@ import org.junit.Test;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
-
-import blasd.apex.core.agent.VirtualMachineWithoutToolsJar;
 
 public class TestVirtualMachineWithoutToolsJar {
 	@Test
