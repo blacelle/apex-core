@@ -29,6 +29,7 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
+import com.google.common.annotations.Beta;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 
@@ -333,5 +334,13 @@ public class ApexLogHelper {
 	public static Object escapeNewLines(Object toString) {
 		return lazyToString(() -> toString.toString().replaceAll("\r", Matcher.quoteReplacement("\\r")).replaceAll("\n",
 				Matcher.quoteReplacement("\\n")));
+	}
+
+	// TODO
+	@Beta
+	@Deprecated
+	public static Object getFirstCharsInMap(Map<?, ?> toString, int limitChars) {
+		// TODO: have a limit per key and value
+		return getFirstChars(toString, limitChars);
 	}
 }

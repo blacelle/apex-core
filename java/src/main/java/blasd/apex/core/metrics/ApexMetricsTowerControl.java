@@ -55,6 +55,7 @@ import com.google.common.eventbus.Subscribe;
 
 import blasd.apex.core.io.ApexFileHelper;
 import blasd.apex.core.logging.ApexLogHelper;
+import blasd.apex.core.memory.IApexMemoryConstants;
 import blasd.apex.core.thread.ApexExecutorsHelper;
 import blasd.apex.core.thread.IApexThreadDumper;
 
@@ -259,7 +260,10 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	}
 
 	protected Object noNewLine(StartMetricEvent key) {
-		return ApexLogHelper.lazyToString(() -> ApexFileHelper.cleanWhitespaces(key.toString()));
+		// Prevent the message to be too big. Else, we may end reporting very regularly about a huge MDX (e.g. 150MB
+		// every 10 seconds is not reasonable)
+		return ApexLogHelper.lazyToString(() -> ApexFileHelper
+				.cleanWhitespaces(ApexLogHelper.getFirstChars(key, IApexMemoryConstants.MB_INT).toString()));
 	}
 
 	/**

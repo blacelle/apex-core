@@ -37,7 +37,7 @@
 		<dependency>
 			<groupId>org.roaringbitmap</groupId>
 			<artifactId>RoaringBitmap</artifactId>
-			<version>0.6.47</version>
+			<version>0.6.48</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/it.unimi.dsi/fastutil -->

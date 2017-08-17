@@ -35,6 +35,8 @@ public interface IHprofParserHandler {
 		public long objectAddress;
 		public ClassImpl clazz;
 		public long usedHeapSize;
+		
+		// TODO Could we reserve capacity depending on class fields?
 		public ArrayLong references = new ArrayLong();
 		public boolean isArray = false;
 

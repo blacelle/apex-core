@@ -46,13 +46,14 @@ import org.eclipse.mat.collect.SetInt;
 import org.eclipse.mat.parser.index.IIndexReader.IOne2LongIndex;
 import org.eclipse.mat.parser.index.IIndexReader.IOne2OneIndex;
 import org.eclipse.mat.parser.index.IndexReader.SizeIndexReader;
-import org.eclipse.mat.parser.index.longroaring.LongIterator;
-import org.eclipse.mat.parser.index.longroaring.MutableTreeRoaringBitmap;
 import org.eclipse.mat.parser.internal.Messages;
 import org.eclipse.mat.parser.io.BitInputStream;
 import org.eclipse.mat.parser.io.BitOutputStream;
 import org.eclipse.mat.util.IProgressListener;
 import org.eclipse.mat.util.MessageUtil;
+import org.roaringbitmap.longlong.LongIterator;
+import org.roaringbitmap.longlong.Roaring64NavigableMap;
+import org.roaringbitmap.longlong.RoaringBitmapSupplier;
 
 public abstract class IndexWriter {
 	public static final int PAGE_SIZE_INT = 1000000;
@@ -179,13 +180,13 @@ public abstract class IndexWriter {
 
 	public static class RoaringIdentifier implements Identifier {
 		// Replace a long[] by this Bitmap
-		MutableTreeRoaringBitmap identifiers;
+		Roaring64NavigableMap identifiers;
 
 		RawIdentifier guarantee;
 
 		public void add(long id) {
 			if (identifiers == null) {
-				identifiers = new MutableTreeRoaringBitmap();
+				identifiers = new Roaring64NavigableMap(true, new RoaringBitmapSupplier());
 				if (Boolean.getBoolean("mat.debug")) {
 					guarantee = new RawIdentifier();
 				}
@@ -199,10 +200,15 @@ public abstract class IndexWriter {
 		}
 
 		public int size() {
-			long cardinality = identifiers.getCardinality();
+			long cardinality = identifiers.getLongCardinality();
 			if (guarantee != null) {
 				assert guarantee.size() == cardinality;
 			}
+
+			if (cardinality > Integer.MAX_VALUE) {
+				throw new IllegalStateException("Too many references: " + cardinality);
+			}
+
 			return (int) cardinality;
 		}
 
@@ -255,7 +261,7 @@ public abstract class IndexWriter {
 				};
 			}
 
-			LongIterator it = identifiers.iterator();
+			LongIterator it = identifiers.getLongIterator();
 			IteratorLong guaranteIt;
 			if (guarantee != null) {
 				guaranteIt = guarantee.iterator();

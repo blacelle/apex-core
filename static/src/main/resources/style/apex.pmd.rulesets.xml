@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	name="Android Application Rules" xmlns="http://pmd.sf.net/ruleset/1.0.0"
-	xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd"
-	xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd">
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Android Application Rules" xmlns="http://pmd.sf.net/ruleset/1.0.0"
+	xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd" xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd">
 
 	<description>Default rules, except those considered not relevant by Apex</description>
 
-	<!-- Default are basic.xml, empty.xml, imports.xml, unnecessary.xml and 
-		unusedcode.xml -->
+	<!-- Default are basic.xml, empty.xml, imports.xml, unnecessary.xml and unusedcode.xml -->
 	<!-- https://maven.apache.org/plugins/maven-pmd-plugin/examples/usingRuleSets.html -->
 
 	<!-- http://pmd.sourceforge.net/pmd-4.3.0/rules/index.html -->
@@ -16,8 +13,7 @@
 	<!-- Not default -->
 	<!-- <rule ref="rulesets/java/android.xml" /> -->
 	<rule ref="rulesets/java/basic.xml">
-		<!-- We consider it is sometimes clearer to break an AND condition in multiple 
-			ifs, typically to add comments between the steps -->
+		<!-- We consider it is sometimes clearer to break an AND condition in multiple ifs, typically to add comments between the steps -->
 		<exclude name="CollapsibleIfStatements" />
 	</rule>
 
@@ -26,7 +22,11 @@
 
 
 	<!-- Not default but interesting -->
-	<rule ref="rulesets/java/clone.xml" />
+	<rule ref="rulesets/java/clone.xml">
+		<!-- https://sourceforge.net/p/pmd/bugs/1204/?SetFreedomCookie -->
+		<!-- PMD requests .clone to throw even if Cloneable: meaningless -->
+		<exclude name="CloneThrowsCloneNotSupportedException"></exclude>
+	</rule>
 
 
 	<!-- Not default -->
@@ -74,8 +74,7 @@
 	<!-- <rule ref="rulesets/java/typeresolution.xml" /> -->
 
 	<rule ref="rulesets/java/unnecessary.xml">
-		<!-- MAT introduced many final classes with final methods: keep final methods 
-			in case the final on class is removed -->
+		<!-- MAT introduced many final classes with final methods: keep final methods in case the final on class is removed -->
 		<exclude name="UnnecessaryFinalModifier" />
 	</rule>
 	<rule ref="rulesets/java/unusedcode.xml" />
