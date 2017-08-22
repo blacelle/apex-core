@@ -22,6 +22,7 @@ import org.eclipse.mat.util.MessageUtil;
 
 public class CSVComparator implements IComparator {
 
+	@Override
 	public List<Difference> compare(File baseline, File testFile) throws Exception {
 		String testName = baseline.getName().substring(0, baseline.getName().lastIndexOf("."));
 

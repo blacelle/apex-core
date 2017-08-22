@@ -28,10 +28,12 @@ class StackFrameImpl implements IStackFrame {
 		this.localObjectIds = localObjectIds;
 	}
 
+	@Override
 	public int[] getLocalObjectsIds() {
 		return localObjectIds == null ? new int[0] : localObjectIds;
 	}
 
+	@Override
 	public String getText() {
 		return text;
 	}

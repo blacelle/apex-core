@@ -40,6 +40,7 @@ public class HprofIndexBuilder implements IIndexBuilder {
 	private IOne2LongIndex id2position;
 	private List<IParsingEnhancer> enhancers;
 
+	@Override
 	public void init(File file, String prefix) {
 		this.file = file;
 		this.prefix = prefix;
@@ -54,6 +55,7 @@ public class HprofIndexBuilder implements IIndexBuilder {
 
 	}
 
+	@Override
 	public void fill(IPreliminaryIndex preliminary, IProgressListener listener) throws SnapshotException, IOException {
 		HprofPreferences.HprofStrictness strictnessPreference = HprofPreferences.getCurrentStrictness();
 
@@ -108,6 +110,7 @@ public class HprofIndexBuilder implements IIndexBuilder {
 		id2position = handler.fillIn(preliminary);
 	}
 
+	@Override
 	public void clean(final int[] purgedMapping, IProgressListener listener) throws IOException {
 
 		// //////////////////////////////////////////////////////////////
@@ -136,6 +139,7 @@ public class HprofIndexBuilder implements IIndexBuilder {
 		id2position = null;
 	}
 
+	@Override
 	public void cancel() {
 		if (id2position != null) {
 			try {
@@ -158,10 +162,12 @@ public class HprofIndexBuilder implements IIndexBuilder {
 			findNext();
 		}
 
+		@Override
 		public boolean hasNext() {
 			return nextIndex < purgedMapping.length;
 		}
 
+		@Override
 		public long next() {
 			long answer = id2position.get(nextIndex);
 			findNext();

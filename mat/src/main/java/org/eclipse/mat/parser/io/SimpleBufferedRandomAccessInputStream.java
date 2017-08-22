@@ -40,6 +40,7 @@ public class SimpleBufferedRandomAccessInputStream extends InputStream {
 		real_pos = raf.getFilePointer();
 	}
 
+	@Override
 	public final int read() throws IOException {
 		if (buf_pos >= buf_end) {
 			if (fillBuffer() < 0) {
@@ -96,10 +97,12 @@ public class SimpleBufferedRandomAccessInputStream extends InputStream {
 		return n;
 	}
 
+	@Override
 	public boolean markSupported() {
 		return false;
 	}
 
+	@Override
 	public void close() throws IOException {
 		raf.close();
 		buffer = null;

@@ -420,6 +420,7 @@ import org.eclipse.mat.util.SilentProgressListener;
 	}
 
 	private static abstract class NewObjectIntIterator extends NewObjectIterator implements IteratorInt {
+		@Override
 		public int next() {
 			int answer = doGetNextInt(nextIndex);
 			findNext();
@@ -437,6 +438,7 @@ import org.eclipse.mat.util.SilentProgressListener;
 			this.classesByNewId = classesByNewId;
 		}
 
+		@Override
 		public void storeKey(int index, Serializable key) {
 			ClassImpl impl = classesByNewId.get(index);
 			impl.setCacheEntry(key);

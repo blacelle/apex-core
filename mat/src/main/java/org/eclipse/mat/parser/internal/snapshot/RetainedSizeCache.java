@@ -65,6 +65,7 @@ public class RetainedSizeCache implements IIndexReader {
 		isDirty = true;
 	}
 
+	@Override
 	public void close() {
 		if (!isDirty)
 			return;
@@ -145,14 +146,17 @@ public class RetainedSizeCache implements IIndexReader {
 		}
 	}
 
+	@Override
 	public int size() {
 		return id2size.size();
 	}
 
+	@Override
 	public void unload() throws IOException {
 		close();
 	}
 
+	@Override
 	public void delete() {
 		close();
 

@@ -23,6 +23,7 @@ public class RegTestUtils {
 	public static final String SEPARATOR = ";";
 
 	private static FileFilter filter = new FileFilter() {
+		@Override
 		public boolean accept(File file) {
 			return (file.getName().endsWith(".hprof") || file.getName().endsWith(".dtfj")
 					|| file.getName().endsWith(".dmp.zip"));
@@ -30,6 +31,7 @@ public class RegTestUtils {
 	};
 
 	public static final FilenameFilter cleanupFilter = new FilenameFilter() {
+		@Override
 		public boolean accept(File dir, String name) {
 			Pattern hprofPattern = Pattern.compile(".*\\.hprof");
 			Pattern dtfjPattern = Pattern.compile(".*\\.dtfj|.*\\.dmp.zip|.*\\.phd|javacore.*\\.txt");
@@ -58,6 +60,7 @@ public class RegTestUtils {
 		// check whether sub-folders contain heap dumps
 
 		File[] directories = dumpsFolder.listFiles(new FileFilter() {
+			@Override
 			public boolean accept(File file) {
 				return file.isDirectory();
 			}

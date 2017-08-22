@@ -93,6 +93,7 @@ public class MultiplePathsFromGCRootsComputerImpl implements IMultiplePathsFromG
 		paths = pathsList.toArray();
 	}
 
+	@Override
 	public MultiplePathsFromGCRootsRecord[] getPathsByGCRoot(IProgressListener progressListener)
 			throws SnapshotException {
 		if (!pathsCalculated) {
@@ -107,6 +108,7 @@ public class MultiplePathsFromGCRootsComputerImpl implements IMultiplePathsFromG
 		return dummy.nextLevel();
 	}
 
+	@Override
 	public Object[] getAllPaths(IProgressListener progressListener) throws SnapshotException {
 		if (!pathsCalculated) {
 			computePaths(progressListener);

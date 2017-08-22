@@ -156,10 +156,12 @@ public final class SetLong implements Serializable {
 			int n = 0;
 			int i = -1;
 
+			@Override
 			public boolean hasNext() {
 				return n < size;
 			}
 
+			@Override
 			public long next() throws NoSuchElementException {
 				while (++i < used.length) {
 					if (used[i]) {

@@ -50,6 +50,7 @@ public abstract class AbstractArrayImpl extends AbstractObjectImpl implements IA
 		this.info = content;
 	}
 
+	@Override
 	public int getLength() {
 		return length;
 	}
@@ -62,10 +63,12 @@ public abstract class AbstractArrayImpl extends AbstractObjectImpl implements IA
 		length = i;
 	}
 
+	@Override
 	protected StringBuffer appendFields(StringBuffer buf) {
 		return super.appendFields(buf).append(";length=").append(length);
 	}
 
+	@Override
 	public String getTechnicalName() {
 		StringBuilder builder = new StringBuilder(256);
 		String name = getClazz().getName();

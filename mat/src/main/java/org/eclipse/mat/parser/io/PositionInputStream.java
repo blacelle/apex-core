@@ -27,6 +27,7 @@ public class PositionInputStream extends FilterInputStream implements DataInput 
 		super(in);
 	}
 
+	@Override
 	public int read() throws IOException {
 		int res = super.read();
 		if (res != -1)
@@ -34,6 +35,7 @@ public class PositionInputStream extends FilterInputStream implements DataInput 
 		return res;
 	}
 
+	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		int res = super.read(b, off, len);
 		if (res != -1)
@@ -41,24 +43,29 @@ public class PositionInputStream extends FilterInputStream implements DataInput 
 		return res;
 	}
 
+	@Override
 	public long skip(long n) throws IOException {
 		long res = super.skip(n);
 		position += res;
 		return res;
 	}
 
+	@Override
 	public boolean markSupported() {
 		return false;
 	}
 
+	@Override
 	public void mark(int readLimit) {
 		throw new UnsupportedOperationException(Messages.PositionInputStream_mark);
 	}
 
+	@Override
 	public void reset() {
 		throw new UnsupportedOperationException(Messages.PositionInputStream_reset);
 	}
 
+	@Override
 	public final int skipBytes(int n) throws IOException {
 		int total = 0;
 		int cur = 0;
@@ -81,10 +88,12 @@ public class PositionInputStream extends FilterInputStream implements DataInput 
 		return (int) total;
 	}
 
+	@Override
 	public final void readFully(byte b[]) throws IOException {
 		readFully(b, 0, b.length);
 	}
 
+	@Override
 	public final void readFully(byte b[], int off, int len) throws IOException {
 		int n = 0;
 		while (n < len) {
@@ -115,6 +124,7 @@ public class PositionInputStream extends FilterInputStream implements DataInput 
 	// DataInput implementations
 	// //////////////////////////////////////////////////////////////
 
+	@Override
 	public final int readUnsignedByte() throws IOException {
 		int ch = in.read();
 		if (ch < 0)
@@ -123,16 +133,19 @@ public class PositionInputStream extends FilterInputStream implements DataInput 
 		return ch;
 	}
 
+	@Override
 	public final int readInt() throws IOException {
 		readFully(readBuffer, 0, 4);
 		return readInt(readBuffer, 0);
 	}
 
+	@Override
 	public final long readLong() throws IOException {
 		readFully(readBuffer, 0, 8);
 		return readLong(readBuffer, 0);
 	}
 
+	@Override
 	public boolean readBoolean() throws IOException {
 		int ch = in.read();
 		if (ch < 0)
@@ -141,6 +154,7 @@ public class PositionInputStream extends FilterInputStream implements DataInput 
 		return (ch != 0);
 	}
 
+	@Override
 	public byte readByte() throws IOException {
 		int ch = in.read();
 		if (ch < 0)
@@ -149,6 +163,7 @@ public class PositionInputStream extends FilterInputStream implements DataInput 
 		return (byte) (ch);
 	}
 
+	@Override
 	public char readChar() throws IOException {
 		int ch1 = in.read();
 		int ch2 = in.read();
@@ -158,18 +173,22 @@ public class PositionInputStream extends FilterInputStream implements DataInput 
 		return (char) ((ch1 << 8) + (ch2 << 0));
 	}
 
+	@Override
 	public double readDouble() throws IOException {
 		return Double.longBitsToDouble(readLong());
 	}
 
+	@Override
 	public float readFloat() throws IOException {
 		return Float.intBitsToFloat(readInt());
 	}
 
+	@Override
 	public String readLine() throws IOException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public short readShort() throws IOException {
 		int ch1 = in.read();
 		int ch2 = in.read();
@@ -179,10 +198,12 @@ public class PositionInputStream extends FilterInputStream implements DataInput 
 		return (short) ((ch1 << 8) + (ch2 << 0));
 	}
 
+	@Override
 	public String readUTF() throws IOException {
 		return DataInputStream.readUTF(this);
 	}
 
+	@Override
 	public int readUnsignedShort() throws IOException {
 		int ch1 = in.read();
 		int ch2 = in.read();

@@ -146,6 +146,7 @@ public class TestIndex {
 			}
 			KeyWriter kw = new KeyWriter() {
 
+				@Override
 				public void storeKey(int index, Serializable key) {
 					// TODO Auto-generated method stub
 

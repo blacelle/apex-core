@@ -46,19 +46,23 @@ public class PrimitiveArrayImpl extends AbstractArrayImpl implements IPrimitiveA
 		this.type = type;
 	}
 
+	@Override
 	public int getType() {
 		return type;
 	}
 
+	@Override
 	public Class<?> getComponentType() {
 		return COMPONENT_TYPE[type];
 	}
 
+	@Override
 	public Object getValueAt(int index) {
 		Object data = getValueArray(index, 1);
 		return data != null ? Array.get(data, 0) : null;
 	}
 
+	@Override
 	public Object getValueArray() {
 		try {
 			return source.getHeapObjectReader().readPrimitiveArrayContent(this, 0, getLength());
@@ -69,6 +73,7 @@ public class PrimitiveArrayImpl extends AbstractArrayImpl implements IPrimitiveA
 		}
 	}
 
+	@Override
 	public Object getValueArray(int offset, int length) {
 		try {
 			return source.getHeapObjectReader().readPrimitiveArrayContent(this, offset, length);
@@ -79,6 +84,7 @@ public class PrimitiveArrayImpl extends AbstractArrayImpl implements IPrimitiveA
 		}
 	}
 
+	@Override
 	protected Field internalGetField(String name) {
 		return null;
 	}
@@ -90,6 +96,7 @@ public class PrimitiveArrayImpl extends AbstractArrayImpl implements IPrimitiveA
 		return references;
 	}
 
+	@Override
 	public List<NamedReference> getOutboundReferences() {
 		List<NamedReference> references = new ArrayList<NamedReference>(1);
 		references.add(new PseudoReference(source, classInstance.getObjectAddress(), "<class>"));

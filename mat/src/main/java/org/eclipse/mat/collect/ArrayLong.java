@@ -162,10 +162,12 @@ public final class ArrayLong {
 		return new IteratorLong() {
 			int index = 0;
 
+			@Override
 			public boolean hasNext() {
 				return index < size;
 			}
 
+			@Override
 			public long next() {
 				return elements[index++];
 			}

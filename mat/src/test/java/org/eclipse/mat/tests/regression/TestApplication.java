@@ -369,6 +369,7 @@ public class TestApplication {
 			for (final File baselineFile : baselineFiles) {
 				File[] matchingFiles = resultDir.listFiles(new FileFilter() {
 
+					@Override
 					public boolean accept(File file) {
 						return file.getName().equals(baselineFile.getName());
 					}
@@ -390,6 +391,7 @@ public class TestApplication {
 			for (final File testResultFile : results) {
 				File[] matchingFiles = baselineDir.listFiles(new FileFilter() {
 
+					@Override
 					public boolean accept(File file) {
 						return file.getName().equals(testResultFile.getName());
 					}

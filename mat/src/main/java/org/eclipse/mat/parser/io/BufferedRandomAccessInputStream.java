@@ -49,6 +49,7 @@ public class BufferedRandomAccessInputStream extends InputStream {
 		this.fileLength = in.length();
 	}
 
+	@Override
 	public final int read() throws IOException {
 		if (reported_pos == fileLength)
 			return -1;
@@ -122,10 +123,12 @@ public class BufferedRandomAccessInputStream extends InputStream {
 		return p;
 	}
 
+	@Override
 	public boolean markSupported() {
 		return false;
 	}
 
+	@Override
 	public void close() throws IOException {
 		raf.close();
 	}

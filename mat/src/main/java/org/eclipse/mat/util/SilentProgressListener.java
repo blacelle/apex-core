@@ -21,29 +21,36 @@ public class SilentProgressListener implements IProgressListener {
 		this.delegate = delegate;
 	}
 
+	@Override
 	public void beginTask(String name, int totalWork) {
 		delegate.subTask(name);
 	}
 
+	@Override
 	public void done() {
 	}
 
+	@Override
 	public boolean isCanceled() {
 		return delegate.isCanceled();
 	}
 
+	@Override
 	public void sendUserMessage(Severity severity, String message, Throwable exception) {
 		delegate.sendUserMessage(severity, message, exception);
 	}
 
+	@Override
 	public void setCanceled(boolean value) {
 		delegate.setCanceled(value);
 	}
 
+	@Override
 	public void subTask(String name) {
 		delegate.subTask(name);
 	}
 
+	@Override
 	public void worked(int work) {
 	}
 

@@ -32,15 +32,18 @@ public final class SimpleStringTokenizer implements Iterable<String> {
 		this.delim = delim;
 	}
 
+	@Override
 	public Iterator<String> iterator() {
 		return new Iterator<String>() {
 			int position = 0;
 			int maxPosition = subject.length();
 
+			@Override
 			public boolean hasNext() {
 				return position < maxPosition;
 			}
 
+			@Override
 			public String next() {
 				if (position >= maxPosition)
 					throw new NoSuchElementException();
@@ -61,6 +64,7 @@ public final class SimpleStringTokenizer implements Iterable<String> {
 				return answer;
 			}
 
+			@Override
 			public void remove() {
 				throw new UnsupportedOperationException();
 			}

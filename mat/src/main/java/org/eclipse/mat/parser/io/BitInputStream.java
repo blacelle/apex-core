@@ -31,12 +31,14 @@ public class BitInputStream implements Flushable, Closeable {
 		this.buffer = new byte[DEFAULT_BUFFER_SIZE];
 	}
 
+	@Override
 	public void flush() {
 		avail = 0;
 		pos = 0;
 		fill = 0;
 	}
 
+	@Override
 	public void close() throws IOException {
 		is.close();
 		is = null;

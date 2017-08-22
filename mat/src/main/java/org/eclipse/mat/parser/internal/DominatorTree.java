@@ -178,10 +178,12 @@ public class DominatorTree {
 							new IteratorInt() {
 								int nextIndex = 2;
 
+								@Override
 								public boolean hasNext() {
 									return nextIndex < dom.length;
 								}
 
+								@Override
 								public int next() {
 									return dom[nextIndex++];
 								}

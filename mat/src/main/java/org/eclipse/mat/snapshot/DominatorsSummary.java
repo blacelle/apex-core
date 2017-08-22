@@ -384,6 +384,7 @@ public final class DominatorsSummary {
 	 * A comparator by name
 	 */
 	public static final Comparator<Object> COMPARE_BY_NAME = new Comparator<Object>() {
+		@Override
 		public int compare(Object o1, Object o2) {
 			if (o1 instanceof ClassDominatorRecord)
 				return ((ClassDominatorRecord) o1).getClassName().compareTo(((ClassDominatorRecord) o2).getClassName());
@@ -398,6 +399,7 @@ public final class DominatorsSummary {
 	 * A comparator by number of dominators
 	 */
 	public static final Comparator<Object> COMPARE_BY_DOMINATORS = new Comparator<Object>() {
+		@Override
 		public int compare(Object o1, Object o2) {
 			int c1 = 0;
 			int c2 = 0;
@@ -419,6 +421,7 @@ public final class DominatorsSummary {
 	 * A comparator by number of dominated objects
 	 */
 	public static final Comparator<Object> COMPARE_BY_DOMINATED = new Comparator<Object>() {
+		@Override
 		public int compare(Object o1, Object o2) {
 			int c1 = 0;
 			int c2 = 0;
@@ -440,6 +443,7 @@ public final class DominatorsSummary {
 	 * A comparator by dominated heap size
 	 */
 	public static final Comparator<Object> COMPARE_BY_DOMINATED_HEAP_SIZE = new Comparator<Object>() {
+		@Override
 		public int compare(Object o1, Object o2) {
 			long c1 = 0;
 			long c2 = 0;
@@ -461,6 +465,7 @@ public final class DominatorsSummary {
 	 * A comparator by dominators heap size
 	 */
 	public static final Comparator<Object> COMPARE_BY_DOMINATOR_HEAP_SIZE = new Comparator<Object>() {
+		@Override
 		public int compare(Object o1, Object o2) {
 			long c1 = 0;
 			long c2 = 0;
@@ -480,6 +485,7 @@ public final class DominatorsSummary {
 	 * A comparator by dominated objects' retained size
 	 */
 	public static final Comparator<Object> COMPARE_BY_DOMINATED_RETAINED_HEAP_SIZE = new Comparator<Object>() {
+		@Override
 		public int compare(Object o1, Object o2) {
 			long c1 = 0;
 			long c2 = 0;
@@ -501,6 +507,7 @@ public final class DominatorsSummary {
 	 * A comparator by dominators' retained size
 	 */
 	public static final Comparator<Object> COMPARE_BY_DOMINATOR_RETAINED_HEAP_SIZE = new Comparator<Object>() {
+		@Override
 		public int compare(Object o1, Object o2) {
 			long c1 = 0;
 			long c2 = 0;
@@ -522,6 +529,7 @@ public final class DominatorsSummary {
 	 */
 	public static Comparator<Object> reverseComparator(final Comparator<Object> comparator) {
 		return new Comparator<Object>() {
+			@Override
 			public int compare(Object o1, Object o2) {
 				return comparator.compare(o2, o1);
 			}

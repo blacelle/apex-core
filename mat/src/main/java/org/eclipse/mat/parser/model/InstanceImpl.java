@@ -83,6 +83,7 @@ public class InstanceImpl extends AbstractObjectImpl implements IInstance {
 		}
 	}
 
+	@Override
 	public List<Field> getFields() {
 		if (fields == null)
 			readFully();
@@ -90,6 +91,7 @@ public class InstanceImpl extends AbstractObjectImpl implements IInstance {
 		return fields;
 	}
 
+	@Override
 	public Field getField(String name) {
 		return internalGetField(name);
 	}
@@ -135,6 +137,7 @@ public class InstanceImpl extends AbstractObjectImpl implements IInstance {
 		}
 	}
 
+	@Override
 	public ArrayLong getReferences() {
 		List<Field> fields = getFields();
 		ArrayLong list = new ArrayLong(fields.size() + 1);
@@ -164,6 +167,7 @@ public class InstanceImpl extends AbstractObjectImpl implements IInstance {
 		return list;
 	}
 
+	@Override
 	public List<NamedReference> getOutboundReferences() {
 		List<NamedReference> list = new ArrayList<NamedReference>();
 

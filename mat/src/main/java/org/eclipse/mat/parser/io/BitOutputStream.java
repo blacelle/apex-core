@@ -38,6 +38,7 @@ public class BitOutputStream implements Flushable, Closeable {
 		free = 8;
 	}
 
+	@Override
 	public void flush() throws IOException {
 		align();
 
@@ -48,6 +49,7 @@ public class BitOutputStream implements Flushable, Closeable {
 		os.flush();
 	}
 
+	@Override
 	public void close() throws IOException {
 		flush();
 		os.close();

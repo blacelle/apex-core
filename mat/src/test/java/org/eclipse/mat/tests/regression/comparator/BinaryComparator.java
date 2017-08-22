@@ -27,6 +27,7 @@ public class BinaryComparator implements IComparator {
 
 	private final String FAILED_MESSAGE = "Test result differs from the baseline";
 
+	@Override
 	public List<Difference> compare(File baseline, File testFile) throws Exception {
 		String testName = baseline.getName().substring(0, baseline.getName().lastIndexOf("."));
 		System.out.println(MessageUtil.format("Comparing: {0}", testName));

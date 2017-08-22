@@ -49,10 +49,12 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 		this.classInstance = classInstance;
 	}
 
+	@Override
 	public long getObjectAddress() {
 		return address;
 	}
 
+	@Override
 	public int getObjectId() {
 		return objectId;
 	}
@@ -73,6 +75,7 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 		this.objectId = objectId;
 	}
 
+	@Override
 	public ClassImpl getClazz() {
 		return classInstance;
 	}
@@ -111,6 +114,7 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 		this.source = (SnapshotImpl) dump;
 	}
 
+	@Override
 	public ISnapshot getSnapshot() {
 		return this.source;
 	}
@@ -118,8 +122,10 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 	/**
 	 * @since 1.0
 	 */
+	@Override
 	abstract public long getUsedHeapSize();
 
+	@Override
 	public long getRetainedHeapSize() {
 		try {
 			return source.getRetainedHeapSize(getObjectId());
@@ -153,10 +159,12 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 		return buf.append("id=0x").append(Long.toHexString(getObjectAddress()));
 	}
 
+	@Override
 	public String getClassSpecificName() {
 		return ClassSpecificNameResolverRegistry.resolve(this);
 	}
 
+	@Override
 	public String getTechnicalName() {
 		StringBuilder builder = new StringBuilder(256);
 		builder.append(getClazz().getName());
@@ -165,6 +173,7 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 		return builder.toString();
 	}
 
+	@Override
 	public String getDisplayName() {
 		String label = getClassSpecificName();
 		if (label == null)
@@ -183,6 +192,7 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 
 	// If the name is in the form <FIELD>{.<FIELD>}
 	// the fields are transiently followed
+	@Override
 	public final Object resolveValue(String name) throws SnapshotException {
 		int p = name.indexOf('.');
 		String n = p < 0 ? name : name.substring(0, p);
@@ -235,6 +245,7 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 	 */
 	protected abstract Field internalGetField(String name);
 
+	@Override
 	public GCRootInfo[] getGCRootInfo() throws SnapshotException {
 		return source.getGCRootInfo(getObjectId());
 	}

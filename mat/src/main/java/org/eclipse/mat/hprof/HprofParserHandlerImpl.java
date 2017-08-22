@@ -85,11 +85,13 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 	// lifecycle
 	// //////////////////////////////////////////////////////////////
 
+	@Override
 	public void beforePass1(XSnapshotInfo snapshotInfo) throws IOException {
 		this.info = snapshotInfo;
 		this.identifiers = IndexWriter.newIdentifier();
 	}
 
+	@Override
 	public void beforePass2(IProgressListener monitor) throws IOException, SnapshotException {
 		// add dummy address for system class loader object
 		identifiers.add(0);
@@ -369,6 +371,7 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 		return r == 0 ? n : n + x - r;
 	}
 
+	@Override
 	public IOne2LongIndex fillIn(IPreliminaryIndex index) throws IOException {
 		// ensure all classes loaded by the system class loaders are marked as
 		// GCRoots
@@ -446,6 +449,7 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 		return sink;
 	}
 
+	@Override
 	public void cancel() {
 		if (constantPool != null)
 			constantPool.clear();
@@ -459,6 +463,7 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 	// report parsed entities
 	// //////////////////////////////////////////////////////////////
 
+	@Override
 	public void addProperty(String name, String value) throws IOException {
 		if (IHprofParserHandler.VERSION.equals(name)) {
 			version = AbstractParser.Version.valueOf(value);
@@ -475,6 +480,7 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 		}
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void addGCRoot(long id, long referrer, int rootType) {
 		if (referrer != 0) {
@@ -498,6 +504,7 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 		r.add(new XGCRootInfo(id, referrer, rootType));
 	}
 
+	@Override
 	public void addClass(ClassImpl clazz, long filePosition) throws IOException {
 		this.identifiers.add(clazz.getObjectAddress());
 		this.classesByAddress.put(clazz.getObjectAddress(), clazz);
@@ -508,6 +515,7 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 		list.add(clazz);
 	}
 
+	@Override
 	public void addObject(HeapObject object, long filePosition) throws IOException {
 		int index = object.objectId;
 
@@ -535,18 +543,22 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 			array2size.set(index, object.usedHeapSize);
 	}
 
+	@Override
 	public void reportInstance(long id, long filePosition) {
 		this.identifiers.add(id);
 	}
 
+	@Override
 	public void reportRequiredObjectArray(long arrayClassID) {
 		requiredArrayClassIDs.add(arrayClassID);
 	}
 
+	@Override
 	public void reportRequiredPrimitiveArray(int arrayType) {
 		requiredPrimitiveArrays.add(arrayType);
 	}
 
+	@Override
 	public void reportRequiredClass(long classID, int size) {
 		if (requiredClassIDs.containsKey(classID)) {
 			if (requiredClassIDs.get(classID) > size) {
@@ -562,18 +574,22 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 	// lookup heap infos
 	// //////////////////////////////////////////////////////////////
 
+	@Override
 	public int getIdentifierSize() {
 		return info.getIdentifierSize();
 	}
 
+	@Override
 	public HashMapLongObject<String> getConstantPool() {
 		return constantPool;
 	}
 
+	@Override
 	public ClassImpl lookupClass(long classId) {
 		return classesByAddress.get(classId);
 	}
 
+	@Override
 	public IClass lookupClassByName(String name, boolean failOnMultipleInstances) {
 		List<ClassImpl> list = classesByName.get(name);
 		if (list == null)
@@ -584,10 +600,12 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 		return list.get(0);
 	}
 
+	@Override
 	public IClass lookupClassByIndex(int objIndex) {
 		return lookupClass(this.identifiers.get(objIndex));
 	}
 
+	@Override
 	public List<IClass> resolveClassHierarchy(long classId) {
 		List<IClass> answer = new ArrayList<IClass>();
 
@@ -602,20 +620,24 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 		return answer;
 	}
 
+	@Override
 	public int mapAddressToId(long address) {
 		return this.identifiers.reverse(address);
 	}
 
+	@Override
 	public XSnapshotInfo getSnapshotInfo() {
 		return info;
 	}
 
+	@Override
 	public long getObjectArrayHeapSize(ClassImpl arrayType, int size) {
 		long usedHeapSize =
 				alignUpToX(pointerSize + refSize + 4 + size * arrayType.getHeapSizePerInstance(), objectAlign);
 		return usedHeapSize;
 	}
 
+	@Override
 	public long getPrimitiveArrayHeapSize(byte elementType, int size) {
 		long usedHeapSize = alignUpToX(alignUpToX(pointerSize + refSize + 4, refSize)
 				+ size * (long) PrimitiveArrayImpl.ELEMENT_SIZE[(int) elementType], objectAlign);

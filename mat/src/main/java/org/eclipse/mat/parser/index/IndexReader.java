@@ -139,6 +139,7 @@ public abstract class IndexReader {
 			}
 		}
 
+		@Override
 		public synchronized void close() {
 			unload();
 
@@ -186,6 +187,7 @@ public abstract class IndexReader {
 			return array;
 		}
 
+		@Override
 		public void delete() {
 			close();
 
@@ -275,6 +277,7 @@ public abstract class IndexReader {
 		/**
 		 * Expand the compressed size.
 		 */
+		@Override
 		public long getSize(int index) {
 			return IndexWriter.SizeIndexCollectorUncompressed.expand(get(index));
 		}
@@ -283,6 +286,7 @@ public abstract class IndexReader {
 		 * Get the (compressed) size.
 		 * Delegate to the int index.
 		 */
+		@Override
 		public int get(int index) {
 			return idx.get(index);
 		}
@@ -290,6 +294,7 @@ public abstract class IndexReader {
 		/**
 		 * Delegate to the int index.
 		 */
+		@Override
 		public int[] getAll(int[] index) {
 			return idx.getAll(index);
 		}
@@ -297,6 +302,7 @@ public abstract class IndexReader {
 		/**
 		 * Delegate to the int index.
 		 */
+		@Override
 		public int[] getNext(int index, int length) {
 			return idx.getNext(index, length);
 		}
@@ -304,6 +310,7 @@ public abstract class IndexReader {
 		/**
 		 * Delegate to the int index.
 		 */
+		@Override
 		public void close() throws IOException {
 			idx.close();
 		}
@@ -311,6 +318,7 @@ public abstract class IndexReader {
 		/**
 		 * Delegate to the int index.
 		 */
+		@Override
 		public void delete() {
 			idx.delete();
 		}
@@ -318,6 +326,7 @@ public abstract class IndexReader {
 		/**
 		 * Delegate to the int index.
 		 */
+		@Override
 		public int size() {
 			return idx.size();
 		}
@@ -325,6 +334,7 @@ public abstract class IndexReader {
 		/**
 		 * Delegate to the int index.
 		 */
+		@Override
 		public void unload() throws IOException {
 			idx.unload();
 		}
@@ -367,6 +377,7 @@ public abstract class IndexReader {
 			open();
 		}
 
+		@Override
 		public int[] get(int index) {
 			long p = header.getPos(index);
 
@@ -392,6 +403,7 @@ public abstract class IndexReader {
 			}
 		}
 
+		@Override
 		public synchronized void close() {
 			header.unload();
 			body.unload();
@@ -411,15 +423,18 @@ public abstract class IndexReader {
 			}
 		}
 
+		@Override
 		public void unload() throws IOException {
 			header.unload();
 			body.unload();
 		}
 
+		@Override
 		public int size() {
 			return header.size();
 		}
 
+		@Override
 		public void delete() {
 			close();
 
@@ -452,6 +467,7 @@ public abstract class IndexReader {
 		 * Reading item 2 gets from [1,14)
 		 * Reading item 3 gets an empty array
 		 */
+		@Override
 		public int[] get(int index) {
 			long p0;
 			long p1;
@@ -488,6 +504,7 @@ public abstract class IndexReader {
 			super(indexFile, header, body);
 		}
 
+		@Override
 		public int[] getObjectsOf(Serializable key) throws SnapshotException, IOException {
 			if (key == null)
 				return new int[0];
@@ -587,6 +604,7 @@ public abstract class IndexReader {
 			in = new SimpleBufferedRandomAccessInputStream(new RandomAccessFile(this.indexFile, "r"));
 		}
 
+		@Override
 		public synchronized void close() {
 			unload();
 
@@ -635,6 +653,7 @@ public abstract class IndexReader {
 			return array;
 		}
 
+		@Override
 		public void delete() {
 			close();
 
@@ -693,6 +712,7 @@ public abstract class IndexReader {
 			}
 		}
 
+		@Override
 		public synchronized void close() {
 			unload();
 
@@ -707,15 +727,18 @@ public abstract class IndexReader {
 			}
 		}
 
+		@Override
 		public void unload() {
 			header.unload();
 			body.unload();
 		}
 
+		@Override
 		public int size() {
 			return header.size();
 		}
 
+		@Override
 		public void delete() {
 			close();
 

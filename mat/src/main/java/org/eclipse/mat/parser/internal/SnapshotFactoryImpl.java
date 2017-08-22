@@ -54,6 +54,7 @@ public class SnapshotFactoryImpl implements SnapshotFactory.Implementation {
 
 	private Map<File, SnapshotEntry> snapshotCache = new HashMap<File, SnapshotEntry>();
 
+	@Override
 	public ISnapshot openSnapshot(File file, Map<String, String> args, IProgressListener listener)
 			throws SnapshotException {
 		ISnapshot answer = null;
@@ -115,6 +116,7 @@ public class SnapshotFactoryImpl implements SnapshotFactory.Implementation {
 		return answer;
 	}
 
+	@Override
 	public synchronized void dispose(ISnapshot snapshot) {
 
 		for (Iterator<SnapshotEntry> iter = snapshotCache.values().iterator(); iter.hasNext();) {
@@ -138,6 +140,7 @@ public class SnapshotFactoryImpl implements SnapshotFactory.Implementation {
 			snapshot.dispose();
 	}
 
+	@Override
 	public List<SnapshotFormat> getSupportedFormats() {
 		return ParserRegistry.getSupportedFormats();
 	}
@@ -530,6 +533,7 @@ public class SnapshotFactoryImpl implements SnapshotFactory.Implementation {
 		final Pattern logPattern = Pattern.compile("inbound\\.index.*\\.log$");
 
 		File[] files = directory.listFiles(new FileFilter() {
+			@Override
 			public boolean accept(File f) {
 				if (f.isDirectory())
 					return false;

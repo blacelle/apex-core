@@ -156,10 +156,12 @@ public final class SetInt implements Serializable {
 			int n = 0;
 			int i = -1;
 
+			@Override
 			public boolean hasNext() {
 				return n < size;
 			}
 
+			@Override
 			public int next() throws NoSuchElementException {
 				while (++i < used.length) {
 					if (used[i]) {

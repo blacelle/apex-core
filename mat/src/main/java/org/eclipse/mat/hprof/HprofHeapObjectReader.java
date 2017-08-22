@@ -42,6 +42,7 @@ public class HprofHeapObjectReader implements IObjectReader {
 	private IIndexReader.IOne2LongIndex o2hprof;
 	private List<IRuntimeEnhancer> enhancers;
 
+	@Override
 	public void open(ISnapshot snapshot) throws IOException {
 		this.snapshot = snapshot;
 
@@ -66,6 +67,7 @@ public class HprofHeapObjectReader implements IObjectReader {
 		// }
 	}
 
+	@Override
 	public long[] readObjectArrayContent(ObjectArrayImpl array, int offset, int length)
 			throws IOException, SnapshotException {
 		Object info = array.getInfo();
@@ -92,6 +94,7 @@ public class HprofHeapObjectReader implements IObjectReader {
 		}
 	}
 
+	@Override
 	public Object readPrimitiveArrayContent(PrimitiveArrayImpl array, int offset, int length)
 			throws IOException, SnapshotException {
 		Object info = array.getInfo();
@@ -172,6 +175,7 @@ public class HprofHeapObjectReader implements IObjectReader {
 		return answer;
 	}
 
+	@Override
 	public IObject read(int objectId, ISnapshot snapshot) throws SnapshotException, IOException {
 		long filePosition = o2hprof.get(objectId);
 		return hprofDump.read(objectId, filePosition, snapshot);
@@ -187,6 +191,7 @@ public class HprofHeapObjectReader implements IObjectReader {
 	 *            {@link IRuntimeEnhancer} extension to return extra data.
 	 * @return the extra data
 	 */
+	@Override
 	public <A> A getAddon(Class<A> addon) throws SnapshotException {
 		for (IRuntimeEnhancer enhancer : enhancers) {
 			A answer = enhancer.getAddon(snapshot, addon);
@@ -196,6 +201,7 @@ public class HprofHeapObjectReader implements IObjectReader {
 		return null;
 	}
 
+	@Override
 	public void close() throws IOException {
 		try {
 			hprofDump.close();

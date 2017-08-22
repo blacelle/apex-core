@@ -90,6 +90,7 @@ public abstract class IndexWriter {
 		long[] identifiers;
 		int size;
 
+		@Override
 		public void add(long id) {
 			if (identifiers == null) {
 				identifiers = new long[10000];
@@ -110,14 +111,17 @@ public abstract class IndexWriter {
 			identifiers[size++] = id;
 		}
 
+		@Override
 		public void sort() {
 			Arrays.sort(identifiers, 0, size);
 		}
 
+		@Override
 		public int size() {
 			return size;
 		}
 
+		@Override
 		public long get(int index) {
 			if (index < 0 || index >= size)
 				throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size); //$NON-NLS-1$//$NON-NLS-2$
@@ -125,6 +129,7 @@ public abstract class IndexWriter {
 			return identifiers[index];
 		}
 
+		@Override
 		public int reverse(long val) {
 			int a, c;
 			for (a = 0, c = size; a < c;) {
@@ -143,15 +148,18 @@ public abstract class IndexWriter {
 			return -1 - a;
 		}
 
+		@Override
 		public IteratorLong iterator() {
 			return new IteratorLong() {
 
 				int index = 0;
 
+				@Override
 				public boolean hasNext() {
 					return index < size;
 				}
 
+				@Override
 				public long next() {
 					return identifiers[index++];
 				}
@@ -159,6 +167,7 @@ public abstract class IndexWriter {
 			};
 		}
 
+		@Override
 		public long[] getNext(int index, int length) {
 			long answer[] = new long[length];
 			for (int ii = 0; ii < length; ii++)
@@ -166,13 +175,16 @@ public abstract class IndexWriter {
 			return answer;
 		}
 
+		@Override
 		public void close() throws IOException {
 		}
 
+		@Override
 		public void delete() {
 			identifiers = null;
 		}
 
+		@Override
 		public void unload() throws IOException {
 			throw new UnsupportedOperationException();
 		}
@@ -184,10 +196,11 @@ public abstract class IndexWriter {
 
 		RawIdentifier guarantee;
 
+		@Override
 		public void add(long id) {
 			if (identifiers == null) {
 				identifiers = new Roaring64NavigableMap(true, new RoaringBitmapSupplier());
-				if (Boolean.getBoolean("mat.debug")) {
+				if (Boolean.getBoolean("mat.assert")) {
 					guarantee = new RawIdentifier();
 				}
 			}
@@ -199,6 +212,7 @@ public abstract class IndexWriter {
 			}
 		}
 
+		@Override
 		public int size() {
 			long cardinality = identifiers.getLongCardinality();
 			if (guarantee != null) {
@@ -212,6 +226,7 @@ public abstract class IndexWriter {
 			return (int) cardinality;
 		}
 
+		@Override
 		public long get(int index) {
 			long get = identifiers.select(index);
 			if (guarantee != null) {
@@ -220,6 +235,7 @@ public abstract class IndexWriter {
 			return get;
 		}
 
+		@Override
 		public int reverse(long val) {
 			long rank = identifiers.rankLong(val);
 
@@ -245,6 +261,7 @@ public abstract class IndexWriter {
 			}
 		}
 
+		@Override
 		public IteratorLong iterator() {
 			if (identifiers == null) {
 				return new IteratorLong() {
@@ -271,6 +288,7 @@ public abstract class IndexWriter {
 
 			return new IteratorLong() {
 
+				@Override
 				public boolean hasNext() {
 					boolean hasNext = it.hasNext();
 					if (guarantee != null) {
@@ -279,6 +297,7 @@ public abstract class IndexWriter {
 					return hasNext;
 				}
 
+				@Override
 				public long next() {
 					long next = it.next();
 					if (guarantee != null) {
@@ -290,6 +309,7 @@ public abstract class IndexWriter {
 			};
 		}
 
+		@Override
 		public long[] getNext(int index, int length) {
 			long answer[] = new long[length];
 			for (int ii = 0; ii < length; ii++) {
@@ -304,14 +324,17 @@ public abstract class IndexWriter {
 			return answer;
 		}
 
+		@Override
 		public void close() throws IOException {
 		}
 
+		@Override
 		public void delete() {
 			identifiers = null;
 			guarantee = null;
 		}
 
+		@Override
 		public void unload() throws IOException {
 			throw new UnsupportedOperationException();
 		}
@@ -609,10 +632,12 @@ public abstract class IndexWriter {
 			this.intArray = intArray;
 		}
 
+		@Override
 		public int next() {
 			return intArray.get(nextIndex++);
 		}
 
+		@Override
 		public boolean hasNext() {
 			return nextIndex < intArray.size;
 		}
@@ -646,9 +671,11 @@ public abstract class IndexWriter {
 			return new IntIndexStreamer().writeTo(out, position, this.iterator());
 		}
 
+		@Override
 		public void close() throws IOException {
 		}
 
+		@Override
 		public void delete() {
 			pages = null;
 		}
@@ -941,10 +968,12 @@ public abstract class IndexWriter {
 				headerIndex = new PosIndexStreamer().writeTo2(out, divider, new IteratorLong() {
 					int i;
 
+					@Override
 					public boolean hasNext() {
 						return i < header.capacity();
 					}
 
+					@Override
 					public long next() {
 						long ret = getHeader(i++);
 						return ret;
@@ -995,6 +1024,7 @@ public abstract class IndexWriter {
 			super(size, indexFile);
 		}
 
+		@Override
 		protected void set(int index, int[] values, int offset, int length) throws IOException {
 			long bodyPos = body.size + 1;
 			setHeader(index, bodyPos);
@@ -1002,6 +1032,7 @@ public abstract class IndexWriter {
 			body.addAll(values, offset, length);
 		}
 
+		@Override
 		protected IIndexReader.IOne2ManyIndex createReader(IIndexReader.IOne2OneIndex headerIndex,
 				IIndexReader.IOne2OneIndex bodyIndex) throws IOException {
 			return new IndexReader.IntIndex1NSortedReader(this.indexFile, headerIndex, bodyIndex);
@@ -1105,10 +1136,12 @@ public abstract class IndexWriter {
 					headerIndex = new PosIndexStreamer().writeTo2(index, divider, new IteratorLong() {
 						int i;
 
+						@Override
 						public boolean hasNext() {
 							return i < header.length;
 						}
 
+						@Override
 						public long next() {
 							long ret = getHeader(i++);
 							return ret;
@@ -1624,10 +1657,12 @@ public abstract class IndexWriter {
 			this.longArray = longArray;
 		}
 
+		@Override
 		public long next() {
 			return longArray.get(nextIndex++);
 		}
 
+		@Override
 		public boolean hasNext() {
 			return nextIndex < longArray.size();
 		}

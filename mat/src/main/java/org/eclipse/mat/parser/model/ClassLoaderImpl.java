@@ -71,6 +71,7 @@ public class ClassLoaderImpl extends InstanceImpl implements IClassLoader {
 		return label;
 	}
 
+	@Override
 	public List<IClass> getDefinedClasses() throws SnapshotException {
 		// Double-checked locking, but okay as definedClasses is volatile and running with Java 1.5 or later
 		List<IClass> result = definedClasses;
@@ -85,6 +86,7 @@ public class ClassLoaderImpl extends InstanceImpl implements IClassLoader {
 		return result;
 	}
 
+	@Override
 	public long getRetainedHeapSizeOfObjects(boolean calculateIfNotAvailable,
 			boolean calculateMinRetainedSize,
 			IProgressListener listener) throws SnapshotException {

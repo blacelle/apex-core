@@ -406,6 +406,7 @@ public class ObjectMarker {
 			this.rootsStack = roots;
 		}
 
+		@Override
 		public void run() {
 			while (true) {
 				synchronized (rootsStack) {
@@ -509,6 +510,7 @@ public class ObjectMarker {
 			}
 		}
 
+		@Override
 		public void run() {
 			rootsStack.linkThread();
 			try {

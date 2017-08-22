@@ -123,10 +123,12 @@ public class TestIndex1to1 {
 			IIndexReader.IOne2OneIndex i2 = ic.writeTo(indexFile, new IteratorInt() {
 				long i;
 
+				@Override
 				public boolean hasNext() {
 					return i < n;
 				}
 
+				@Override
 				public int next() {
 					return (int) i++;
 				}

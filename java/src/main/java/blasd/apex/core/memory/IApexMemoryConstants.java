@@ -48,11 +48,11 @@ public interface IApexMemoryConstants {
 	long TB = KB * KB * KB * KB;
 	int TB_INT = Ints.saturatedCast(TB);
 
-	long CHAR = 4;
-	long INT = 4;
-	long LONG = 8;
+	long CHAR = Character.BYTES;
+	long INT = Integer.BYTES;
+	long LONG = Long.BYTES;
 	long OBJECT = 8;
 
-	long FLOAT = 4;
-	long DOUBLE = 8;
+	long FLOAT = Float.BYTES;
+	long DOUBLE = Double.BYTES;
 }

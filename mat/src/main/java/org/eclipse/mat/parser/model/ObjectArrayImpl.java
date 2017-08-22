@@ -63,6 +63,7 @@ public class ObjectArrayImpl extends AbstractArrayImpl implements IObjectArray {
 		return alignUpTo8(2 * clazz.getHeapSizePerInstance() + 4 + length * (long) clazz.getHeapSizePerInstance());
 	}
 
+	@Override
 	public long[] getReferenceArray() {
 		try {
 			return source.getHeapObjectReader().readObjectArrayContent(this, 0, getLength());
@@ -73,6 +74,7 @@ public class ObjectArrayImpl extends AbstractArrayImpl implements IObjectArray {
 		}
 	}
 
+	@Override
 	public long[] getReferenceArray(int offset, int length) {
 		try {
 			return source.getHeapObjectReader().readObjectArrayContent(this, offset, length);
@@ -83,6 +85,7 @@ public class ObjectArrayImpl extends AbstractArrayImpl implements IObjectArray {
 		}
 	}
 
+	@Override
 	public ArrayLong getReferences() {
 		ArrayLong answer = new ArrayLong(getLength() + 1);
 
@@ -98,6 +101,7 @@ public class ObjectArrayImpl extends AbstractArrayImpl implements IObjectArray {
 		return answer;
 	}
 
+	@Override
 	protected Field internalGetField(String name) {
 		if (name.charAt(0) != '[' || name.charAt(name.length() - 1) != ']')
 			return null;
@@ -117,6 +121,7 @@ public class ObjectArrayImpl extends AbstractArrayImpl implements IObjectArray {
 		}
 	}
 
+	@Override
 	public List<NamedReference> getOutboundReferences() {
 		List<NamedReference> answer = new ArrayList<NamedReference>(getLength() + 1);
 

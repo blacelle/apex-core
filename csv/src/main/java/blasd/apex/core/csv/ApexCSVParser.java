@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import com.google.common.hash.BloomFilter;
-import com.google.common.hash.BloomFilterSpy;
 import com.google.common.hash.Funnels;
 import com.google.common.primitives.Bytes;
 
@@ -166,7 +165,7 @@ public class ApexCSVParser {
 		bloomFilter.put(actualBytes);
 
 		// Consider a String is recurrent only after the 100th row
-		if (currentRowIndex >= ONE_HUNDRED && BloomFilterSpy.estimateCardinality(bloomFilter) * TEN < currentRowIndex) {
+		if (currentRowIndex >= ONE_HUNDRED && bloomFilter.approximateElementCount() * TEN < currentRowIndex) {
 			// Each value seems to appear quite often
 
 			return recurrentByteArrayToString.computeIfAbsent(Bytes.asList(actualBytes),

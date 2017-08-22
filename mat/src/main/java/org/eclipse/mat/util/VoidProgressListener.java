@@ -25,6 +25,7 @@ public class VoidProgressListener implements IProgressListener {
 	 * 
 	 * @see IProgressListener#beginTask(String, int)
 	 */
+	@Override
 	public void beginTask(String name, int totalWork) {
 	}
 
@@ -33,6 +34,7 @@ public class VoidProgressListener implements IProgressListener {
 	 * 
 	 * @see IProgressListener#done()
 	 */
+	@Override
 	public void done() {
 	}
 
@@ -41,6 +43,7 @@ public class VoidProgressListener implements IProgressListener {
 	 * 
 	 * @see IProgressListener#isCanceled()
 	 */
+	@Override
 	public boolean isCanceled() {
 		return cancelled;
 	}
@@ -50,6 +53,7 @@ public class VoidProgressListener implements IProgressListener {
 	 * 
 	 * @see IProgressListener#setCanceled(boolean)
 	 */
+	@Override
 	public void setCanceled(boolean value) {
 		cancelled = value;
 	}
@@ -59,6 +63,7 @@ public class VoidProgressListener implements IProgressListener {
 	 * 
 	 * @see IProgressListener#subTask(String)
 	 */
+	@Override
 	public void subTask(String name) {
 	}
 
@@ -67,6 +72,7 @@ public class VoidProgressListener implements IProgressListener {
 	 * 
 	 * @see IProgressListener#worked(int)
 	 */
+	@Override
 	public void worked(int work) {
 	}
 
@@ -75,6 +81,7 @@ public class VoidProgressListener implements IProgressListener {
 	 * 
 	 * @see IProgressListener#sendUserMessage(Severity, String, Throwable)
 	 */
+	@Override
 	public void sendUserMessage(Severity severity, String message, Throwable exception) {
 	}
 

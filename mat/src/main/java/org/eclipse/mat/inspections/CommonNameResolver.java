@@ -28,6 +28,7 @@ import org.eclipse.mat.snapshot.registry.ClassSpecificNameResolverRegistry;
 public class CommonNameResolver {
 	@Subject("java.lang.String")
 	public static class StringResolver implements IClassSpecificNameResolver {
+		@Override
 		public String resolve(IObject obj) throws SnapshotException {
 			return PrettyPrinter.objectAsString(obj, 1024);
 		}
@@ -36,6 +37,7 @@ public class CommonNameResolver {
 	@Subjects({ "java.lang.StringBuffer", //
 			"java.lang.StringBuilder" })
 	public static class StringBufferResolver implements IClassSpecificNameResolver {
+		@Override
 		public String resolve(IObject obj) throws SnapshotException {
 			Integer count = (Integer) obj.resolveValue("count");
 			if (count == null)
@@ -53,6 +55,7 @@ public class CommonNameResolver {
 
 	@Subject("java.lang.Thread")
 	public static class ThreadResolver implements IClassSpecificNameResolver {
+		@Override
 		public String resolve(IObject obj) throws SnapshotException {
 			IObject name = (IObject) obj.resolveValue("name");
 			return name != null ? name.getClassSpecificName() : null;
@@ -61,6 +64,7 @@ public class CommonNameResolver {
 
 	@Subject("java.lang.ThreadGroup")
 	public static class ThreadGroupResolver implements IClassSpecificNameResolver {
+		@Override
 		public String resolve(IObject object) throws SnapshotException {
 			IObject nameString = (IObject) object.resolveValue("name");
 			if (nameString == null)
@@ -81,6 +85,7 @@ public class CommonNameResolver {
 			"java.util.concurrent.atomic.AtomicLong", //
 	})
 	public static class ValueResolver implements IClassSpecificNameResolver {
+		@Override
 		public String resolve(IObject heapObject) throws SnapshotException {
 			Object value = heapObject.resolveValue("value");
 			return value != null ? String.valueOf(value) : null;
@@ -89,6 +94,7 @@ public class CommonNameResolver {
 
 	@Subjects("java.util.concurrent.atomic.AtomicBoolean")
 	public static class AtomicBooleanResolver implements IClassSpecificNameResolver {
+		@Override
 		public String resolve(IObject heapObject) throws SnapshotException {
 			Integer value = (Integer) heapObject.resolveValue("value");
 			return value != null ? Boolean.toString(value != 0) : null;
@@ -97,6 +103,7 @@ public class CommonNameResolver {
 
 	@Subjects("java.util.concurrent.atomic.AtomicReference")
 	public static class AtomicReferenceValueResolver implements IClassSpecificNameResolver {
+		@Override
 		public String resolve(IObject heapObject) throws SnapshotException {
 			IObject value = (IObject) heapObject.resolveValue("value");
 			return value != null ? ClassSpecificNameResolverRegistry.resolve(value) : null;
@@ -105,6 +112,7 @@ public class CommonNameResolver {
 
 	@Subjects("java.util.concurrent.atomic.AtomicStampedReference")
 	public static class AtomicStampedReferenceValueResolver implements IClassSpecificNameResolver {
+		@Override
 		public String resolve(IObject heapObject) throws SnapshotException {
 			IObject value = (IObject) heapObject.resolveValue("pair.reference");
 			return value != null ? ClassSpecificNameResolverRegistry.resolve(value) : null;
@@ -113,6 +121,7 @@ public class CommonNameResolver {
 
 	@Subject("char[]")
 	public static class CharArrayResolver implements IClassSpecificNameResolver {
+		@Override
 		public String resolve(IObject heapObject) throws SnapshotException {
 			IPrimitiveArray charArray = (IPrimitiveArray) heapObject;
 			return PrettyPrinter.arrayAsString(charArray, 0, charArray.getLength(), 1024);
@@ -121,6 +130,7 @@ public class CommonNameResolver {
 
 	@Subject("byte[]")
 	public static class ByteArrayResolver implements IClassSpecificNameResolver {
+		@Override
 		public String resolve(IObject heapObject) throws SnapshotException {
 			IPrimitiveArray arr = (IPrimitiveArray) heapObject;
 			byte[] value = (byte[]) arr.getValueArray(0, Math.min(arr.getLength(), 1024));
@@ -145,6 +155,7 @@ public class CommonNameResolver {
 	 */
 	@Subject("java.net.URL")
 	public static class URLResolver implements IClassSpecificNameResolver {
+		@Override
 		public String resolve(IObject obj) throws SnapshotException {
 			StringBuilder builder = new StringBuilder();
 			IObject protocol = (IObject) obj.resolveValue("protocol");
@@ -176,6 +187,7 @@ public class CommonNameResolver {
 
 	@Subject("java.lang.reflect.AccessibleObject")
 	public static class AccessibleObjectResolver implements IClassSpecificNameResolver {
+		@Override
 		public String resolve(IObject obj) throws SnapshotException {
 			// Important fields
 			// modifiers - not actually present, but present in all superclasses
@@ -210,6 +222,7 @@ public class CommonNameResolver {
 
 	@Subject("java.lang.reflect.Field")
 	public static class FieldResolver extends AccessibleObjectResolver {
+		@Override
 		public String resolve(IObject obj) throws SnapshotException {
 			// Important fields
 			// modifiers
@@ -248,6 +261,7 @@ public class CommonNameResolver {
 
 	@Subject("java.lang.reflect.Method")
 	public static class MethodResolver extends AccessibleObjectResolver {
+		@Override
 		public String resolve(IObject obj) throws SnapshotException {
 			// Important fields
 			// modifiers
@@ -301,6 +315,7 @@ public class CommonNameResolver {
 
 	@Subject("java.lang.reflect.Constructor")
 	public static class ConstructorResolver extends AccessibleObjectResolver {
+		@Override
 		public String resolve(IObject obj) throws SnapshotException {
 			// Important fields
 			// modifiers

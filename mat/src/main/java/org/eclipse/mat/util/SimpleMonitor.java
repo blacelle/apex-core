@@ -50,6 +50,7 @@ public class SimpleMonitor {
 			this.majorUnits = majorUnits;
 		}
 
+		@Override
 		public void beginTask(String name, int totalWork) {
 			if (name != null)
 				delegate.subTask(name);
@@ -62,15 +63,18 @@ public class SimpleMonitor {
 			unitsReported = 0;
 		}
 
+		@Override
 		public void subTask(String name) {
 			delegate.subTask(name);
 		}
 
+		@Override
 		public void done() {
 			if (majorUnits - unitsReported > 0)
 				delegate.worked(majorUnits - unitsReported);
 		}
 
+		@Override
 		public boolean isCanceled() {
 			return delegate.isCanceled();
 		}
@@ -96,14 +100,17 @@ public class SimpleMonitor {
 			}
 		}
 
+		@Override
 		public void worked(int work) {
 			totalWorkDone(workDone + work);
 		}
 
+		@Override
 		public void setCanceled(boolean value) {
 			delegate.setCanceled(value);
 		}
 
+		@Override
 		public void sendUserMessage(Severity severity, String message, Throwable exception) {
 			delegate.sendUserMessage(severity, message, exception);
 		}

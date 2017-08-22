@@ -28,10 +28,12 @@ class ThreadStackImpl implements IThreadStack {
 		this.stackFrames = stackFrames;
 	}
 
+	@Override
 	public IStackFrame[] getStackFrames() {
 		return stackFrames;
 	}
 
+	@Override
 	public int getThreadId() {
 		return threadId;
 	}

@@ -35,6 +35,7 @@ public class ConsoleProgressListener implements IProgressListener {
 		this.out = out;
 	}
 
+	@Override
 	public void beginTask(String name, int totalWork) {
 		out.write(Messages.ConsoleProgressListener_Label_Task + " " + name + "\n");
 		out.write("[");
@@ -48,6 +49,7 @@ public class ConsoleProgressListener implements IProgressListener {
 		out.flush();
 	}
 
+	@Override
 	public void done() {
 		if (!isDone) {
 			out.write("]\n");
@@ -57,14 +59,17 @@ public class ConsoleProgressListener implements IProgressListener {
 
 	}
 
+	@Override
 	public boolean isCanceled() {
 		return false;
 	}
 
+	@Override
 	public void setCanceled(boolean value) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void subTask(String name) {
 		out.write("\n" + Messages.ConsoleProgressListener_Label_Subtask + " " + name + "\n[");
 		for (int ii = 0; ii < dotsPrinted; ii++)
@@ -72,6 +77,7 @@ public class ConsoleProgressListener implements IProgressListener {
 		out.flush();
 	}
 
+	@Override
 	public void worked(int work) {
 		workAccumulated += work;
 
@@ -86,6 +92,7 @@ public class ConsoleProgressListener implements IProgressListener {
 		}
 	}
 
+	@Override
 	public void sendUserMessage(Severity severity, String message, Throwable exception) {
 		out.write("\n");
 

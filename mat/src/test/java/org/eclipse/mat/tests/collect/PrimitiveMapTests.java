@@ -81,14 +81,17 @@ public class PrimitiveMapTests {
 			this.delegate = delegate;
 		}
 
+		@Override
 		public void clear() {
 			delegate.clear();
 		}
 
+		@Override
 		public boolean containsKey(Object key) {
 			return delegate.containsKey((Integer) key);
 		}
 
+		@Override
 		public boolean containsValue(Object value) {
 			long v = (Long) value;
 
@@ -99,20 +102,24 @@ public class PrimitiveMapTests {
 			return false;
 		}
 
+		@Override
 		public Set<Entry<Integer, Long>> entrySet() {
 			Set<Entry<Integer, Long>> answer = new HashSet<Entry<Integer, Long>>();
 			for (Iterator<HashMapIntLong.Entry> iter = delegate.entries(); iter.hasNext();) {
 				final HashMapIntLong.Entry entry = iter.next();
 				answer.add(new Entry<Integer, Long>() {
 
+					@Override
 					public Integer getKey() {
 						return entry.getKey();
 					}
 
+					@Override
 					public Long getValue() {
 						return entry.getValue();
 					}
 
+					@Override
 					public Long setValue(Long value) {
 						throw new UnsupportedOperationException();
 					}
@@ -121,14 +128,17 @@ public class PrimitiveMapTests {
 			return answer;
 		}
 
+		@Override
 		public Long get(Object key) {
 			return delegate.get((Integer) key);
 		}
 
+		@Override
 		public boolean isEmpty() {
 			return delegate.isEmpty();
 		}
 
+		@Override
 		public Set<Integer> keySet() {
 			Set<Integer> answer = new HashSet<Integer>();
 			for (IteratorInt iter = delegate.keys(); iter.hasNext();)
@@ -136,6 +146,7 @@ public class PrimitiveMapTests {
 			return answer;
 		}
 
+		@Override
 		public Long put(Integer key, Long value) {
 			Long retValue = null;
 
@@ -148,10 +159,12 @@ public class PrimitiveMapTests {
 			return replace ? retValue : null;
 		}
 
+		@Override
 		public void putAll(Map<? extends Integer, ? extends Long> t) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Long remove(Object key) {
 			Long retValue = null;
 
@@ -164,10 +177,12 @@ public class PrimitiveMapTests {
 			return removed ? retValue : null;
 		}
 
+		@Override
 		public int size() {
 			return delegate.size();
 		}
 
+		@Override
 		public Collection<Long> values() {
 			List<Long> answer = new ArrayList<Long>();
 			for (IteratorLong iter = delegate.values(); iter.hasNext();)
@@ -181,6 +196,7 @@ public class PrimitiveMapTests {
 			super(delegate);
 		}
 
+		@Override
 		public Set<Integer> keySet() {
 			Set<Integer> answer = new HashSet<Integer>();
 			int[] keys = delegate.getAllKeys();
@@ -189,6 +205,7 @@ public class PrimitiveMapTests {
 			return answer;
 		}
 
+		@Override
 		public Collection<Long> values() {
 			List<Long> answer = new ArrayList<Long>();
 			long[] values = delegate.getAllValues();
@@ -255,14 +272,17 @@ public class PrimitiveMapTests {
 			this.delegate = delegate;
 		}
 
+		@Override
 		public void clear() {
 			delegate.clear();
 		}
 
+		@Override
 		public boolean containsKey(Object key) {
 			return delegate.containsKey((Integer) key);
 		}
 
+		@Override
 		public boolean containsValue(Object value) {
 			for (Iterator<V> iter = delegate.values(); iter.hasNext();) {
 				if (value.equals(iter.next()))
@@ -271,20 +291,24 @@ public class PrimitiveMapTests {
 			return false;
 		}
 
+		@Override
 		public Set<Entry<Integer, V>> entrySet() {
 			Set<Entry<Integer, V>> answer = new HashSet<Entry<Integer, V>>();
 			for (Iterator<HashMapIntObject.Entry<V>> iter = delegate.entries(); iter.hasNext();) {
 				final HashMapIntObject.Entry<V> entry = iter.next();
 				answer.add(new Entry<Integer, V>() {
 
+					@Override
 					public Integer getKey() {
 						return entry.getKey();
 					}
 
+					@Override
 					public V getValue() {
 						return entry.getValue();
 					}
 
+					@Override
 					public V setValue(V value) {
 						throw new UnsupportedOperationException();
 					}
@@ -293,14 +317,17 @@ public class PrimitiveMapTests {
 			return answer;
 		}
 
+		@Override
 		public V get(Object key) {
 			return delegate.get((Integer) key);
 		}
 
+		@Override
 		public boolean isEmpty() {
 			return delegate.isEmpty();
 		}
 
+		@Override
 		public Set<Integer> keySet() {
 			Set<Integer> answer = new HashSet<Integer>();
 			for (IteratorInt iter = delegate.keys(); iter.hasNext();)
@@ -308,22 +335,27 @@ public class PrimitiveMapTests {
 			return answer;
 		}
 
+		@Override
 		public V put(Integer key, V value) {
 			return delegate.put(key, value);
 		}
 
+		@Override
 		public void putAll(Map<? extends Integer, ? extends V> t) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public V remove(Object key) {
 			return delegate.remove((Integer) key);
 		}
 
+		@Override
 		public int size() {
 			return delegate.size();
 		}
 
+		@Override
 		public Collection<V> values() {
 			List<V> answer = new ArrayList<V>();
 			for (Iterator<V> iter = delegate.values(); iter.hasNext();)
@@ -338,6 +370,7 @@ public class PrimitiveMapTests {
 			super(delegate);
 		}
 
+		@Override
 		public Set<Integer> keySet() {
 			Set<Integer> answer = new HashSet<Integer>();
 			int[] keys = delegate.getAllKeys();
@@ -346,6 +379,7 @@ public class PrimitiveMapTests {
 			return answer;
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public Collection<V> values() {
 			List<V> answer = new ArrayList<V>();
@@ -362,6 +396,7 @@ public class PrimitiveMapTests {
 			super(delegate);
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public Collection<V> values() {
 			List<V> answer = new ArrayList<V>();
@@ -424,14 +459,17 @@ public class PrimitiveMapTests {
 			this.delegate = delegate;
 		}
 
+		@Override
 		public void clear() {
 			delegate.clear();
 		}
 
+		@Override
 		public boolean containsKey(Object key) {
 			return delegate.containsKey((Long) key);
 		}
 
+		@Override
 		public boolean containsValue(Object value) {
 			for (Iterator<V> iter = delegate.values(); iter.hasNext();) {
 				if (value.equals(iter.next()))
@@ -440,20 +478,24 @@ public class PrimitiveMapTests {
 			return false;
 		}
 
+		@Override
 		public Set<Entry<Long, V>> entrySet() {
 			Set<Entry<Long, V>> answer = new HashSet<Entry<Long, V>>();
 			for (Iterator<HashMapLongObject.Entry<V>> iter = delegate.entries(); iter.hasNext();) {
 				final HashMapLongObject.Entry<V> entry = iter.next();
 				answer.add(new Entry<Long, V>() {
 
+					@Override
 					public Long getKey() {
 						return entry.getKey();
 					}
 
+					@Override
 					public V getValue() {
 						return entry.getValue();
 					}
 
+					@Override
 					public V setValue(V value) {
 						throw new UnsupportedOperationException();
 					}
@@ -462,14 +504,17 @@ public class PrimitiveMapTests {
 			return answer;
 		}
 
+		@Override
 		public V get(Object key) {
 			return delegate.get((Long) key);
 		}
 
+		@Override
 		public boolean isEmpty() {
 			return delegate.isEmpty();
 		}
 
+		@Override
 		public Set<Long> keySet() {
 			Set<Long> answer = new HashSet<Long>();
 			for (IteratorLong iter = delegate.keys(); iter.hasNext();)
@@ -477,22 +522,27 @@ public class PrimitiveMapTests {
 			return answer;
 		}
 
+		@Override
 		public V put(Long key, V value) {
 			return delegate.put(key, value);
 		}
 
+		@Override
 		public void putAll(Map<? extends Long, ? extends V> t) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public V remove(Object key) {
 			return delegate.remove((Long) key);
 		}
 
+		@Override
 		public int size() {
 			return delegate.size();
 		}
 
+		@Override
 		public Collection<V> values() {
 			List<V> answer = new ArrayList<V>();
 			for (Iterator<V> iter = delegate.values(); iter.hasNext();)
@@ -507,6 +557,7 @@ public class PrimitiveMapTests {
 			super(delegate);
 		}
 
+		@Override
 		public Set<Long> keySet() {
 			Set<Long> answer = new HashSet<Long>();
 			long[] keys = delegate.getAllKeys();
@@ -515,6 +566,7 @@ public class PrimitiveMapTests {
 			return answer;
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public Collection<V> values() {
 			List<V> answer = new ArrayList<V>();
@@ -531,6 +583,7 @@ public class PrimitiveMapTests {
 			super(delegate);
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public Collection<V> values() {
 			List<V> answer = new ArrayList<V>();
@@ -607,15 +660,18 @@ public class PrimitiveMapTests {
 			this.delegate = delegate;
 		}
 
+		@Override
 		public void clear() {
 			delegate.clear();
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public boolean containsKey(Object key) {
 			return delegate.containsKey((K) key);
 		}
 
+		@Override
 		public boolean containsValue(Object value) {
 			long v = (Long) value;
 
@@ -626,20 +682,24 @@ public class PrimitiveMapTests {
 			return false;
 		}
 
+		@Override
 		public Set<Entry<K, Long>> entrySet() {
 			Set<Entry<K, Long>> answer = new HashSet<Entry<K, Long>>();
 			for (Iterator<HashMapObjectLong.Entry<K>> iter = delegate.entries(); iter.hasNext();) {
 				final HashMapObjectLong.Entry<K> entry = iter.next();
 				answer.add(new Entry<K, Long>() {
 
+					@Override
 					public K getKey() {
 						return entry.getKey();
 					}
 
+					@Override
 					public Long getValue() {
 						return entry.getValue();
 					}
 
+					@Override
 					public Long setValue(Long value) {
 						throw new UnsupportedOperationException();
 					}
@@ -648,15 +708,18 @@ public class PrimitiveMapTests {
 			return answer;
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public Long get(Object key) {
 			return delegate.get((K) key);
 		}
 
+		@Override
 		public boolean isEmpty() {
 			return delegate.isEmpty();
 		}
 
+		@Override
 		public Set<K> keySet() {
 			Set<K> answer = new HashSet<K>();
 			for (Iterator<K> iter = delegate.keys(); iter.hasNext();)
@@ -664,6 +727,7 @@ public class PrimitiveMapTests {
 			return answer;
 		}
 
+		@Override
 		public Long put(K key, Long value) {
 			Long retValue = null;
 
@@ -676,10 +740,12 @@ public class PrimitiveMapTests {
 			return replace ? retValue : null;
 		}
 
+		@Override
 		public void putAll(Map<? extends K, ? extends Long> t) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public Long remove(Object key) {
 			Long retValue = null;
@@ -693,10 +759,12 @@ public class PrimitiveMapTests {
 			return removed ? retValue : null;
 		}
 
+		@Override
 		public int size() {
 			return delegate.size();
 		}
 
+		@Override
 		public Collection<Long> values() {
 			List<Long> answer = new ArrayList<Long>();
 			for (IteratorLong iter = delegate.values(); iter.hasNext();)
@@ -711,6 +779,7 @@ public class PrimitiveMapTests {
 			super(delegate);
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public Set<K> keySet() {
 			Set<K> answer = new HashSet<K>();
@@ -720,6 +789,7 @@ public class PrimitiveMapTests {
 			return answer;
 		}
 
+		@Override
 		public Collection<Long> values() {
 			List<Long> answer = new ArrayList<Long>();
 			long[] values = delegate.getAllValues();
@@ -735,6 +805,7 @@ public class PrimitiveMapTests {
 			super(delegate);
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public Set<K> keySet() {
 			Set<K> answer = new HashSet<K>();
@@ -753,6 +824,7 @@ public class PrimitiveMapTests {
 		/**
 		 * check that remove is done by equality not identity
 		 */
+		@Override
 		public Long remove(Object key) {
 			if (key instanceof Integer) {
 				key = new Integer((Integer) key);

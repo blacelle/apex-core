@@ -148,10 +148,12 @@ public final class ArrayInt {
 		return new IteratorInt() {
 			int index = 0;
 
+			@Override
 			public boolean hasNext() {
 				return index < size;
 			}
 
+			@Override
 			public int next() {
 				return elements[index++];
 			}

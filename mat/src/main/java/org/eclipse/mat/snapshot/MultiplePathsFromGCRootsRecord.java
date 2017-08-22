@@ -169,6 +169,7 @@ public class MultiplePathsFromGCRootsRecord {
 	public static Comparator<MultiplePathsFromGCRootsRecord> getComparatorByNumberOfReferencedObjects() {
 		return new Comparator<MultiplePathsFromGCRootsRecord>() {
 
+			@Override
 			public int compare(MultiplePathsFromGCRootsRecord o1, MultiplePathsFromGCRootsRecord o2) {
 				if (o1.paths.size() < o2.paths.size())
 					return 1;
@@ -187,6 +188,7 @@ public class MultiplePathsFromGCRootsRecord {
 	public static Comparator<MultiplePathsFromGCRootsRecord> getComparatorByReferencedHeapSize() {
 		return new Comparator<MultiplePathsFromGCRootsRecord>() {
 
+			@Override
 			public int compare(MultiplePathsFromGCRootsRecord o1, MultiplePathsFromGCRootsRecord o2) {
 				try {
 					if (o1.getReferencedHeapSize() < o2.getReferencedHeapSize())
@@ -210,6 +212,7 @@ public class MultiplePathsFromGCRootsRecord {
 	public static Comparator<MultiplePathsFromGCRootsRecord> getComparatorByReferencedRetainedSize() {
 		return new Comparator<MultiplePathsFromGCRootsRecord>() {
 
+			@Override
 			public int compare(MultiplePathsFromGCRootsRecord o1, MultiplePathsFromGCRootsRecord o2) {
 				if (o1.getReferencedRetainedSize() < o2.getReferencedRetainedSize())
 					return 1;
