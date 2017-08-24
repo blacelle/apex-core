@@ -11,40 +11,46 @@ import java.util.Comparator;
  * @author Benoit Lacelle
  *
  */
-// Hidden as it holds implementation details for RoaringTreeMap. We may decide to change the logic
-// here, hence it should
-// not be used elsewhere
 class RoaringIntPacking {
 
   /**
    * 
-   * @param id a long to decompose into two integers
-   * @return an int holding 32 bits of information of a long. Typically the highest order bits.
+   * @param id any long, positive or negative
+   * @return an int holding the 32 highest order bits of information of the input long
    */
-  // TODO: enable an int with the expected qualities while considering the input long as a 64bits
-  // unsigned long
   public static int high(long id) {
     return (int) (id >> 32);
   }
 
   /**
    * 
-   * @param id a long to decompose into two integers
-   * @return an int holding 32 bits of information of a long. Typically the lowest order bits.
+   * @param id any long, positive or negative
+   * @return an int holding the 32 lowest order bits of information of the input long
    */
-  // TODO: enable an int with the expected qualities while considering the input long as a 64bits
-  // unsigned long
   public static int low(long id) {
     return (int) id;
   }
 
+  /**
+   * 
+   * @param high an integer representing the highest order bits of the output long
+   * @param low an integer representing the lowest order bits of the output long
+   * @return a long packing together the integers as computed by
+   *         {@link RoaringIntPacking#high(long)} and {@link RoaringIntPacking#low(long)}
+   */
   // https://stackoverflow.com/questions/12772939/java-storing-two-ints-in-a-long
   public static long pack(int high, int low) {
     return (((long) high) << 32) | (low & 0xffffffffL);
   }
 
 
-
+  /**
+   * 
+   * @param signedLongs true if long put in a {@link Roaring64NavigableMap} should be considered as
+   *        signed long.
+   * @return the int representing the highest value which can be set as high value in a
+   *         {@link Roaring64NavigableMap}
+   */
   public static int highestHigh(boolean signedLongs) {
     if (signedLongs) {
       return Integer.MAX_VALUE;
@@ -94,10 +100,5 @@ class RoaringIntPacking {
       b = b.add(TWO_64);
     }
     return b.toString();
-  }
-
-  // Duplicated from jdk8 Integer.toUnsignedLong
-  static long toUnsignedLong(int x) {
-    return ((long) x) & 0xffffffffL;
   }
 }

@@ -1,18 +1,20 @@
 package org.roaringbitmap.longlong;
 
+import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.Objects;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -20,6 +22,8 @@ import org.roaringbitmap.BitmapDataProvider;
 import org.roaringbitmap.IntConsumer;
 import org.roaringbitmap.IntIterator;
 import org.roaringbitmap.RoaringBitmap;
+import org.roaringbitmap.Util;
+import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
 import org.roaringbitmap.buffer.MutableRoaringBitmap;
 
 // this class is not thread-safe
@@ -51,9 +55,6 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
   // TODO: I would prefer not managing arrays myself
   private transient long[] sortedCumulatedCardinality = new long[0];
   private transient int[] sortedHighs = new int[0];
-
-  // Enable random-access to any bitmap, without requiring a new Iterator instance
-  private transient final ArrayList<BitmapDataProvider> lowBitmaps = new ArrayList<>();
 
   // We guess consecutive .addLong will be on proximate longs: we remember the bitmap attached to
   // this bucket in order
@@ -130,19 +131,11 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
   }
 
   private void resetPerfHelpers() {
-    if (signedLongs) {
-      firstHighNotValid = Integer.MIN_VALUE;
-    } else {
-      firstHighNotValid = 0;
-    }
+    firstHighNotValid = RoaringIntPacking.highestHigh(signedLongs) + 1;
     allValid = false;
 
     sortedCumulatedCardinality = new long[0];
     sortedHighs = new int[0];
-
-    // In case of de-serialization, we need to add back all bitmaps
-    lowBitmaps.clear();
-    // lowBitmaps.addAll(highToBitmap.values());
 
     latestAddedHigh = null;
   }
@@ -219,10 +212,6 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
 
     BitmapDataProvider previous = highToBitmap.put(high, bitmap);
     assert previous == null : "Should push only not-existing high";
-
-    // If there is 1 bucket before, we need to add at index 1
-    // TODO .size were too slow
-    // lowBitmaps.add(nbHighBefore, bitmap);
   }
 
   private int low(long id) {
@@ -297,8 +286,9 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
 
       // There is a bucket leading to this cardinality: the j-th element is the first element of
       // next bucket
-      BitmapDataProvider nextBitmap = lowBitmaps.get(position + 1);
-      return RoaringIntPacking.pack(sortedHighs[position + 1], nextBitmap.select(0));
+      int high = sortedHighs[position + 1];
+      BitmapDataProvider nextBitmap = highToBitmap.get(high);
+      return RoaringIntPacking.pack(high, nextBitmap.select(0));
     } else {
       // There is no bucket with this cardinality
       int insertionPoint = -position - 1;
@@ -315,11 +305,9 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
       // We get a 'select' query for a single bitmap: should fit in an int
       final int givenBitmapSelect = (int) (j - previousBucketCardinality);
 
-      BitmapDataProvider bitmaps = lowBitmaps.get(insertionPoint);
-
-      int low = bitmaps.select(givenBitmapSelect);
-
       int high = sortedHighs[insertionPoint];
+      BitmapDataProvider lowBitmap = highToBitmap.get(high);
+      int low = lowBitmap.select(givenBitmapSelect);
 
       return RoaringIntPacking.pack(high, low);
     }
@@ -403,25 +391,25 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
 
     int indexOk = ensureCumulatives(high);
 
-    int bitmapPosition = binarySearch(sortedHighs, 0, indexOk, high);
+    int highPosition = binarySearch(sortedHighs, 0, indexOk, high);
 
-    if (bitmapPosition >= 0) {
+    if (highPosition >= 0) {
       // There is a bucket holding this item
 
       final long previousBucketCardinality;
-      if (bitmapPosition == 0) {
+      if (highPosition == 0) {
         previousBucketCardinality = 0;
       } else {
-        previousBucketCardinality = sortedCumulatedCardinality[bitmapPosition - 1];
+        previousBucketCardinality = sortedCumulatedCardinality[highPosition - 1];
       }
 
-      BitmapDataProvider lowBitmap = lowBitmaps.get(bitmapPosition);
+      BitmapDataProvider lowBitmap = highToBitmap.get(sortedHighs[highPosition]);
 
       // Rank is previous cardinality plus rank in current bitmap
       return previousBucketCardinality + lowBitmap.rankLong(low);
     } else {
       // There is no bucket holding this item: insertionPoint is previous bitmap
-      int insertionPoint = -bitmapPosition - 1;
+      int insertionPoint = -highPosition - 1;
 
       if (insertionPoint == 0) {
         // this key is before all inserted keys
@@ -495,6 +483,7 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
 
       boolean earlyBreak = true;
 
+      // .size on tailMap make an iterator: arg
       int indexOk = highToBitmap.size() - tailMap.size();
 
       Iterator<Entry<Integer, BitmapDataProvider>> it = tailMap.entrySet().iterator();
@@ -510,23 +499,11 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
           // We need to remove this array. Else, later binary searches will fails (e.g. in
           // ensureOne)
 
-          // int sizeBefore = highToBitmap.size();
-
           // highToBitmap can not be modified as we iterate over it
           if (latestAddedHigh != null && latestAddedHigh.getKey().intValue() == currentHigh) {
             latestAddedHigh = null;
           }
           it.remove();
-          // highToBitmap.remove(currentHigh);
-
-          // int nbToCopy = sizeBefore - indexOk - 1;
-          // if (nbToCopy > 0) {
-          // System.arraycopy(sortedCumulatedCardinality, indexOk + 1, sortedCumulatedCardinality,
-          // indexOk, nbToCopy);
-          // System.arraycopy(sortedHighs, indexOk + 1, sortedHighs, indexOk, nbToCopy);
-          // }
-          //
-          lowBitmaps.remove(indexOk);
         } else {
           ensureOne(e, currentHigh, indexOk);
 
@@ -598,35 +575,16 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
         index = -1;
       }
     } else if (indexOk < sortedHighs.length) {
-      if (sortedHighs[indexOk - 1] == currentHigh) {
-        index = indexOk;
-      } else {
-        index = -indexOk - 1;
-      }
+      index = -indexOk - 1;
     } else {
       index = -sortedHighs.length - 1;
     }
     assert index == binarySearch(sortedHighs, 0, indexOk, currentHigh);
 
     if (index >= 0) {
-      // This bitmap has already been registered
-      BitmapDataProvider bitmap = e.getValue();
-      assert bitmap == highToBitmap.get(sortedHighs[index]);
-
-      final long previousCardinality;
-      if (currentHigh >= 1) {
-        previousCardinality = sortedCumulatedCardinality[index - 1];
-      } else {
-        previousCardinality = 0;
-      }
-      sortedCumulatedCardinality[index] = previousCardinality + bitmap.getCardinality();
-
-      if (currentHigh == Integer.MAX_VALUE) {
-        allValid = true;
-        firstHighNotValid = currentHigh;
-      } else {
-        firstHighNotValid = currentHigh + 1;
-      }
+      // This would mean calling .ensureOne is useless: should never got here at the first time
+      throw new IllegalStateException("Unexpectely found " + currentHigh + " in "
+          + Arrays.toString(sortedHighs) + " strictly before index" + indexOk);
     } else {
       int insertionPosition = -index - 1;
 
@@ -641,35 +599,11 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
         sortedHighs = Arrays.copyOf(sortedHighs, newSize);
         sortedCumulatedCardinality = Arrays.copyOf(sortedCumulatedCardinality, newSize);
 
+        // Not actually needed. But simplify the reading of array content
         Arrays.fill(sortedHighs, previousSize, sortedHighs.length, highestHigh());
         Arrays.fill(sortedCumulatedCardinality, previousSize, sortedHighs.length, Long.MAX_VALUE);
-        lowBitmaps.ensureCapacity(newSize);
-      } else {
-        // Insertion in the middle
-        int previousLength = sortedHighs.length;
-
-        if (indexOk < previousLength) {
-          // We are updating a bucket previously added
-
-          // Ensure the new 0 is in the middle
-          System.arraycopy(sortedHighs, insertionPosition, sortedHighs, insertionPosition + 1,
-              indexOk - insertionPosition);
-        } else {
-          // There is a new bucket
-          sortedHighs = Arrays.copyOf(sortedHighs, previousLength + 1);
-          // Ensure the new 0 is in the middle
-          System.arraycopy(sortedHighs, insertionPosition, sortedHighs, insertionPosition + 1,
-              previousLength - insertionPosition);
-
-          sortedCumulatedCardinality =
-              Arrays.copyOf(sortedCumulatedCardinality, sortedCumulatedCardinality.length + 1);
-
-          // No need to copy higher cardinalities as anyway, the cardinalities may not be valid
-          // anymore
-        }
       }
       sortedHighs[insertionPosition] = currentHigh;
-      lowBitmaps.add(insertionPosition, e.getValue());
 
       final long previousCardinality;
       if (insertionPosition >= 1) {
@@ -706,35 +640,38 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
   public void or(final Roaring64NavigableMap x2) {
     boolean firstBucket = true;
 
-    for (Entry<Integer, BitmapDataProvider> e : x2.highToBitmap.entrySet()) {
+    for (Entry<Integer, BitmapDataProvider> e2 : x2.highToBitmap.entrySet()) {
       // Keep object to prevent auto-boxing
-      Integer high = e.getKey();
+      Integer high = e2.getKey();
 
-      BitmapDataProvider currentBitmap = this.highToBitmap.get(high);
+      BitmapDataProvider lowBitmap1 = this.highToBitmap.get(high);
 
-      BitmapDataProvider lowBitmap2 = e.getValue();
+      BitmapDataProvider lowBitmap2 = e2.getValue();
+
       // TODO Reviewers: is it a good idea to rely on BitmapDataProvider except in methods
       // expecting an actual MutableRoaringBitmap?
-      if ((currentBitmap == null || currentBitmap instanceof RoaringBitmap)
+      // TODO This code may lead to closing a buffer Bitmap in current Navigable even if current is
+      // not on buffer
+      if ((lowBitmap1 == null || lowBitmap1 instanceof RoaringBitmap)
           && lowBitmap2 instanceof RoaringBitmap) {
-        if (currentBitmap == null) {
+        if (lowBitmap1 == null) {
           // Clone to prevent future modification of this modifying the input Bitmap
           RoaringBitmap lowBitmap2Clone = ((RoaringBitmap) lowBitmap2).clone();
 
           pushBitmapForHigh(high, lowBitmap2Clone);
         } else {
-          ((RoaringBitmap) currentBitmap).or((RoaringBitmap) lowBitmap2);
+          ((RoaringBitmap) lowBitmap1).or((RoaringBitmap) lowBitmap2);
         }
-      } else if ((currentBitmap == null || currentBitmap instanceof MutableRoaringBitmap)
+      } else if ((lowBitmap1 == null || lowBitmap1 instanceof MutableRoaringBitmap)
           && lowBitmap2 instanceof MutableRoaringBitmap) {
-        if (currentBitmap == null) {
+        if (lowBitmap1 == null) {
           // Clone to prevent future modification of this modifying the input Bitmap
           BitmapDataProvider lowBitmap2Clone = ((MutableRoaringBitmap) lowBitmap2).clone();
 
 
           pushBitmapForHigh(high, lowBitmap2Clone);
         } else {
-          ((MutableRoaringBitmap) currentBitmap).or((MutableRoaringBitmap) lowBitmap2);
+          ((MutableRoaringBitmap) lowBitmap1).or((MutableRoaringBitmap) lowBitmap2);
         }
       } else {
         throw new UnsupportedOperationException(
@@ -744,27 +681,169 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
       if (firstBucket) {
         firstBucket = false;
 
+        // Invalidate the lowest high as lowest not valid
         firstHighNotValid = Math.min(firstHighNotValid, high);
         allValid = false;
       }
     }
-
   }
 
+  /**
+   * In-place bitwise XOR (symmetric difference) operation. The current bitmap is modified.
+   *
+   * @param x2 other bitmap
+   */
+  public void xor(final Roaring64NavigableMap x2) {
+    boolean firstBucket = true;
+
+    for (Entry<Integer, BitmapDataProvider> e2 : x2.highToBitmap.entrySet()) {
+      // Keep object to prevent auto-boxing
+      Integer high = e2.getKey();
+
+      BitmapDataProvider lowBitmap1 = this.highToBitmap.get(high);
+
+      BitmapDataProvider lowBitmap2 = e2.getValue();
+
+      // TODO Reviewers: is it a good idea to rely on BitmapDataProvider except in methods
+      // expecting an actual MutableRoaringBitmap?
+      // TODO This code may lead to closing a buffer Bitmap in current Navigable even if current is
+      // not on buffer
+      if ((lowBitmap1 == null || lowBitmap1 instanceof RoaringBitmap)
+          && lowBitmap2 instanceof RoaringBitmap) {
+        if (lowBitmap1 == null) {
+          // Clone to prevent future modification of this modifying the input Bitmap
+          RoaringBitmap lowBitmap2Clone = ((RoaringBitmap) lowBitmap2).clone();
+
+          pushBitmapForHigh(high, lowBitmap2Clone);
+        } else {
+          ((RoaringBitmap) lowBitmap1).xor((RoaringBitmap) lowBitmap2);
+        }
+      } else if ((lowBitmap1 == null || lowBitmap1 instanceof MutableRoaringBitmap)
+          && lowBitmap2 instanceof MutableRoaringBitmap) {
+        if (lowBitmap1 == null) {
+          // Clone to prevent future modification of this modifying the input Bitmap
+          BitmapDataProvider lowBitmap2Clone = ((MutableRoaringBitmap) lowBitmap2).clone();
+
+          pushBitmapForHigh(high, lowBitmap2Clone);
+        } else {
+          ((MutableRoaringBitmap) lowBitmap1).xor((MutableRoaringBitmap) lowBitmap2);
+        }
+      } else {
+        throw new UnsupportedOperationException(
+            ".or is not between " + this.getClass() + " and " + lowBitmap2.getClass());
+      }
+
+      if (firstBucket) {
+        firstBucket = false;
+
+        // Invalidate the lowest high as lowest not valid
+        firstHighNotValid = Math.min(firstHighNotValid, high);
+        allValid = false;
+      }
+    }
+  }
+
+  /**
+   * In-place bitwise AND (intersection) operation. The current bitmap is modified.
+   *
+   * @param x2 other bitmap
+   */
+  public void and(final Roaring64NavigableMap x2) {
+    boolean firstBucket = true;
+
+    Iterator<Entry<Integer, BitmapDataProvider>> thisIterator = highToBitmap.entrySet().iterator();
+    while (thisIterator.hasNext()) {
+      Entry<Integer, BitmapDataProvider> e1 = thisIterator.next();
+
+      // Keep object to prevent auto-boxing
+      Integer high = e1.getKey();
+
+      BitmapDataProvider lowBitmap2 = x2.highToBitmap.get(high);
+
+      if (lowBitmap2 == null) {
+        // None of given high values are present in x2
+        thisIterator.remove();
+      } else {
+        BitmapDataProvider lowBitmap1 = e1.getValue();
+
+        if (lowBitmap2 instanceof RoaringBitmap && lowBitmap1 instanceof RoaringBitmap) {
+          ((RoaringBitmap) lowBitmap1).and((RoaringBitmap) lowBitmap2);
+        } else if (lowBitmap2 instanceof MutableRoaringBitmap
+            && lowBitmap1 instanceof MutableRoaringBitmap) {
+          ((MutableRoaringBitmap) lowBitmap1).and((MutableRoaringBitmap) lowBitmap2);
+        } else {
+          throw new UnsupportedOperationException(
+              ".and is not between " + this.getClass() + " and " + lowBitmap1.getClass());
+        }
+      }
+
+      if (firstBucket) {
+        firstBucket = false;
+
+        // Invalidate the lowest high as lowest not valid
+        firstHighNotValid = Math.min(firstHighNotValid, high);
+        allValid = false;
+      }
+    }
+  }
+
+
+  /**
+   * In-place bitwise ANDNOT (difference) operation. The current bitmap is modified.
+   *
+   * @param x2 other bitmap
+   */
+  public void andNot(final Roaring64NavigableMap x2) {
+    boolean firstBucket = true;
+
+    Iterator<Entry<Integer, BitmapDataProvider>> thisIterator = highToBitmap.entrySet().iterator();
+    while (thisIterator.hasNext()) {
+      Entry<Integer, BitmapDataProvider> e1 = thisIterator.next();
+
+      // Keep object to prevent auto-boxing
+      Integer high = e1.getKey();
+
+      BitmapDataProvider lowBitmap2 = x2.highToBitmap.get(high);
+
+      if (lowBitmap2 != null) {
+        BitmapDataProvider lowBitmap1 = e1.getValue();
+
+        if (lowBitmap2 instanceof RoaringBitmap && lowBitmap1 instanceof RoaringBitmap) {
+          ((RoaringBitmap) lowBitmap1).andNot((RoaringBitmap) lowBitmap2);
+        } else if (lowBitmap2 instanceof MutableRoaringBitmap
+            && lowBitmap1 instanceof MutableRoaringBitmap) {
+          ((MutableRoaringBitmap) lowBitmap1).andNot((MutableRoaringBitmap) lowBitmap2);
+        } else {
+          throw new UnsupportedOperationException(
+              ".and is not between " + this.getClass() + " and " + lowBitmap1.getClass());
+        }
+      }
+
+      if (firstBucket) {
+        firstBucket = false;
+
+        // Invalidate the lowest high as lowest not valid
+        firstHighNotValid = Math.min(firstHighNotValid, high);
+        allValid = false;
+      }
+    }
+  }
+
+  /**
+   * {@link Roaring64NavigableMap} are serializable. However, contrary to RoaringBitmap, the
+   * serialization format is not well-defined: for now, it is strongly coupled with Java standard
+   * serialization. Just like the serialization may be incompatible between various Java versions,
+   * {@link Roaring64NavigableMap} are subject to incompatibilities. Moreover, even on a given Java
+   * versions, the serialization format may change from one RoaringBitmap version to another
+   */
   @Override
   public void writeExternal(ObjectOutput out) throws IOException {
-    // TODO: Should we transport the performance tweak 'doCacheCardinalities'?
-
-    out.writeBoolean(signedLongs);
-    out.writeObject(highToBitmap);
+    serialize(out);
   }
 
   @Override
   public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-    signedLongs = in.readBoolean();
-    highToBitmap = (NavigableMap<Integer, BitmapDataProvider>) in.readObject();
-
-    resetPerfHelpers();
+    deserialize(in);
   }
 
   /**
@@ -884,13 +963,20 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
 
   @Override
   public boolean contains(long x) {
-    throw new UnsupportedOperationException("TODO");
+    int high = RoaringIntPacking.high(x);
+    BitmapDataProvider lowBitmap = highToBitmap.get(high);
+    if (lowBitmap == null) {
+      return false;
+    }
+
+    int low = RoaringIntPacking.low(x);
+    return lowBitmap.contains(low);
   }
 
 
   @Override
   public int getSizeInBytes() {
-    throw new UnsupportedOperationException("TODO");
+    return (int) getLongSizeInBytes();
   }
 
   @Override
@@ -908,14 +994,113 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
     throw new UnsupportedOperationException("TODO");
   }
 
-  @Override
-  public void serialize(DataOutput out) throws IOException {
-    throw new UnsupportedOperationException("TODO");
+  /**
+   * Use a run-length encoding where it is estimated as more space efficient
+   * 
+   * @return
+   *
+   * @return whether a change was applied
+   */
+  public boolean runOptimize() {
+    boolean hasChanged = false;
+    for (BitmapDataProvider lowBitmap : highToBitmap.values()) {
+      if (lowBitmap instanceof RoaringBitmap) {
+        hasChanged |= ((RoaringBitmap) lowBitmap).runOptimize();
+      } else if (lowBitmap instanceof MutableRoaringBitmap) {
+        hasChanged |= ((MutableRoaringBitmap) lowBitmap).runOptimize();
+      }
+    }
+    return hasChanged;
   }
 
+
+  /**
+   * Serialize this bitmap.
+   *
+   * Unlike RoaringBitmap, there is no specification for now: it may change from onve java version
+   * to another, and from one RoaringBitmap version to another.
+   *
+   * Consider calling {@link #runOptimize} before serialization to improve compression.
+   *
+   * The current bitmap is not modified.
+   *
+   * @param out the DataOutput stream
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Override
-  public int serializedSizeInBytes() {
-    throw new UnsupportedOperationException("TODO");
+  public void serialize(DataOutput out) throws IOException {
+    // TODO: Should we transport the performance tweak 'doCacheCardinalities'?
+    out.writeBoolean(signedLongs);
+
+    out.writeInt(highToBitmap.size());
+
+    for (Entry<Integer, BitmapDataProvider> entry : highToBitmap.entrySet()) {
+      out.writeInt(entry.getKey().intValue());
+      entry.getValue().serialize(out);
+    }
+  }
+
+
+  /**
+   * Deserialize (retrieve) this bitmap.
+   * 
+   * Unlike RoaringBitmap, there is no specification for now: it may change from one java version to
+   * another, and from one RoaringBitmap version to another.
+   *
+   * The current bitmap is overwritten.
+   *
+   * @param in the DataInput stream
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  public void deserialize(DataInput in) throws IOException {
+    this.clear();
+
+    signedLongs = in.readBoolean();
+
+    int nbHighs = in.readInt();
+
+    // Other NavigableMap may accept a target capacity
+    highToBitmap = new TreeMap<>();
+
+    for (int i = 0; i < nbHighs; i++) {
+      int high = in.readInt();
+      RoaringBitmap provider = new RoaringBitmap();
+      provider.deserialize(in);
+
+      highToBitmap.put(high, provider);
+    }
+
+    resetPerfHelpers();
+  }
+
+
+  @Override
+  public long serializedSizeInBytes() {
+    long nbBytes = 0L;
+
+    // .writeBoolean for signedLongs boolean
+    nbBytes += 1;
+
+    // .writeInt for number of different high values
+    nbBytes += 4;
+
+    for (Entry<Integer, BitmapDataProvider> entry : highToBitmap.entrySet()) {
+      // .writeInt for high
+      nbBytes += 4;
+
+      // The low bitmap size in bytes
+      nbBytes += entry.getValue().serializedSizeInBytes();
+    }
+
+    return nbBytes;
+  }
+
+  /**
+   * reset to an empty bitmap; result occupies as much space a newly created bitmap.
+   */
+  public void clear() {
+    this.highToBitmap.clear();
+    resetPerfHelpers();
   }
 
   /**
@@ -991,18 +1176,17 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
         currentStartLow = 0;
       }
 
+      long startLowAsLong = Util.toUnsignedLong(currentStartLow);
 
-      final int currentEndLow;
+      final long endLowAsLong;
       if (endHigh == high) {
         // The whole range ends in this bucket
-        currentEndLow = endLow;
+        endLowAsLong = Util.toUnsignedLong(endLow);
       } else {
-        // Add the bucket until the end
-        currentEndLow = -1;
+        // Add the bucket until the end: we have a +1 as, in RoaringBitmap.add(long,long), the end
+        // is excluded
+        endLowAsLong = Util.toUnsignedLong(-1) + 1;
       }
-
-      long startLowAsLong = RoaringIntPacking.toUnsignedLong(currentStartLow);
-      long endLowAsLong = RoaringIntPacking.toUnsignedLong(currentEndLow);
 
       if (endLowAsLong > startLowAsLong) {
         // Initialize the bitmap only if there is access data to write
@@ -1060,10 +1244,7 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((highToBitmap == null) ? 0 : highToBitmap.hashCode());
-    return result;
+    return highToBitmap.hashCode();
   }
 
   @Override
@@ -1078,16 +1259,39 @@ public class Roaring64NavigableMap implements Externalizable, LongBitmapDataProv
       return false;
     }
     Roaring64NavigableMap other = (Roaring64NavigableMap) obj;
-    if (highToBitmap == null) {
-      if (other.highToBitmap != null) {
-        return false;
-      }
-    } else if (!highToBitmap.equals(other.highToBitmap)) {
-      return false;
-    }
-    return true;
+    return Objects.equals(highToBitmap, other.highToBitmap);
   }
 
 
 
+  /**
+   * Add the value if it is not already present, otherwise remove it.
+   *
+   * @param x long value
+   */
+  public void flip(final long x) {
+    int high = RoaringIntPacking.high(x);
+    BitmapDataProvider lowBitmap = highToBitmap.get(high);
+    if (lowBitmap == null) {
+      // The value is not added: add it without any flip specific code
+      addLong(x);
+    } else {
+      int low = RoaringIntPacking.low(x);
+
+      // .flip is not in BitmapDataProvider contract
+      // TODO Is it relevant to calling .flip with a cast?
+      if (lowBitmap instanceof RoaringBitmap) {
+        ((RoaringBitmap) lowBitmap).flip(low);
+      } else if (lowBitmap instanceof MutableRoaringBitmap) {
+        ((MutableRoaringBitmap) lowBitmap).flip(low);
+      } else {
+        // Fallback to a manual flip
+        if (lowBitmap.contains(low)) {
+          lowBitmap.remove(low);
+        } else {
+          lowBitmap.add(low);
+        }
+      }
+    }
+  }
 }

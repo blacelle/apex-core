@@ -26,6 +26,7 @@ import org.eclipse.mat.parser.index.IIndexReader;
 import org.eclipse.mat.parser.index.IndexReader;
 import org.eclipse.mat.parser.index.IndexWriter;
 import org.eclipse.mat.parser.index.IndexWriter.Identifier;
+import org.eclipse.mat.parser.index.IndexWriter.Identifier;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -41,7 +41,6 @@ public interface IHprofParserHandler {
 		public boolean isArray = false;
 
 		public HeapObject(int objectId, long objectAddress, ClassImpl clazz, long usedHeapSize) {
-			super();
 			this.objectId = objectId;
 			this.objectAddress = objectAddress;
 			this.clazz = clazz;

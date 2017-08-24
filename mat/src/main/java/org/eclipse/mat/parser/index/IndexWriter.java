@@ -54,8 +54,17 @@ import org.eclipse.mat.util.MessageUtil;
 import org.roaringbitmap.longlong.LongIterator;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
 import org.roaringbitmap.longlong.RoaringBitmapSupplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import blasd.apex.core.logging.ApexLogHelper;
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 
 public abstract class IndexWriter {
+
+	protected static final Logger LOGGER = LoggerFactory.getLogger(IndexWriter.class);
+
 	public static final int PAGE_SIZE_INT = 1000000;
 	public static final int PAGE_SIZE_LONG = 500000;
 	// Set this to true to test more code paths with smaller indices
@@ -196,8 +205,17 @@ public abstract class IndexWriter {
 
 		RawIdentifier guarantee;
 
+		boolean addedAfterSort = false;
+		Long2IntMap reverseCache = new Long2IntOpenHashMap(10000);
+
+		{
+			reverseCache.defaultReturnValue(-1);
+		}
+
 		@Override
 		public void add(long id) {
+			addedAfterSort = true;
+
 			if (identifiers == null) {
 				identifiers = new Roaring64NavigableMap(true, new RoaringBitmapSupplier());
 				if (Boolean.getBoolean("mat.assert")) {
@@ -237,6 +255,11 @@ public abstract class IndexWriter {
 
 		@Override
 		public int reverse(long val) {
+			int reverse = reverseCache.get(val);
+			if (reverse >= 0) {
+				return reverse;
+			}
+
 			long rank = identifiers.rankLong(val);
 
 			// Roaring rank is 1-based: if only a '0', its rank is 1, we select 'rank-1' hoping to find back 0
@@ -249,7 +272,14 @@ public abstract class IndexWriter {
 					assert guarantee.reverse(val) == rank0Based;
 				}
 
-				return (int) rank0Based;
+				int asInt = (int) rank0Based;
+				if (reverseCache.size() == 10000) {
+					// Prevent the ache for growing too big
+					reverseCache.clear();
+				}
+				reverseCache.put(val, asInt);
+
+				return asInt;
 			} else {
 				int minusNext = (int) (-1L - rank);
 
@@ -341,6 +371,16 @@ public abstract class IndexWriter {
 
 		@Override
 		public void sort() {
+			long bytesBefore = identifiers.serializedSizeInBytes();
+			identifiers.runOptimize();
+			long bytesAfter = identifiers.serializedSizeInBytes();
+
+			LOGGER.info(".runOptimize moved from {} to {}",
+					ApexLogHelper.getNiceMemory(bytesBefore),
+					ApexLogHelper.getNiceMemory(bytesAfter));
+
+			addedAfterSort = false;
+
 			// no-op as Roaring is already sorted
 			if (guarantee != null) {
 				guarantee.sort();
