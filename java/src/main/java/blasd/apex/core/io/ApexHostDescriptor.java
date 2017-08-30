@@ -119,6 +119,10 @@ public class ApexHostDescriptor {
 		return "ApexHostDescriptor [host=" + host + ", hostIsIp=" + hostIsIp + ", hostIsValid=" + hostIsValid + "]";
 	}
 
+	/**
+	 * 
+	 * @return the space domain. Given 'http://www.corman.io/youpi', it would return 'cormoran.io'
+	 */
 	public Optional<String> getHostSpace() {
 		if (!getIsValid() || getIsIP()) {
 			return Optional.empty();
