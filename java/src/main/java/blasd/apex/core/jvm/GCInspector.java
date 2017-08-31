@@ -33,6 +33,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.lang.management.BufferPoolMXBean;
 import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryType;
 import java.lang.management.MemoryUsage;
@@ -140,6 +141,8 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 	protected static final MBeanServer MBEAN_SERVER = ManagementFactory.getPlatformMBeanServer();
 	protected static final OperatingSystemMXBean OS_MBEAN = ManagementFactory.getOperatingSystemMXBean();
 	protected static final ThreadMXBean THREAD_MBEAN = ManagementFactory.getThreadMXBean();
+
+	protected static final MemoryMXBean MEMORY_MBEAN = ManagementFactory.getMemoryMXBean();
 	protected static final List<MemoryPoolMXBean> MEMORY_POOLS_MBEAN = ManagementFactory.getMemoryPoolMXBeans();
 
 	protected AtomicReference<LocalDateTime> latestThreadDump = new AtomicReference<>();
@@ -217,14 +220,13 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 		// In maven: org.apache.maven.surefire.booter.ForkedBooter.exit(ForkedBooter.java:144)
 		// Bean disposing is expected to be done in the main thead: does this main thread comes from junit or surefire?
 
-		Optional<StackTraceElement> matching =
-				Arrays.stream(Thread.currentThread().getStackTrace())
-						.filter(ste -> Arrays.asList(".surefire.", ".failsafe.", ".junit.")
-								.stream()
-								.filter(name -> ste.getClassName().contains(name))
-								.findAny()
-								.isPresent())
-						.findAny();
+		Optional<StackTraceElement> matching = Arrays.stream(Thread.currentThread().getStackTrace())
+				.filter(ste -> Arrays.asList(".surefire.", ".failsafe.", ".junit.")
+						.stream()
+						.filter(name -> ste.getClassName().contains(name))
+						.findAny()
+						.isPresent())
+				.findAny();
 
 		matching.ifPresent(ste -> LOGGER.info("We have detected a unit-test with: {}", ste));
 
@@ -410,8 +412,17 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 	}
 
 	protected void appendHeap(StringBuilder sb, long totalHeapUsedAfter) {
-		sb.append(" - Heap:");
+		long maxHeap = MEMORY_MBEAN.getHeapMemoryUsage().getMax();
+
+		sb.append(" - Heap: fromGC=");
 		appendSize(sb, totalHeapUsedAfter);
+		sb.append(" - ").append(ApexLogHelper.getNicePercentage(totalHeapUsedAfter, maxHeap));
+
+		long heapAsTotal = MEMORY_MBEAN.getHeapMemoryUsage().getUsed();
+		sb.append(" - fromMX=");
+		appendSize(sb, heapAsTotal);
+		sb.append(" - ").append(ApexLogHelper.getNicePercentage(heapAsTotal, maxHeap));
+
 	}
 
 	protected void appendNonHeap(StringBuilder sb, long nonHeapUsedAfter) {
@@ -557,9 +568,11 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 				long directMemoryUsed = directMemoryBean.getMemoryUsed();
 				additionalMemory += directMemoryUsed;
 				appendSize(sb, directMemoryUsed);
-				sb.append("(allocationCount=").append(directMemoryBean.getCount()).append(')');
 				sb.append(" over max=");
-				appendSize(sb, ApexForOracleJVM.maxDirectMemory());
+				long maxDirectMemory = ApexForOracleJVM.maxDirectMemory();
+				appendSize(sb, maxDirectMemory);
+				sb.append(" - ").append(ApexLogHelper.getNicePercentage(directMemoryUsed, maxDirectMemory));
+				sb.append(" (allocationCount=").append(directMemoryBean.getCount()).append(')');
 			}
 		}
 

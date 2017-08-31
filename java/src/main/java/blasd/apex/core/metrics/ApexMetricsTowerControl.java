@@ -146,7 +146,7 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	protected void logOnDetectingVeryLongTask(StartMetricEvent startEvent) {
 		String threadDump = apexThreadDumper.getSmartThreadDumpAsString(false);
 
-		LOGGER.error("Very-Long task: {} ThreadDump: {}", startEvent, threadDump);
+		LOGGER.error("Task is marked as very-long: {} ThreadDump: {}", startEvent, threadDump);
 	}
 
 	protected void logOnEndEvent(StartMetricEvent startEvent) {
@@ -160,7 +160,7 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 			long longRunningInMillis = TimeUnit.SECONDS.toMillis(longRunningCheckSeconds);
 			Object lazyToString = ApexLogHelper.lazyToString(() -> endEvent.get().startEvent.toStringNoStack());
 			if (timeInMs > FACTOR_FOR_TOO_OLD * longRunningInMillis) {
-				LOGGER.warn("End of very-long {}", lazyToString);
+				LOGGER.info("End of very-long {}", lazyToString);
 			} else if (timeInMs > longRunningInMillis) {
 				LOGGER.info("End of long {} ended", lazyToString);
 			} else {
@@ -243,7 +243,7 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 			} else {
 				if (activeSince.isBefore(muchtooOldBarrier)) {
 					// This task is active since more than XXX seconds
-					LOGGER.warn(LOG_MESSAGE, time, activeSince, cleanKey);
+					LOGGER.warn(LOG_MESSAGE, activeSince, time, cleanKey);
 
 					// If this is the first encounter as verySLow, we may have additional operations
 					verySlowTasks.refresh(startEvent);
@@ -308,8 +308,10 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 
 	protected void invalidateStartEvent(StartMetricEvent startEvent) {
 		if (activeTasks.getIfPresent(startEvent) == null) {
-			LOGGER.debug("And EndEvent has been submitted without its StartEvent having been registered"
-					+ ", or after having been already invalidated: {}", startEvent);
+			LOGGER.debug(
+					"And EndEvent has been submitted without its StartEvent having been registered"
+							+ ", or after having been already invalidated: {}",
+					startEvent);
 		} else {
 			invalidate(startEvent);
 		}
@@ -370,14 +372,14 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	 * In some cases, we may have ghosts active tasks. One can invalidate them manually through this method
 	 * 
 	 * @param name
-	 *            the full name of the activeTask to invalidate
+	 *            the full name of the activeTask to invalidate. If '*', we cancel all tasks
 	 * @return true if we succeeded removing this entry
 	 */
 	@ManagedOperation
-	public boolean invalidateActiveTasks(String name) {
+	public boolean invalidateActiveTasks(String nameOrStar) {
 		for (StartMetricEvent startEvent : activeTasks.asMap().keySet()) {
 			// Compare without the stack else it would be difficult to cancel from a JConsole
-			if (name.equals(startEvent.toStringNoStack())) {
+			if ("*".equals(nameOrStar) || nameOrStar.equals(startEvent.toStringNoStack())) {
 				invalidate(startEvent);
 				return true;
 			}
