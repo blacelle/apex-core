@@ -51,9 +51,9 @@ import org.eclipse.mat.parser.io.BitInputStream;
 import org.eclipse.mat.parser.io.BitOutputStream;
 import org.eclipse.mat.util.IProgressListener;
 import org.eclipse.mat.util.MessageUtil;
+import org.roaringbitmap.RoaringBitmapSupplier;
 import org.roaringbitmap.longlong.LongIterator;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
-import org.roaringbitmap.longlong.RoaringBitmapSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
