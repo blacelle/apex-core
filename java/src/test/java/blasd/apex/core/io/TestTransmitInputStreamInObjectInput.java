@@ -32,7 +32,6 @@ import java.io.ObjectOutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import org.awaitility.Awaitility;
 import org.junit.Assert;
