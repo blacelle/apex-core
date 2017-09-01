@@ -202,7 +202,7 @@ public class GeneralSnapshotTests {
 				IObject obj;
 				try {
 					obj = snapshot.getObject(o);
-				} catch (SnapshotException e) {
+				} catch (SnapshotException | RuntimeException e) {
 					LOGGER.error("We did not found back {} amongst {}. SNapshot={}",
 							o,
 							Arrays.toString(cls.getObjectIds()),
