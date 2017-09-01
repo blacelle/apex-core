@@ -71,7 +71,8 @@ public class TestStartMetricEvent {
 
 		Assertions.assertThat(startEvent.toString()).contains("Benoit");
 
-		Assert.assertEquals("StartMetricEvent{names=[Test], source=sourceObject} startDetails={UserName=Benoit}",
+		Assert.assertEquals(
+				"Started in 'main': StartMetricEvent{names=[Test], source=sourceObject} startDetails={UserName=Benoit}",
 				startEvent.toString());
 	}
 
@@ -83,7 +84,8 @@ public class TestStartMetricEvent {
 
 		startEvent.setEndDetails(ImmutableMap.of("endKey", "endValue"));
 
-		Assert.assertEquals("StartMetricEvent{names=[Test], source=sourceObject} endDetails={endKey=endValue}",
+		Assert.assertEquals(
+				"Started in 'main': StartMetricEvent{names=[Test], source=sourceObject} endDetails={endKey=endValue}",
 				startEvent.toString());
 	}
 

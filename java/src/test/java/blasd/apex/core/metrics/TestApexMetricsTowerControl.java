@@ -254,6 +254,7 @@ public class TestApexMetricsTowerControl {
 		mtc.onEndEvent(end);
 		mtc.onStartEvent(start);
 
+		// We should have no active task as the end event arrives
 		Assert.assertEquals(0, mtc.getActiveTasksSize());
 	}
 }

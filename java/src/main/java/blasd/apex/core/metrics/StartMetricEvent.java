@@ -164,7 +164,7 @@ public class StartMetricEvent extends AMetricEvent {
 	}
 
 	public String toStringNoStack() {
-		String suffix = "Started in '" + startThread + "'";
+		String suffix = "";
 
 		if (!startDetails.isEmpty()) {
 			suffix += " startDetails=" + startDetails;
@@ -174,10 +174,11 @@ public class StartMetricEvent extends AMetricEvent {
 		}
 
 		long currentProgress = progress.getAsLong();
+		String prefix = "Started in '" + startThread + "': ";
 		if (currentProgress < 0L) {
-			return super.toString() + suffix;
+			return prefix + super.toString() + suffix;
 		} else {
-			return super.toString() + " progress=" + currentProgress + suffix;
+			return prefix + super.toString() + " progress=" + currentProgress + suffix;
 		}
 	}
 

@@ -24,10 +24,10 @@ addons:
 #https://docs.travis-ci.com/user/customizing-the-build/#Customizing-the-Build-Step
 # quite not to consumes more than the 4MB of authorized logs
 # https://github.com/travis-ci/travis-ci/issues/1382
-install: "mvn clean install -DskipTests -PskipStyle"
+install: "mvn clean install -DskipTests -PskipStyle --fail-at-end"
 #script: "mvn deploy -DskipTests --settings travis-maven-settings.xml"
 script:
-  - "mvn install coveralls:report"
+  - "mvn install coveralls:report --fail-at-end"
   - "mvn org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar"
 #deploy: "mvn deploy --settings travis-maven-settings.xml"
 
