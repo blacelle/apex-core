@@ -57,13 +57,26 @@ public class EndMetricEvent extends AMetricEvent {
 			LOGGER.info("No StartMetricEvent has been provided");
 			return null;
 		} else {
-			EndMetricEvent endMetricEvent = new EndMetricEvent(startEvent);
-			if (startEvent.registerEndEvent(endMetricEvent)) {
+			EndMetricEvent endMetricEvent = buildEndEvent(startEvent);
+			if (startEvent.endMetricEvent.get() == endMetricEvent) {
+				// This is the first endMetricEvent
 				post(eventBus, endMetricEvent);
 				return endMetricEvent;
 			} else {
 				return startEvent.endMetricEvent.get();
 			}
 		}
+	}
+
+	/**
+	 * 
+	 * @param start
+	 * @return a new EndMetricEvent instance. We try to attach it as end event for StartMetricEvent, which would fail if
+	 *         another EndEvent has already been attached
+	 */
+	public static EndMetricEvent buildEndEvent(StartMetricEvent start) {
+		EndMetricEvent endEvent = new EndMetricEvent(start);
+		start.registerEndEvent(endEvent);
+		return endEvent;
 	}
 }

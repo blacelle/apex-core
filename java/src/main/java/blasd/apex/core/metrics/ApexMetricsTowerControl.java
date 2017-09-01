@@ -279,6 +279,12 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	public void onStartEvent(StartMetricEvent startEvent) {
 		if (startEvent.source == null) {
 			LOGGER.debug("Discard StartEvent which is missing a Source: {}", startEvent);
+		} else if (startEvent.endMetricEvent.get() != null) {
+			// The startMetric event have finished even before being received by this: do not start
+			// We may prefer to start and end right away but it would lead to multiple .onEndEvent
+			LOGGER.debug("Discard StartEvent which has already ended: {} -> {}",
+					startEvent,
+					startEvent.endMetricEvent.get());
 		} else {
 			// .refresh would rewrite the startTime on multiple events
 			activeTasks.getUnchecked(startEvent);

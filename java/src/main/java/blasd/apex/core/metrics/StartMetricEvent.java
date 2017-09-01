@@ -197,7 +197,7 @@ public class StartMetricEvent extends AMetricEvent {
 	/**
 	 * 
 	 * @param endMetricEvent
-	 * @return true if we succesfully registered an EndMetricEvent. Typically fails if already ended
+	 * @return true if we successfully registered an EndMetricEvent. Typically fails if already ended
 	 */
 	public boolean registerEndEvent(EndMetricEvent endMetricEvent) {
 		return this.endMetricEvent.compareAndSet(null, endMetricEvent);

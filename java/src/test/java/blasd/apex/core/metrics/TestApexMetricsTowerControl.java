@@ -238,6 +238,22 @@ public class TestApexMetricsTowerControl {
 
 		Assert.assertFalse(mtc.scheduledFuture.get().isCancelled());
 		Assert.assertTrue(currentFuture.isCancelled());
+	}
 
+	// Start and End events consuming methods have the annotation @AllowConcurrentEvents: we may receive the end before
+	// the start
+	@Test
+	public void testReceiveEndBeforeStart() {
+		ApexMetricsTowerControl mtc = makeApexMetricsTowerControl();
+
+		StartMetricEvent start = new StartMetricEvent(this, "testReceiveEndBeforeStart");
+
+		EndMetricEvent end = EndMetricEvent.buildEndEvent(start);
+
+		// Let's imagine the end arrives before the start
+		mtc.onEndEvent(end);
+		mtc.onStartEvent(start);
+
+		Assert.assertEquals(0, mtc.getActiveTasksSize());
 	}
 }
