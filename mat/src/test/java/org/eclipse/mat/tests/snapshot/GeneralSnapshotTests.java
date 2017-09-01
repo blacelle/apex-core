@@ -31,9 +31,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunWith(value = Parameterized.class)
 public class GeneralSnapshotTests {
+
+	protected static final Logger LOGGER = LoggerFactory.getLogger(GeneralSnapshotTests.class);
+
 	enum Methods {
 		NONE, FRAMES_ONLY, RUNNING_METHODS, ALL_METHODS
 	}
@@ -51,27 +56,25 @@ public class GeneralSnapshotTests {
 
 	@Parameters
 	public static Collection<Object[]> data() {
-		return Arrays
-				.asList(new Object[][] { { TestSnapshots.SUN_JDK6_32BIT, Stacks.NONE },
-						{ TestSnapshots.SUN_JDK5_64BIT, Stacks.NONE },
-						{ TestSnapshots.SUN_JDK6_18_32BIT, Stacks.FRAMES_AND_OBJECTS },
-						{ TestSnapshots.SUN_JDK6_18_64BIT, Stacks.FRAMES_AND_OBJECTS },
-						{ TestSnapshots.SUN_JDK5_13_32BIT, Stacks.NONE },
-						{ TestSnapshots.IBM_JDK6_32BIT_HEAP, Stacks.NONE },
-						{ TestSnapshots.IBM_JDK6_32BIT_JAVA, Stacks.FRAMES },
-						{ TestSnapshots.IBM_JDK6_32BIT_HEAP_AND_JAVA, Stacks.FRAMES },
-						{ TestSnapshots.IBM_JDK6_32BIT_SYSTEM, Stacks.FRAMES_AND_OBJECTS },
-						{ "allMethods", Stacks.FRAMES_AND_OBJECTS },
-						{ "runningMethods", Stacks.FRAMES_AND_OBJECTS },
-						{ "framesOnly", Stacks.FRAMES_AND_OBJECTS },
-						{ "noMethods", Stacks.FRAMES_AND_OBJECTS },
-						{ TestSnapshots.IBM_JDK142_32BIT_HEAP, Stacks.NONE },
-						{ TestSnapshots.IBM_JDK142_32BIT_JAVA, Stacks.FRAMES },
-						{ TestSnapshots.IBM_JDK142_32BIT_HEAP_AND_JAVA,
-								DTFJreadJavacore142 ? Stacks.FRAMES : Stacks.NONE },
-						{ TestSnapshots.IBM_JDK142_32BIT_SYSTEM, Stacks.FRAMES },
-						{ TestSnapshots.ORACLE_JDK7_21_64BIT, Stacks.FRAMES_AND_OBJECTS },
-						{ TestSnapshots.ORACLE_JDK8_05_64BIT, Stacks.FRAMES_AND_OBJECTS }, });
+		return Arrays.asList(new Object[][] { { TestSnapshots.SUN_JDK6_32BIT, Stacks.NONE },
+				{ TestSnapshots.SUN_JDK5_64BIT, Stacks.NONE },
+				{ TestSnapshots.SUN_JDK6_18_32BIT, Stacks.FRAMES_AND_OBJECTS },
+				{ TestSnapshots.SUN_JDK6_18_64BIT, Stacks.FRAMES_AND_OBJECTS },
+				{ TestSnapshots.SUN_JDK5_13_32BIT, Stacks.NONE },
+				{ TestSnapshots.IBM_JDK6_32BIT_HEAP, Stacks.NONE },
+				{ TestSnapshots.IBM_JDK6_32BIT_JAVA, Stacks.FRAMES },
+				{ TestSnapshots.IBM_JDK6_32BIT_HEAP_AND_JAVA, Stacks.FRAMES },
+				{ TestSnapshots.IBM_JDK6_32BIT_SYSTEM, Stacks.FRAMES_AND_OBJECTS },
+				{ "allMethods", Stacks.FRAMES_AND_OBJECTS },
+				{ "runningMethods", Stacks.FRAMES_AND_OBJECTS },
+				{ "framesOnly", Stacks.FRAMES_AND_OBJECTS },
+				{ "noMethods", Stacks.FRAMES_AND_OBJECTS },
+				{ TestSnapshots.IBM_JDK142_32BIT_HEAP, Stacks.NONE },
+				{ TestSnapshots.IBM_JDK142_32BIT_JAVA, Stacks.FRAMES },
+				{ TestSnapshots.IBM_JDK142_32BIT_HEAP_AND_JAVA, DTFJreadJavacore142 ? Stacks.FRAMES : Stacks.NONE },
+				{ TestSnapshots.IBM_JDK142_32BIT_SYSTEM, Stacks.FRAMES },
+				{ TestSnapshots.ORACLE_JDK7_21_64BIT, Stacks.FRAMES_AND_OBJECTS },
+				{ TestSnapshots.ORACLE_JDK8_05_64BIT, Stacks.FRAMES_AND_OBJECTS }, });
 	}
 
 	public GeneralSnapshotTests(String snapshotname, Stacks s) {
@@ -124,8 +127,8 @@ public class GeneralSnapshotTests {
 				}
 			}
 		/*
-		 *  PHD+javacore sometimes doesn't mark javacore threads as type Thread as
-		 *  javacore thread id is not a real object id  
+		 * PHD+javacore sometimes doesn't mark javacore threads as type Thread as javacore thread id is not a real
+		 * object id
 		 */
 		for (int o : snapshot.getGCRoots()) {
 			for (GCRootInfo g : snapshot.getGCRootInfo(o)) {
@@ -196,7 +199,17 @@ public class GeneralSnapshotTests {
 		for (IClass cls : snapshot.getClasses()) {
 			long prev = -1;
 			for (int o : cls.getObjectIds()) {
-				IObject obj = snapshot.getObject(o);
+				IObject obj;
+				try {
+					obj = snapshot.getObject(o);
+				} catch (SnapshotException e) {
+					LOGGER.error("We did not found back {} amongst {}. SNapshot={}",
+							o,
+							Arrays.toString(cls.getObjectIds()),
+							snapshot.getSnapshotInfo());
+					throw new IllegalStateException(e);
+				}
+
 				long n = obj.getUsedHeapSize();
 				long n2 = snapshot.getHeapSize(o);
 				if (n != n2) {
