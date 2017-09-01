@@ -220,13 +220,14 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 		// In maven: org.apache.maven.surefire.booter.ForkedBooter.exit(ForkedBooter.java:144)
 		// Bean disposing is expected to be done in the main thead: does this main thread comes from junit or surefire?
 
-		Optional<StackTraceElement> matching = Arrays.stream(Thread.currentThread().getStackTrace())
-				.filter(ste -> Arrays.asList(".surefire.", ".failsafe.", ".junit.")
-						.stream()
-						.filter(name -> ste.getClassName().contains(name))
-						.findAny()
-						.isPresent())
-				.findAny();
+		Optional<StackTraceElement> matching =
+				Arrays.stream(Thread.currentThread().getStackTrace())
+						.filter(ste -> Arrays.asList(".surefire.", ".failsafe.", ".junit.")
+								.stream()
+								.filter(name -> ste.getClassName().contains(name))
+								.findAny()
+								.isPresent())
+						.findAny();
 
 		matching.ifPresent(ste -> LOGGER.info("We have detected a unit-test with: {}", ste));
 

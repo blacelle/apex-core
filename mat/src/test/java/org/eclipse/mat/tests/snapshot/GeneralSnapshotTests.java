@@ -203,10 +203,13 @@ public class GeneralSnapshotTests {
 				try {
 					obj = snapshot.getObject(o);
 				} catch (SnapshotException | RuntimeException e) {
-					LOGGER.error("We did not found back {} amongst {}. SNapshot={}",
-							o,
-							Arrays.toString(cls.getObjectIds()),
-							snapshot.getSnapshotInfo());
+					LOGGER.error(
+							"We did not found back " + o
+									+ " amongst "
+									+ Arrays.toString(cls.getObjectIds())
+									+ ". SNapshot="
+									+ snapshot.getSnapshotInfo(),
+							e);
 					throw new IllegalStateException(e);
 				}
 

@@ -74,8 +74,10 @@ public class Pass2Parser extends AbstractParser {
 
 				long length = readUnsignedInt();
 				if (length < 0)
-					throw new SnapshotException(MessageUtil
-							.format(Messages.Pass1Parser_Error_IllegalRecordLength, length, in.position(), record));
+					throw new SnapshotException(MessageUtil.format(Messages.Pass1Parser_Error_IllegalRecordLength,
+							length,
+							in.position(),
+							record));
 
 				length = updateLengthIfNecessary(fileSize, curPos, record, length, monitor);
 
@@ -154,8 +156,9 @@ public class Pass2Parser extends AbstractParser {
 				readPrimitiveArrayDump(segmentStartPos);
 				break;
 			default:
-				throw new SnapshotException(MessageUtil
-						.format(Messages.Pass1Parser_Error_InvalidHeapDumpFile, segmentType, segmentStartPos));
+				throw new SnapshotException(MessageUtil.format(Messages.Pass1Parser_Error_InvalidHeapDumpFile,
+						segmentType,
+						segmentStartPos));
 			}
 			segmentStartPos = in.position();
 		}
