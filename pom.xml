@@ -86,6 +86,26 @@
 				<jacoco.skip>true</jacoco.skip>
 			</properties>
 		</profile>
+		<profile>
+			<!-- Used with -DskipTests: skip tests and skip style checking -->
+			<id>dirty</id>
+			<activation>
+				<property>
+					<name>skipTests</name>
+				</property>
+			</activation>
+			<properties>
+				<!-- Skip tests -->
+				<maven.test.skip>true</maven.test.skip>
+
+				<!-- Ckip code checkings -->
+				<jacoco.skip>true</jacoco.skip>
+				<checkstyle.skip>true</checkstyle.skip>
+				<pmd.skip>true</pmd.skip>
+				<cpd.skip>true</cpd.skip>
+				<maven.javadoc.skip>true</maven.javadoc.skip>
+			</properties>
+		</profile>
 	</profiles>
 
 	<modules>

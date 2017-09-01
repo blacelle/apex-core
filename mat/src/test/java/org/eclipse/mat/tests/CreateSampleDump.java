@@ -143,14 +143,10 @@ public class CreateSampleDump {
 	// //////////////////////////////////////////////////////////////
 
 	static class ReferenceTestData {
-		@SuppressWarnings("unchecked")
-		SoftReference clearedSoftReference;
-		@SuppressWarnings("unchecked")
-		SoftReference availableSoftReference;
-		@SuppressWarnings("unchecked")
-		WeakReference clearedWeakReference;
-		@SuppressWarnings("unchecked")
-		WeakReference availableWeakReference;
+		SoftReference<?> clearedSoftReference;
+		SoftReference<?> availableSoftReference;
+		WeakReference<?> clearedWeakReference;
+		WeakReference<?> availableWeakReference;
 		String keptWeakReference;
 
 		ReferenceTestData() {

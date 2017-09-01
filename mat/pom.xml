@@ -38,7 +38,7 @@
 		<dependency>
 			<groupId>com.github.blasd.apex</groupId>
 			<artifactId>apex-java</artifactId>
-			<version>1.5</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
@@ -52,6 +52,17 @@
 			<groupId>org.xerial.snappy</groupId>
 			<artifactId>snappy-java</artifactId>
 			<version>1.1.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>me.lemire.integercompression</groupId>
+			<artifactId>JavaFastPFOR</artifactId>
+			<version>0.1.11</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/it.unimi.dsi/fastutil -->

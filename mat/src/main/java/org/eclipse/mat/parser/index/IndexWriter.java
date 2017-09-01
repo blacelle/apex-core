@@ -23,11 +23,7 @@ import java.lang.ref.SoftReference;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -46,13 +42,15 @@ import org.eclipse.mat.collect.SetInt;
 import org.eclipse.mat.parser.index.IIndexReader.IOne2LongIndex;
 import org.eclipse.mat.parser.index.IIndexReader.IOne2OneIndex;
 import org.eclipse.mat.parser.index.IndexReader.SizeIndexReader;
+import org.eclipse.mat.parser.index.IndexWriter.Identifier;
+import org.eclipse.mat.parser.index.IndexWriter.KeyWriter;
+import org.eclipse.mat.parser.index.IndexWriter.RoaringIdentifier;
 import org.eclipse.mat.parser.internal.Messages;
 import org.eclipse.mat.parser.io.BitInputStream;
 import org.eclipse.mat.parser.io.BitOutputStream;
 import org.eclipse.mat.util.IProgressListener;
 import org.eclipse.mat.util.MessageUtil;
 import org.roaringbitmap.RoaringBitmapSupplier;
-import org.roaringbitmap.longlong.LongIterator;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -397,7 +395,10 @@ public abstract class IndexWriter {
 			try {
 				File tmpFile = prepareIntArrayInFile(".IntIndexCollectorUncompressed", size);
 
-				FileChannel fc = new RandomAccessFile(tmpFile, "rw").getChannel();
+				// https://stackoverflow.com/questions/27570052/allocate-big-file
+				RandomAccessFile randomAccessFile = new RandomAccessFile(tmpFile, "rw");
+
+				FileChannel fc = randomAccessFile.getChannel();
 
 				dataElements = fc.map(FileChannel.MapMode.READ_WRITE, 0, fc.size()).asIntBuffer();
 				// this.dataElements = IntBuffer.allocate(size);
@@ -865,32 +866,9 @@ public abstract class IndexWriter {
 		// We do not need the file to survive the JVM as the goal is just to spare heap
 		tmpFile.deleteOnExit();
 
-		// Prepare a fill full of zeroes
-		try (SeekableByteChannel outChannel =
-				Files.newByteChannel(tmpFile.toPath(), EnumSet.of(StandardOpenOption.WRITE))) {
-			int leftToAdd = size;
-
-			ByteBuffer bf1024 = ByteBuffer.allocate(1024 * 4);
-			bf1024.asIntBuffer().put(new int[1024]);
-
-			while (leftToAdd > 0) {
-				int writeNow = Math.min(1024, leftToAdd);
-
-				ByteBuffer bf;
-				if (writeNow == 1024) {
-					// Reset before flushing to file
-					bf1024.position(0);
-					bf = bf1024;
-				} else {
-					bf = ByteBuffer.allocate(writeNow * 4);
-					bf.asIntBuffer().put(new int[writeNow]);
-				}
-
-				int nwritten = outChannel.write(bf);
-
-				// Is it legit to write less than the whole ByteBuffer?
-				leftToAdd -= nwritten / 4;
-			}
+		// https://stackoverflow.com/questions/27570052/allocate-big-file
+		try (RandomAccessFile out = new RandomAccessFile(tmpFile, "rw")) {
+			out.setLength(1L * Integer.BYTES * size);
 		}
 		return tmpFile;
 	}

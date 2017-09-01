@@ -61,6 +61,8 @@ package blasd.apex.core.jvm;
  * 
  * -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps
  * 
+ * For -Xloggc, %p.%t are very important else gc logs will be overriden on each restart
+ *
  * -Xloggc:../log/jvm_gc.%p.%t.log -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
  * -XX:+PrintClassHistogramBeforeFullGC -XX:+PrintClassHistogramAfterFullGC -XX:+PrintGCApplicationStoppedTime
  * -XX:+PrintSafepointStatistics –XX:PrintSafepointStatisticsCount=1
