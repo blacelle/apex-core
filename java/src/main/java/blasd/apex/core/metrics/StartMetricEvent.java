@@ -72,6 +72,7 @@ public class StartMetricEvent extends AMetricEvent {
 	// Remember the stack could be much helpful
 	public final Optional<StackTraceElement[]> stack;
 
+	protected final String startThread = Thread.currentThread().getName();
 	public final long startTime = System.currentTimeMillis();
 
 	protected final Map<String, ?> startDetails;
@@ -163,8 +164,7 @@ public class StartMetricEvent extends AMetricEvent {
 	}
 
 	public String toStringNoStack() {
-		long currentProgress = progress.getAsLong();
-		String suffix = "";
+		String suffix = "Started in '" + startThread + "'";
 
 		if (!startDetails.isEmpty()) {
 			suffix += " startDetails=" + startDetails;
@@ -173,6 +173,7 @@ public class StartMetricEvent extends AMetricEvent {
 			suffix += " endDetails=" + endDetails;
 		}
 
+		long currentProgress = progress.getAsLong();
 		if (currentProgress < 0L) {
 			return super.toString() + suffix;
 		} else {
