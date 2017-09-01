@@ -75,8 +75,12 @@ import org.eclipse.mat.util.IProgressListener;
 import org.eclipse.mat.util.IProgressListener.OperationCanceledException;
 import org.eclipse.mat.util.MessageUtil;
 import org.eclipse.mat.util.VoidProgressListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class SnapshotImpl implements ISnapshot {
+
+	protected static final Logger LOGGER = LoggerFactory.getLogger(SnapshotImpl.class);
 
 	// //////////////////////////////////////////////////////////////
 	// factory methods
@@ -292,9 +296,9 @@ public final class SnapshotImpl implements ISnapshot {
 
 		this.heapObjectReader.open(this);
 
-		//        Object unreach = snapshotInfo.getProperty(UnreachableObjectsHistogram.class.getName());
-		//        if (unreach instanceof UnreachableObjectsHistogram)
-		//            ((UnreachableObjectsHistogram)unreach).setSnapshot(this);
+		// Object unreach = snapshotInfo.getProperty(UnreachableObjectsHistogram.class.getName());
+		// if (unreach instanceof UnreachableObjectsHistogram)
+		// ((UnreachableObjectsHistogram)unreach).setSnapshot(this);
 	}
 
 	private void calculateLoaderLabels() throws SnapshotException {
@@ -420,58 +424,58 @@ public final class SnapshotImpl implements ISnapshot {
 		return result;
 	}
 
-	//    public Histogram getHistogram(IProgressListener listener) throws SnapshotException
-	//    {
-	//        if (listener == null)
-	//            listener = new VoidProgressListener();
+	// public Histogram getHistogram(IProgressListener listener) throws SnapshotException
+	// {
+	// if (listener == null)
+	// listener = new VoidProgressListener();
 	//
-	//        HistogramBuilder histogramBuilder = new HistogramBuilder(Messages.SnapshotImpl_Histogram);
+	// HistogramBuilder histogramBuilder = new HistogramBuilder(Messages.SnapshotImpl_Histogram);
 	//
-	//        Object[] classes = classCache.getAllValues();
-	//        for (int i = 0; i < classes.length; i++)
-	//        {
-	//            histogramBuilder.put(new XClassHistogramRecord((ClassImpl) classes[i]));
-	//        }
+	// Object[] classes = classCache.getAllValues();
+	// for (int i = 0; i < classes.length; i++)
+	// {
+	// histogramBuilder.put(new XClassHistogramRecord((ClassImpl) classes[i]));
+	// }
 	//
-	//        if (listener.isCanceled())
-	//            throw new IProgressListener.OperationCanceledException();
+	// if (listener.isCanceled())
+	// throw new IProgressListener.OperationCanceledException();
 	//
-	//        return histogramBuilder.toHistogram(this, true);
-	//    }
+	// return histogramBuilder.toHistogram(this, true);
+	// }
 
-	//    public Histogram getHistogram(int[] objectIds, IProgressListener progressMonitor) throws SnapshotException
-	//    {
-	//        if (progressMonitor == null)
-	//            progressMonitor = new VoidProgressListener();
+	// public Histogram getHistogram(int[] objectIds, IProgressListener progressMonitor) throws SnapshotException
+	// {
+	// if (progressMonitor == null)
+	// progressMonitor = new VoidProgressListener();
 	//
-	//        HistogramBuilder histogramBuilder = new HistogramBuilder(Messages.SnapshotImpl_Histogram);
+	// HistogramBuilder histogramBuilder = new HistogramBuilder(Messages.SnapshotImpl_Histogram);
 	//
-	//        progressMonitor.beginTask(Messages.SnapshotImpl_BuildingHistogram, objectIds.length >>> 8);
+	// progressMonitor.beginTask(Messages.SnapshotImpl_BuildingHistogram, objectIds.length >>> 8);
 	//
-	//        // Arrays.sort(objectIds);
-	//        // int[] classIds = indexManager.o2class().getAll(objectIds);
+	// // Arrays.sort(objectIds);
+	// // int[] classIds = indexManager.o2class().getAll(objectIds);
 	//
-	//        IOne2OneIndex o2class = indexManager.o2class();
+	// IOne2OneIndex o2class = indexManager.o2class();
 	//
-	//        int classId;
+	// int classId;
 	//
-	//        for (int ii = 0; ii < objectIds.length; ii++)
-	//        {
-	//            classId = o2class.get(objectIds[ii]);
+	// for (int ii = 0; ii < objectIds.length; ii++)
+	// {
+	// classId = o2class.get(objectIds[ii]);
 	//
-	//            histogramBuilder.add(classId, objectIds[ii], getHeapSize(objectIds[ii]));
+	// histogramBuilder.add(classId, objectIds[ii], getHeapSize(objectIds[ii]));
 	//
-	//            if ((ii & 0xff) == 0)
-	//            {
-	//                if (progressMonitor.isCanceled())
-	//                    return null;
-	//                progressMonitor.worked(1);
-	//            }
-	//        }
+	// if ((ii & 0xff) == 0)
+	// {
+	// if (progressMonitor.isCanceled())
+	// return null;
+	// progressMonitor.worked(1);
+	// }
+	// }
 	//
-	//        progressMonitor.done();
-	//        return histogramBuilder.toHistogram(this, false);
-	//    }
+	// progressMonitor.done();
+	// return histogramBuilder.toHistogram(this, false);
+	// }
 
 	@Override
 	public int[] getInboundRefererIds(int objectId) throws SnapshotException {
@@ -563,8 +567,7 @@ public final class SnapshotImpl implements ISnapshot {
 		}
 
 		/*
-		 * take the retained set of a single object out of the dominator tree -
-		 * it's faster
+		 * take the retained set of a single object out of the dominator tree - it's faster
 		 */
 		if (objectIds.length == 1) {
 			return getSingleObjectRetainedSet(objectIds[0]);
@@ -579,18 +582,16 @@ public final class SnapshotImpl implements ISnapshot {
 		boolean[] reachable = new boolean[numberOfObjects];
 
 		/*
-		 * Initially mark all the objects whose retained set is to be calculated
-		 * Thus the dfs will not go through this objects, and all objects
-		 * retained from them will stay unmarked (the bits will be clear)
+		 * Initially mark all the objects whose retained set is to be calculated Thus the dfs will not go through this
+		 * objects, and all objects retained from them will stay unmarked (the bits will be clear)
 		 */
 		for (int objId : objectIds) {
 			reachable[objId] = true;
 		}
 
 		/*
-		 * The dfs() will start from the GC roots, follow the outbound
-		 * references, and mark all unmarked objects. The retained set will
-		 * contain the unmarked objects
+		 * The dfs() will start from the GC roots, follow the outbound references, and mark all unmarked objects. The
+		 * retained set will contain the unmarked objects
 		 */
 		ObjectMarker marker = new ObjectMarker(roots.getAllKeys(),
 				reachable,
@@ -609,8 +610,7 @@ public final class SnapshotImpl implements ISnapshot {
 		int[] retained = new int[numberOfObjects - numReached];
 
 		/*
-		 * Unmark also the initial objects, as we want them to be included in
-		 * the retained set
+		 * Unmark also the initial objects, as we want them to be included in the retained set
 		 */
 		for (int objId : objectIds) {
 			reachable[objId] = false;
@@ -636,8 +636,7 @@ public final class SnapshotImpl implements ISnapshot {
 		}
 
 		/*
-		 * take the retained set of a single object out of the dominator tree -
-		 * it's faster
+		 * take the retained set of a single object out of the dominator tree - it's faster
 		 */
 		if (objectIds.length == 1) {
 			return getSingleObjectRetainedSet(objectIds[0]);
@@ -652,18 +651,16 @@ public final class SnapshotImpl implements ISnapshot {
 		boolean[] reachable = new boolean[numberOfObjects];
 
 		/*
-		 * Initially mark all the objects whose retained set is to be calculated
-		 * Thus the dfs will not go through this objects, and all objects
-		 * retained from them will stay unmarked (the bits will be clear)
+		 * Initially mark all the objects whose retained set is to be calculated Thus the dfs will not go through this
+		 * objects, and all objects retained from them will stay unmarked (the bits will be clear)
 		 */
 		for (int objId : objectIds) {
 			reachable[objId] = true;
 		}
 
 		/*
-		 * Mark all the GC roots, and keep them in a stack. The worker threads
-		 * are going to pop() one by one the gc roots and do the marking from
-		 * them
+		 * Mark all the GC roots, and keep them in a stack. The worker threads are going to pop() one by one the gc
+		 * roots and do the marking from them
 		 */
 		int[] gcRoots = roots.getAllKeys();
 		ObjectMarker marker = new ObjectMarker(gcRoots,
@@ -678,16 +675,14 @@ public final class SnapshotImpl implements ISnapshot {
 		}
 
 		/*
-		 * Unmark also the initial objects, as we want them to be included in
-		 * the retained set
+		 * Unmark also the initial objects, as we want them to be included in the retained set
 		 */
 		for (int objId : objectIds) {
 			reachable[objId] = false;
 		}
 
 		/*
-		 * build the result in an IntArray - the exact number of marked is not
-		 * known
+		 * build the result in an IntArray - the exact number of marked is not known
 		 */
 		ArrayIntBig retained = new ArrayIntBig();
 
@@ -750,9 +745,8 @@ public final class SnapshotImpl implements ISnapshot {
 			ExcludedReferencesDescriptor[] excludedReferences,
 			IProgressListener progressMonitor) throws SnapshotException {
 		/*
-		 * first pass - mark starting from the GC roots, avoiding
-		 * excludedReferences, until initial are reached. The non-marked objects
-		 * will be a common retained set from the excluded and initial objects
+		 * first pass - mark starting from the GC roots, avoiding excludedReferences, until initial are reached. The
+		 * non-marked objects will be a common retained set from the excluded and initial objects
 		 */
 		boolean[] firstPass = new boolean[getSnapshotInfo().getNumberOfObjects()];
 		// mark all initial
@@ -772,8 +766,7 @@ public final class SnapshotImpl implements ISnapshot {
 		}
 
 		/*
-		 * Second pass - from the non-marked objects mark the ones starting from
-		 * the initial set (objectIds)
+		 * Second pass - from the non-marked objects mark the ones starting from the initial set (objectIds)
 		 */
 		boolean[] secondPass = new boolean[firstPass.length];
 		System.arraycopy(firstPass, 0, secondPass, 0, firstPass.length);
@@ -830,8 +823,8 @@ public final class SnapshotImpl implements ISnapshot {
 		}
 
 		/*
-		 * objects on the path from a top-ancestor to the <root> will be saved
-		 * here to avoid walking the same path many times
+		 * objects on the path from a top-ancestor to the <root> will be saved here to avoid walking the same path many
+		 * times
 		 */
 		SetInt negativeCache = new SetInt(2 * objectIds.length);
 
@@ -864,9 +857,8 @@ public final class SnapshotImpl implements ISnapshot {
 			boolean save = true;
 
 			/*
-			 * For each object walk up the dominator tree until either the
-			 * <root> is reached or an object which is already in the retained
-			 * set
+			 * For each object walk up the dominator tree until either the <root> is reached or an object which is
+			 * already in the retained set
 			 */
 			while (dominatorId > -1) {
 				// temp.push(dominatorId); // save all objects on the path
@@ -905,9 +897,8 @@ public final class SnapshotImpl implements ISnapshot {
 				}
 
 				/*
-				 * Add the the objects retained by objectId to the whole
-				 * retained set. Always use one and the same stack, it is empty
-				 * at the end of this block
+				 * Add the the objects retained by objectId to the whole retained set. Always use one and the same
+				 * stack, it is empty at the end of this block
 				 */
 
 				stack[size++] = objectId; // push
@@ -952,23 +943,20 @@ public final class SnapshotImpl implements ISnapshot {
 			listener = new VoidProgressListener();
 
 		/*
-		 * For big objects sets use a boolean[] instead of SetInt to mark
-		 * processed objects SetInt is too memory expensive and on huge sets may
-		 * lead to an OOMError Using the boolean[] is also faster on bigger
-		 * sets.
+		 * For big objects sets use a boolean[] instead of SetInt to mark processed objects SetInt is too memory
+		 * expensive and on huge sets may lead to an OOMError Using the boolean[] is also faster on bigger sets.
 		 */
 		if (objectIds.length > 1000000)
 			return getTopAncestorsWithBooleanCache(objectIds, listener);
 
 		/*
-		 * objects on the path from a top-ancestor to the <root> will be saved
-		 * here to avoid walking the same path many times
+		 * objects on the path from a top-ancestor to the <root> will be saved here to avoid walking the same path many
+		 * times
 		 */
 		SetInt negativeCache = new SetInt(objectIds.length);
 
 		/*
-		 * objects on the path to a top-ancestor will be cached here, to avoid
-		 * walking the same path multiple times.
+		 * objects on the path to a top-ancestor will be cached here, to avoid walking the same path multiple times.
 		 */
 		SetInt positiveCache = new SetInt(2 * objectIds.length);
 		for (int i : objectIds) {
@@ -1003,9 +991,8 @@ public final class SnapshotImpl implements ISnapshot {
 			boolean save = true;
 
 			/*
-			 * For each object walk up the dominator tree until either the
-			 * <root> is reached or an object which is already in the retained
-			 * set
+			 * For each object walk up the dominator tree until either the <root> is reached or an object which is
+			 * already in the retained set
 			 */
 			while (dominatorId > -1) {
 				// temp.push(dominatorId); // save all objects on the path
@@ -1054,14 +1041,13 @@ public final class SnapshotImpl implements ISnapshot {
 
 	private int[] getTopAncestorsWithBooleanCache(int[] objectIds, IProgressListener listener) {
 		/*
-		 * objects on the path from a top-ancestor to the <root> will be saved
-		 * here to avoid walking the same path many times
+		 * objects on the path from a top-ancestor to the <root> will be saved here to avoid walking the same path many
+		 * times
 		 */
 		boolean[] negativeCache = new boolean[snapshotInfo.getNumberOfObjects()];
 
 		/*
-		 * objects on the path to a top-ancestor will be cached here, to avoid
-		 * walking the same path multiple times.
+		 * objects on the path to a top-ancestor will be cached here, to avoid walking the same path multiple times.
 		 */
 		boolean[] positiveCache = new boolean[snapshotInfo.getNumberOfObjects()];
 		for (int i : objectIds) {
@@ -1096,9 +1082,8 @@ public final class SnapshotImpl implements ISnapshot {
 			boolean save = true;
 
 			/*
-			 * For each object walk up the dominator tree until either the
-			 * <root> is reached or an object which is already in the retained
-			 * set
+			 * For each object walk up the dominator tree until either the <root> is reached or an object which is
+			 * already in the retained set
 			 */
 			while (dominatorId > -1) {
 				// temp.push(dominatorId); // save all objects on the path
@@ -1386,9 +1371,12 @@ public final class SnapshotImpl implements ISnapshot {
 	@Override
 	public int mapAddressToId(long objectAddress) throws SnapshotException {
 		int objectId = indexManager.o2address().reverse(objectAddress);
-		if (objectId < 0)
+		if (objectId < 0) {
+			LOGGER.error("All ids: {}",
+					Arrays.toString(indexManager.o2address().getNext(0, indexManager.o2address().size())));
 			throw new SnapshotException(MessageUtil.format(Messages.SnapshotImpl_Error_ObjectNotFound,
 					new Object[] { "0x" + Long.toHexString(objectAddress) }));
+		}
 		return objectId;
 	}
 
@@ -1567,8 +1555,7 @@ public final class SnapshotImpl implements ISnapshot {
 
 	private class PathsFromGCRootsComputerImpl implements IPathsFromGCRootsComputer {
 		/*
-		 * special state of the path computer 0 initial; 1 final; 2 processing a
-		 * GC root; 3 normal processing
+		 * special state of the path computer 0 initial; 1 final; 2 processing a GC root; 3 normal processing
 		 */
 		private int state;
 
@@ -1647,8 +1634,8 @@ public final class SnapshotImpl implements ISnapshot {
 			case 0: // INITIAL
 			{
 				/*
-				 * some special check if the initial object itself is a GC
-				 * root usually the GC roots are found among the referrers
+				 * some special check if the initial object itself is a GC root usually the GC roots are found among the
+				 * referrers
 				 */
 				if (roots.containsKey(currentId)) {
 					referringThreads = null;
@@ -1741,8 +1728,7 @@ public final class SnapshotImpl implements ISnapshot {
 				PathsFromGCRootsTreeBuilder current = rootBuilder;
 
 				/*
-				 * now add the path as a branch start from 1, as path[0] is the
-				 * starting object
+				 * now add the path as a branch start from 1, as path[0] is the starting object
 				 */
 				for (int k = 1; k < path.length; k++) {
 					int childId = path[k];
@@ -1836,22 +1822,24 @@ public final class SnapshotImpl implements ISnapshot {
 	/**
 	 * Get additional JVM information, if available.
 	 * <p>
-	 * A known type is {@link UnreachableObjectsHistogram}. 
-	 * Extra information can be obtained from an implementation of {@link IObjectReader#getAddon(Class)}.
-	 * @param addon the type of the data. For example, {@link UnreachableObjectsHistogram}.class
+	 * A known type is {@link UnreachableObjectsHistogram}. Extra information can be obtained from an implementation of
+	 * {@link IObjectReader#getAddon(Class)}.
+	 * 
+	 * @param addon
+	 *            the type of the data. For example, {@link UnreachableObjectsHistogram}.class
 	 * @return the extra data
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public <A> A getSnapshotAddons(Class<A> addon) throws SnapshotException {
-		//        if (addon == UnreachableObjectsHistogram.class)
-		//        {
-		//            return (A) this.getSnapshotInfo().getProperty(UnreachableObjectsHistogram.class.getName());
-		//        }
-		//        else
-		//        {
+		// if (addon == UnreachableObjectsHistogram.class)
+		// {
+		// return (A) this.getSnapshotInfo().getProperty(UnreachableObjectsHistogram.class.getName());
+		// }
+		// else
+		// {
 		return heapObjectReader.getAddon(addon);
-		//        }
+		// }
 	}
 
 	@Override
