@@ -1372,7 +1372,8 @@ public final class SnapshotImpl implements ISnapshot {
 	public int mapAddressToId(long objectAddress) throws SnapshotException {
 		int objectId = indexManager.o2address().reverse(objectAddress);
 		if (objectId < 0) {
-			LOGGER.error("All ids: {}",
+			LOGGER.error("Missing {} amnogst all ids: {}",
+					objectAddress,
 					Arrays.toString(indexManager.o2address().getNext(0, indexManager.o2address().size())));
 			throw new SnapshotException(MessageUtil.format(Messages.SnapshotImpl_Error_ObjectNotFound,
 					new Object[] { "0x" + Long.toHexString(objectAddress) }));
