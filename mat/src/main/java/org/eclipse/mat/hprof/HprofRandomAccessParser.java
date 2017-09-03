@@ -56,18 +56,23 @@ public class HprofRandomAccessParser extends AbstractParser {
 			throws IOException, SnapshotException {
 		in.seek(position);
 		int segmentType = in.readUnsignedByte();
-		switch (segmentType) {
-		case Constants.DumpSegment.INSTANCE_DUMP:
-			return readInstanceDump(objectId, dump);
-		case Constants.DumpSegment.OBJECT_ARRAY_DUMP:
-			return readObjectArrayDump(objectId, dump);
-		case Constants.DumpSegment.PRIMITIVE_ARRAY_DUMP:
-			return readPrimitiveArrayDump(objectId, dump);
-		default:
-			throw new IOException(
-					MessageUtil.format(Messages.HprofRandomAccessParser_Error_IllegalDumpSegment, segmentType));
+		try {
+			switch (segmentType) {
+			case Constants.DumpSegment.INSTANCE_DUMP:
+				return readInstanceDump(objectId, dump);
+			case Constants.DumpSegment.OBJECT_ARRAY_DUMP:
+				return readObjectArrayDump(objectId, dump);
+			case Constants.DumpSegment.PRIMITIVE_ARRAY_DUMP:
+				return readPrimitiveArrayDump(objectId, dump);
+			default:
+				throw new IOException(
+						MessageUtil.format(Messages.HprofRandomAccessParser_Error_IllegalDumpSegment, segmentType));
+			}
+		} catch (SnapshotException e) {
+			throw new RuntimeException(
+					"Issue on segmentType=" + segmentType + " reqPosition=" + position + " position=" + in.position(),
+					e);
 		}
-
 	}
 
 	public List<IClass> resolveClassHierarchy(ISnapshot snapshot, IClass clazz) throws SnapshotException {
