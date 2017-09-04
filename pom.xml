@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.github.blasd.apex</groupId>
 		<artifactId>apex-core-metadata</artifactId>
-		<version>1.6</version>
+		<version>1.7-SNAPSHOT</version>
 		<relativePath>metadata</relativePath>
 	</parent>
 
@@ -559,6 +559,6 @@
 	<scm>
 		<!-- Only developerConnection was not set in parent po;m as its own parent was not a SNAPSHOT -->
 		<developerConnection>${scm.developerConnection}</developerConnection>
-		<tag>apex-core1.6</tag>
+		<tag>HEAD</tag>
 	</scm>
 </project>
