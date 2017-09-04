@@ -560,7 +560,7 @@ public abstract class IndexReader {
 			this.indexFile = indexFile;
 			this.pageStart = pageStart;
 
-			LOGGER.warn("Openfor size={} file={}", size, indexFile);
+			LOGGER.debug("Open for size={} file={}", size, indexFile);
 
 			open();
 		}

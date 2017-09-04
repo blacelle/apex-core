@@ -6,6 +6,16 @@ import java.io.RandomAccessFile;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 
+import com.google.common.annotations.Beta;
+
+/**
+ * Helpers related to Buffers. TYpically enable quick and easy allocating of a ByteBuffer over a blank memory mapped
+ * file
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+@Beta
 public class ApexBufferHelper {
 
 	public static IntBuffer makeIntBuffer(int size) throws IOException {

@@ -24,10 +24,6 @@
 
 		<!-- MAT needs more memory to handle heapdumps -->
 		<xmx>1024M</xmx>
-
-
-		<!-- MAT does not like multiple parsing of same heapDump at the same time -->
-		<forkCount>1</forkCount>
 	</properties>
 
 	<dependencies>

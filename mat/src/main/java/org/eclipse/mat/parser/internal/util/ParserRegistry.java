@@ -12,10 +12,9 @@ package org.eclipse.mat.parser.internal.util;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.eclipse.mat.hprof.HprofHeapObjectReader;
-import org.eclipse.mat.hprof.HprofIndexBuilder;
 import org.eclipse.mat.parser.IIndexBuilder;
 import org.eclipse.mat.parser.IObjectReader;
 import org.eclipse.mat.snapshot.SnapshotFormat;
@@ -30,20 +29,20 @@ public class ParserRegistry {
 
 	private static final List<Parser> parsers = Arrays.asList(new Parser("hprof",
 			new SnapshotFormat("hprof", new String[] { "hprof", "bin" }),
-			new org.eclipse.mat.hprof.HprofHeapObjectReader(),
-			new org.eclipse.mat.hprof.HprofIndexBuilder()));
+			() -> new org.eclipse.mat.hprof.HprofHeapObjectReader(),
+			() -> new org.eclipse.mat.hprof.HprofIndexBuilder()));
 
 	public static class Parser {
 		private final String id;
 		private final SnapshotFormat snapshotFormat;
 
-		private final IObjectReader objectReader;
-		private final IIndexBuilder indexBuilder;
+		private final Supplier<IObjectReader> objectReader;
+		private final Supplier<IIndexBuilder> indexBuilder;
 
 		public Parser(String id,
 				SnapshotFormat snapshotFormat,
-				HprofHeapObjectReader objectReader,
-				HprofIndexBuilder indexBuilder) {
+				Supplier<IObjectReader> objectReader,
+				Supplier<IIndexBuilder> indexBuilder) {
 			this.id = id;
 			this.snapshotFormat = snapshotFormat;
 
@@ -64,11 +63,11 @@ public class ParserRegistry {
 		}
 
 		public IObjectReader createObjectReader() {
-			return objectReader;
+			return objectReader.get();
 		}
 
 		public IIndexBuilder createIndexBuider() {
-			return indexBuilder;
+			return indexBuilder.get();
 		}
 	}
 
