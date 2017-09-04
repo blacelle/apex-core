@@ -69,7 +69,7 @@ public class HprofRandomAccessParser extends AbstractParser {
 						MessageUtil.format(Messages.HprofRandomAccessParser_Error_IllegalDumpSegment, segmentType));
 			}
 		} catch (SnapshotException e) {
-			throw new RuntimeException(
+			throw new SnapshotException(
 					"Issue on segmentType=" + segmentType + " reqPosition=" + position + " position=" + in.position(),
 					e);
 		}

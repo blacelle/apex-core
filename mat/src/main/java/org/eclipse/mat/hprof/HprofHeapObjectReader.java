@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.mat.SnapshotException;
@@ -177,8 +178,18 @@ public class HprofHeapObjectReader implements IObjectReader {
 
 	@Override
 	public IObject read(int objectId, ISnapshot snapshot) throws SnapshotException, IOException {
-		long filePosition = o2hprof.get(objectId);
-		return hprofDump.read(objectId, filePosition, snapshot);
+		try {
+			long filePosition = o2hprof.get(objectId);
+			return hprofDump.read(objectId, filePosition, snapshot);
+		} catch (SnapshotException e) {
+			throw new SnapshotException(
+					"Issue on objectId=" + objectId
+							+ " snapshot="
+							+ snapshot
+							+ " allIndexes="
+							+ Arrays.toString(o2hprof.getNext(0, o2hprof.size())),
+					e);
+		}
 	}
 
 	/**
