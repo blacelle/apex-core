@@ -38,6 +38,12 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.javolution</groupId>
+			<artifactId>javolution-core-java</artifactId>
+			<version>${javolution.version}</version>
+		</dependency>
+
 		<!-- https://github.com/mkouba/muojo -->
 		<!-- <dependency> -->
 		<!-- <groupId>java-sizeof</groupId> -->
@@ -63,8 +69,7 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
 					<excludes>
-						<!-- LoggingMethodCallAnnotationMBeanExporter is a bunch of exception 
-							catching. Add * to hold anonymous classes -->
+						<!-- LoggingMethodCallAnnotationMBeanExporter is a bunch of exception catching. Add * to hold anonymous classes -->
 						<exclude>blasd/apex/server/monitoring/spring/LoggingMethodCallAnnotationMBeanExporter*</exclude>
 
 						<!-- ApexCSVReader is just an incubator project -->
