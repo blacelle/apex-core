@@ -19,11 +19,6 @@ import com.google.common.annotations.Beta;
 public class ApexBufferHelper {
 
 	public static IntBuffer makeIntBuffer(int size) throws IOException {
-		if (true) {
-			// TODO Check without File IntBuffer
-			return IntBuffer.wrap(new int[size]);
-		}
-
 		File tmpFile = prepareIntArrayInFile(".IntArray1NWriter", size);
 
 		FileChannel fc = new RandomAccessFile(tmpFile, "rw").getChannel();
