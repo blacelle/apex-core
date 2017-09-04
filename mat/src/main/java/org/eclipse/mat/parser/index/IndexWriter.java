@@ -54,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import blasd.apex.core.logging.ApexLogHelper;
+import io.cormoran.buffer.ApexBufferHelper;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 
@@ -391,14 +392,7 @@ public abstract class IndexWriter {
 
 		public IntIndexCollectorUncompressed(int size) {
 			try {
-				File tmpFile = prepareIntArrayInFile(".IntIndexCollectorUncompressed", size);
-
-				// https://stackoverflow.com/questions/27570052/allocate-big-file
-				RandomAccessFile randomAccessFile = new RandomAccessFile(tmpFile, "rw");
-
-				FileChannel fc = randomAccessFile.getChannel();
-
-				dataElements = fc.map(FileChannel.MapMode.READ_WRITE, 0, fc.size()).asIntBuffer();
+				dataElements = ApexBufferHelper.makeIntBuffer(size);
 				// this.dataElements = IntBuffer.allocate(size);
 			} catch (RuntimeException | IOException e) {
 				e.printStackTrace();
@@ -859,18 +853,6 @@ public abstract class IndexWriter {
 
 	}
 
-	private static File prepareIntArrayInFile(String suffix, int size) throws IOException {
-		File tmpFile = File.createTempFile("mat", suffix);
-		// We do not need the file to survive the JVM as the goal is just to spare heap
-		tmpFile.deleteOnExit();
-
-		// https://stackoverflow.com/questions/27570052/allocate-big-file
-		try (RandomAccessFile out = new RandomAccessFile(tmpFile, "rw")) {
-			out.setLength(1L * Integer.BYTES * size);
-		}
-		return tmpFile;
-	}
-
 	public static class IntArray1NWriter {
 		IntBuffer header;
 		// Used to expand the range of values stored in the header up to 2^40
@@ -882,11 +864,7 @@ public abstract class IndexWriter {
 
 		public IntArray1NWriter(int size, File indexFile) throws IOException {
 			try {
-				File tmpFile = prepareIntArrayInFile(".IntArray1NWriter", size);
-
-				FileChannel fc = new RandomAccessFile(tmpFile, "rw").getChannel();
-
-				this.header = fc.map(FileChannel.MapMode.READ_WRITE, 0, fc.size()).asIntBuffer();
+				this.header = ApexBufferHelper.makeIntBuffer(size);
 				// this.header = IntBuffer.allocate(size);
 			} catch (RuntimeException | IOException e) {
 				e.printStackTrace();

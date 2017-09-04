@@ -152,8 +152,6 @@ public class SnapshotFactoryImpl implements SnapshotFactory.Implementation {
 	private final ISnapshot parse(File file, String prefix, Map<String, String> args, IProgressListener listener)
 			throws SnapshotException {
 		List<ParserRegistry.Parser> parsers = ParserRegistry.matchParser(file.getName());
-		//        if (parsers.isEmpty())
-		//            parsers.addAll(registry.delegates()); // try all...
 
 		List<IOException> errors = new ArrayList<IOException>();
 
@@ -183,7 +181,7 @@ public class SnapshotFactoryImpl implements SnapshotFactory.Implementation {
 
 				indexBuilder.fill(idx, listener);
 
-				//                if (ParserPlugin.getDefault().isDebugging())
+				// if (ParserPlugin.getDefault().isDebugging())
 				if (false) {
 					validateIndices(idx, listener);
 				}
@@ -210,16 +208,17 @@ public class SnapshotFactoryImpl implements SnapshotFactory.Implementation {
 		}
 
 		if (errors.size() > 1) {
-			//            MultiStatus status = new MultiStatus(ParserPlugin.PLUGIN_ID, 0,
-			//                            MessageUtil.format(Messages.SnapshotFactoryImpl_ErrorOpeningHeapDump, file.getName()), null);
-			//            for (IOException error : errors)
-			//                status.add(new Status(IStatus.ERROR, ParserPlugin.PLUGIN_ID, 0, error.getLocalizedMessage(), error));
-			//            // Create a CoreException so that all the errors will be logged
-			//            CoreException ce = new CoreException(status);
+			// MultiStatus status = new MultiStatus(ParserPlugin.PLUGIN_ID, 0,
+			// MessageUtil.format(Messages.SnapshotFactoryImpl_ErrorOpeningHeapDump, file.getName()), null);
+			// for (IOException error : errors)
+			// status.add(new Status(IStatus.ERROR, ParserPlugin.PLUGIN_ID, 0, error.getLocalizedMessage(), error));
+			// // Create a CoreException so that all the errors will be logged
+			// CoreException ce = new CoreException(status);
 			RuntimeException ce = new RuntimeException("Nb errors: " + errors.size(), errors.get(0));
 
 			throw new SnapshotException(
-					MessageUtil.format(Messages.SnapshotFactoryImpl_Error_OpeningHeapDump, file.getName()), ce);
+					MessageUtil.format(Messages.SnapshotFactoryImpl_Error_OpeningHeapDump, file.getName()),
+					ce);
 		} else if (errors.size() == 1) {
 			throw new SnapshotException(
 					MessageUtil.format(Messages.SnapshotFactoryImpl_Error_OpeningHeapDump, file.getName()),

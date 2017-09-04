@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.lang.ref.SoftReference;
+import java.util.Arrays;
 
 import org.eclipse.mat.SnapshotException;
 import org.eclipse.mat.collect.ArrayIntCompressed;
@@ -24,17 +25,22 @@ import org.eclipse.mat.collect.HashMapIntObject;
 import org.eclipse.mat.parser.index.IndexWriter.ArrayIntLongCompressed;
 import org.eclipse.mat.parser.internal.Messages;
 import org.eclipse.mat.parser.io.SimpleBufferedRandomAccessInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementations to read index files.
  */
 public abstract class IndexReader {
+	protected static final Logger LOGGER = LoggerFactory.getLogger(IndexReader.class);
+
 	public static final boolean DEBUG = false;
 
 	/**
 	 * An int to int index reader.
 	 * 
 	 * Disk file structure:
+	 * 
 	 * <pre>
 	 * Page 0: ArrayIntCompressed
 	 * Page 1: ArrayIntCompressed
@@ -49,15 +55,11 @@ public abstract class IndexReader {
 	 * total size (4)
 	 * </pre>
 	 * 
-	 * Experimental for version 1.2: 
-	 * The disk format has been enhanced to allow more than
-	 * 2^31 entries by using the page n+1 start pointer to find the start
-	 * of the page offsets, and so the number of pages, and the size field
-	 * is then negative and used to measure the number of entries on the
-	 * last page (from 1 to page size).
-	 * This is experimental and index files with 2^31 entries or more
-	 * are not compatible with 1.1 or earlier and might not be compatible
-	 * with 1.3 or later.
+	 * Experimental for version 1.2: The disk format has been enhanced to allow more than 2^31 entries by using the page
+	 * n+1 start pointer to find the start of the page offsets, and so the number of pages, and the size field is then
+	 * negative and used to measure the number of entries on the last page (from 1 to page size). This is experimental
+	 * and index files with 2^31 entries or more are not compatible with 1.1 or earlier and might not be compatible with
+	 * 1.3 or later.
 	 */
 	public static class IntIndexReader extends IndexWriter.IntIndex<SoftReference<ArrayIntCompressed>>
 			implements IIndexReader.IOne2OneIndex {
@@ -198,10 +200,8 @@ public abstract class IndexReader {
 	}
 
 	/**
-	 * Internal class used to index using large offsets
-	 * into the body of stream of entries of a 1 to N index.
-	 * This looks like an IntIndexReader but the pages can hold
-	 * long values.
+	 * Internal class used to index using large offsets into the body of stream of entries of a 1 to N index. This looks
+	 * like an IntIndexReader but the pages can hold long values.
 	 */
 	static class PositionIndexReader extends IntIndexReader {
 		public PositionIndexReader(File indexFile) throws IOException {
@@ -250,8 +250,9 @@ public abstract class IndexReader {
 	}
 
 	/**
-	 * Creates a index reader for array sizes, presuming the sizes are stored as ints
-	 * and get expanded in the reverse of the compression.
+	 * Creates a index reader for array sizes, presuming the sizes are stored as ints and get expanded in the reverse of
+	 * the compression.
+	 * 
 	 * @since 1.0
 	 */
 	public static class SizeIndexReader implements IIndexReader.IOne2SizeIndex {
@@ -259,6 +260,7 @@ public abstract class IndexReader {
 
 		/**
 		 * Constructor used when reopening a dump
+		 * 
 		 * @param indexFile
 		 * @throws IOException
 		 */
@@ -268,6 +270,7 @@ public abstract class IndexReader {
 
 		/**
 		 * Construct a size index reader based on a int index holding the compressed data
+		 * 
 		 * @param idx
 		 */
 		public SizeIndexReader(IIndexReader.IOne2OneIndex idx) {
@@ -283,8 +286,7 @@ public abstract class IndexReader {
 		}
 
 		/**
-		 * Get the (compressed) size.
-		 * Delegate to the int index.
+		 * Get the (compressed) size. Delegate to the int index.
 		 */
 		@Override
 		public int get(int index) {
@@ -456,16 +458,9 @@ public abstract class IndexReader {
 		}
 
 		/**
-		 * The header holds positions encoded as p+1 into the body
-		 * There is no length field - the length is up to the next one,
-		 * which is greater than the first.
-		 * 0 means no data
-		 * E.g.
-		 * 10 6 1 0 14
-		 * Reading item 0 gets from [10,14)
-		 * Reading item 1 gets from [6,14)
-		 * Reading item 2 gets from [1,14)
-		 * Reading item 3 gets an empty array
+		 * The header holds positions encoded as p+1 into the body There is no length field - the length is up to the
+		 * next one, which is greater than the first. 0 means no data E.g. 10 6 1 0 14 Reading item 0 gets from [10,14)
+		 * Reading item 1 gets from [6,14) Reading item 2 gets from [1,14) Reading item 3 gets an empty array
 		 */
 		@Override
 		public int[] get(int index) {
@@ -534,6 +529,7 @@ public abstract class IndexReader {
 	 * Creates a int to long index reader
 	 * 
 	 * Disk file structure:
+	 * 
 	 * <pre>
 	 * Page 0: ArrayLongCompressed
 	 * Page 1: ArrayLongCompressed
@@ -564,7 +560,19 @@ public abstract class IndexReader {
 			this.indexFile = indexFile;
 			this.pageStart = pageStart;
 
+			LOGGER.debug("Open for size={} file={}", size, indexFile);
+
 			open();
+		}
+
+		@Override
+		public String toString() {
+			return "LongIndexReader [indexFile=" + indexFile
+					+ ", size="
+					+ size
+					+ ", pageStart="
+					+ Arrays.toString(pageStart)
+					+ "]";
 		}
 
 		public LongIndexReader(File indexFile) throws IOException {
