@@ -12,7 +12,7 @@
 
 	<groupId>com.github.blasd.apex</groupId>
 	<artifactId>apex-core-metadata</artifactId>
-	<version>1.6-SNAPSHOT</version>
+	<version>1.6</version>
 
 	<packaging>pom</packaging>
 
@@ -256,7 +256,7 @@
 		<!-- Do not add developperConnection as parent is not a SNAPSHOT -->
 		<connection>${scm.connection}</connection>
 		<url>${scm.url}</url>
-		<tag>HEAD</tag>
+		<tag>apex-core1.6</tag>
 	</scm>
 
 	<!-- <pluginRepositories> -->
