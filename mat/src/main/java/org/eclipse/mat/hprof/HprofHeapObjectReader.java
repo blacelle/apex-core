@@ -182,17 +182,15 @@ public class HprofHeapObjectReader implements IObjectReader {
 			long filePosition = o2hprof.get(objectId);
 			return hprofDump.read(objectId, filePosition, snapshot);
 		} catch (SnapshotException e) {
-			throw new SnapshotException(
-					"Issue on objectId=" + objectId
-							+ " snapshot="
-							+ snapshot.getSnapshotInfo().getPath()
-							+ " o2hprof="
-							+ o2hprof
-							+ " o2hprof.size()="
-							+ o2hprof.size()
-							+ " allIndexes="
-							+ Arrays.toString(o2hprof.getNext(0, o2hprof.size())),
-					e);
+			throw new SnapshotException("Issue on objectId=" + objectId
+					+ " snapshot="
+					+ snapshot.getSnapshotInfo().getPath()
+					+ " o2hprof="
+					+ o2hprof
+					+ " o2hprof.size()="
+					+ o2hprof.size()
+					+ " allIndexes="
+					+ Arrays.toString(o2hprof.getNext(0, o2hprof.size())), e);
 		}
 	}
 

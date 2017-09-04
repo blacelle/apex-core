@@ -217,8 +217,7 @@ public class SnapshotFactoryImpl implements SnapshotFactory.Implementation {
 			RuntimeException ce = new RuntimeException("Nb errors: " + errors.size(), errors.get(0));
 
 			throw new SnapshotException(
-					MessageUtil.format(Messages.SnapshotFactoryImpl_Error_OpeningHeapDump, file.getName()),
-					ce);
+					MessageUtil.format(Messages.SnapshotFactoryImpl_Error_OpeningHeapDump, file.getName()), ce);
 		} else if (errors.size() == 1) {
 			throw new SnapshotException(
 					MessageUtil.format(Messages.SnapshotFactoryImpl_Error_OpeningHeapDump, file.getName()),

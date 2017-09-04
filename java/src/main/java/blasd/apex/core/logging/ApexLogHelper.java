@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import com.google.common.annotations.Beta;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
+import com.google.common.math.LongMath;
 
 import blasd.apex.core.memory.IApexMemoryConstants;
 
@@ -186,6 +187,7 @@ public class ApexLogHelper {
 	private static final String MINUTES_PREFIX = "min";
 	private static final String SECONDS_PREFIX = "sec";
 	private static final String MILLIS_PREFIX = "ms";
+	private static final String NANOS_PREFIX = "ns";
 
 	public static Object getNiceTime(long time, TimeUnit timeUnit) {
 		return ApexLogHelper.lazyToString(() -> {
@@ -240,58 +242,66 @@ public class ApexLogHelper {
 
 	public static Object getNiceRate(long nbEntries, long time, TimeUnit timeUnit) {
 		return lazyToString(() -> {
-			if (time <= 0) {
-				// Edge case
-				return nbEntries + "#/0" + timeUnit;
-			}
-
-			// We prefer rate per second, without any /
-			long entryPerSecond = TimeUnit.SECONDS.convert(nbEntries / time, timeUnit);
-
-			if (entryPerSecond > LIMIT_ENTRY_PER_XXX) {
-				// if rate is too high, we switch to rate per minute
-				long entryPerMinute = TimeUnit.MINUTES.convert(nbEntries / time, timeUnit);
-
-				if (entryPerMinute > LIMIT_ENTRY_PER_XXX) {
-					// Rate per minute is high enough: stick to it
-					return entryPerMinute + "#/" + MINUTES_PREFIX;
-				} else {
-					// Rate per second is nice
-					return entryPerSecond + "#/" + SECONDS_PREFIX;
-				}
-			} else {
-				long nbSeconds = TimeUnit.SECONDS.convert(time, timeUnit);
-
-				if (nbSeconds > 0) {
-					// The window is 1 second wide
-					long entryPerSecond2 = nbEntries / nbSeconds;
-
-					return entryPerSecond2 + "#/" + SECONDS_PREFIX;
-				} else {
-					// The window is not 1 second wide: it can safely be turned to nanos
-					long entryPerNano = TimeUnit.NANOSECONDS.convert(nbEntries, timeUnit) / time;
-
-					long entryPerSecond2 = TimeUnit.SECONDS.convert(entryPerNano, TimeUnit.NANOSECONDS);
-
-					if (entryPerSecond2 > 0) {
-						// Rate per second is nice
-						return entryPerSecond2 + "#/" + SECONDS_PREFIX;
-					} else {
-						long entryPerMillis = TimeUnit.MILLISECONDS.convert(entryPerNano, TimeUnit.NANOSECONDS);
-						return entryPerMillis + "#/" + MILLIS_PREFIX;
-					}
-				}
-				//
-				// // Rate per second is too low: switch to rate per millis
-				// long entryPerMillis = nbEntries / TimeUnit.MILLISECONDS.convert(time, timeUnit);
-				//
-				// if (entryPerMillis >= 0) {
-				// return entryPerMillis + "#/ms";
-				// } else {
-				//
-				// }
-			}
+			return arg(nbEntries, time, timeUnit);
 		});
+	}
+
+	private static String arg(long nbEntries, long time, TimeUnit timeUnit) {
+		if (time <= 0) {
+			// Edge case
+			return nbEntries + "#/0" + timeUnit;
+		} else if (nbEntries == 0) {
+			// Edge case
+			return "0#/" + MILLIS_PREFIX;
+		}
+
+		long nbPerNano = nbEntries * timeUnit.convert(1, TimeUnit.NANOSECONDS) / time;
+		if (nbPerNano > 0) {
+			return nbPerNano + "#/" + NANOS_PREFIX;
+		} else if (timeUnit.toNanos(time) >= 0) {
+			long nbPerNano2 = nbEntries / timeUnit.toNanos(time);
+			if (nbPerNano2 > 0) {
+				return nbPerNano2 + "#/" + NANOS_PREFIX;
+			}
+		}
+
+		long nbPerMilli = nbEntries * timeUnit.convert(1, TimeUnit.MILLISECONDS) / time;
+		if (nbPerMilli > 0) {
+			return nbPerMilli + "#/" + MILLIS_PREFIX;
+		} else if (timeUnit.toMillis(time) >= 0) {
+			long nbPerMilli2 = nbEntries / timeUnit.toMillis(time);
+			if (nbPerMilli2 > 0) {
+				return nbPerMilli2 + "#/" + MILLIS_PREFIX;
+			}
+		}
+
+		long nbPerSecond = nbEntries * timeUnit.convert(1, TimeUnit.SECONDS) / time;
+		if (nbPerSecond > 0) {
+			return nbPerSecond + "#/" + SECONDS_PREFIX;
+		} else if (timeUnit.toMillis(time) >= 0) {
+			long nbPerSecond2 = nbEntries / timeUnit.toSeconds(time);
+			if (nbPerSecond2 > 0) {
+				return nbPerSecond2 + "#/" + SECONDS_PREFIX;
+			}
+		}
+
+		long nbPerMinute = nbEntries * timeUnit.convert(1, TimeUnit.MINUTES) / time;
+		if (nbPerMinute > 0) {
+			return nbPerMinute + "#/" + MINUTES_PREFIX;
+		} else if (timeUnit.toMinutes(time) >= 0) {
+			long nbPerMinute2 = nbEntries / timeUnit.toMinutes(time);
+			if (nbPerMinute2 > 0) {
+				return nbPerMinute2 + "#/" + MINUTES_PREFIX;
+			}
+		}
+
+		long nbPerHour = nbEntries * timeUnit.convert(1, TimeUnit.HOURS) / time;
+		if (nbPerHour > 0) {
+			return nbPerHour + "#/" + HOURS_PREFIX;
+		}
+
+		long nbPerDay = nbEntries / timeUnit.toDays(time);
+		return nbPerDay + "#/" + DAYS_PREFIX;
 	}
 
 	public static Object getFirstChars(Object toString, int limitChars) {

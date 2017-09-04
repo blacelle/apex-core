@@ -79,13 +79,22 @@ public class TestApexLogHelper {
 
 	@Test
 	public void testBigTimeLowRate() {
-		Assert.assertEquals("1440#/min", ApexLogHelper.getNiceRate(10, 10, TimeUnit.DAYS).toString());
+		Assert.assertEquals("1#/days", ApexLogHelper.getNiceRate(10, 10, TimeUnit.DAYS).toString());
+	}
+
+	@Test
+	public void testBigTimeVeryLowRate() {
+		Assert.assertEquals("10#/sec", ApexLogHelper.getNiceRate(1, 100, TimeUnit.MILLISECONDS).toString());
+	}
+
+	@Test
+	public void testBigTimeVeryLowRate1() {
+		Assert.assertEquals("30#/min", ApexLogHelper.getNiceRate(5, 10 * 1000, TimeUnit.MILLISECONDS).toString());
 	}
 
 	@Test
 	public void testBigTimeHIghRate() {
-		Assert.assertEquals("309237644160#/min",
-				ApexLogHelper.getNiceRate(Integer.MAX_VALUE, 10, TimeUnit.DAYS).toString());
+		Assert.assertEquals("2#/ms", ApexLogHelper.getNiceRate(Integer.MAX_VALUE, 10, TimeUnit.DAYS).toString());
 	}
 
 	@Test
@@ -95,7 +104,7 @@ public class TestApexLogHelper {
 
 	@Test
 	public void testLowTimeHighRate() {
-		Assert.assertEquals("3579#/min",
+		Assert.assertEquals("214#/ns",
 				ApexLogHelper.getNiceRate(Integer.MAX_VALUE, 10, TimeUnit.MILLISECONDS).toString());
 	}
 
@@ -164,6 +173,12 @@ public class TestApexLogHelper {
 	@Test
 	public void testGetNiceDaysAndHours() {
 		Assert.assertEquals("4days 4hours", ApexLogHelper.getNiceTime(100, TimeUnit.HOURS).toString());
+	}
+
+	@Test
+	public void testGetNiceTimeFromNanos() {
+		Assert.assertEquals("1sec",
+				ApexLogHelper.getNiceTime(TimeUnit.SECONDS.toNanos(1), TimeUnit.NANOSECONDS).toString());
 	}
 
 	@Test

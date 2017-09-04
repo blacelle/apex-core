@@ -1,6 +1,9 @@
 package blasd.apex.core.primitive;
 
 /**
+ * Enable concatenating 2 CharSequence at the cost of a very small object. It is much more memory-efficient than
+ * concatenating Strings
+ * 
  * @author Benoit Lacelle
  *
  */
