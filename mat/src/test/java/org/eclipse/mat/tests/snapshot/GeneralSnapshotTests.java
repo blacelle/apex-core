@@ -56,25 +56,27 @@ public class GeneralSnapshotTests {
 
 	@Parameters
 	public static Collection<Object[]> data() {
-		return Arrays.asList(new Object[][] { { TestSnapshots.SUN_JDK6_32BIT, Stacks.NONE },
-				{ TestSnapshots.SUN_JDK5_64BIT, Stacks.NONE },
-				{ TestSnapshots.SUN_JDK6_18_32BIT, Stacks.FRAMES_AND_OBJECTS },
-				{ TestSnapshots.SUN_JDK6_18_64BIT, Stacks.FRAMES_AND_OBJECTS },
-				{ TestSnapshots.SUN_JDK5_13_32BIT, Stacks.NONE },
-				{ TestSnapshots.IBM_JDK6_32BIT_HEAP, Stacks.NONE },
-				{ TestSnapshots.IBM_JDK6_32BIT_JAVA, Stacks.FRAMES },
-				{ TestSnapshots.IBM_JDK6_32BIT_HEAP_AND_JAVA, Stacks.FRAMES },
-				{ TestSnapshots.IBM_JDK6_32BIT_SYSTEM, Stacks.FRAMES_AND_OBJECTS },
-				{ "allMethods", Stacks.FRAMES_AND_OBJECTS },
-				{ "runningMethods", Stacks.FRAMES_AND_OBJECTS },
-				{ "framesOnly", Stacks.FRAMES_AND_OBJECTS },
-				{ "noMethods", Stacks.FRAMES_AND_OBJECTS },
-				{ TestSnapshots.IBM_JDK142_32BIT_HEAP, Stacks.NONE },
-				{ TestSnapshots.IBM_JDK142_32BIT_JAVA, Stacks.FRAMES },
-				{ TestSnapshots.IBM_JDK142_32BIT_HEAP_AND_JAVA, DTFJreadJavacore142 ? Stacks.FRAMES : Stacks.NONE },
-				{ TestSnapshots.IBM_JDK142_32BIT_SYSTEM, Stacks.FRAMES },
-				{ TestSnapshots.ORACLE_JDK7_21_64BIT, Stacks.FRAMES_AND_OBJECTS },
-				{ TestSnapshots.ORACLE_JDK8_05_64BIT, Stacks.FRAMES_AND_OBJECTS }, });
+		return Arrays
+				.asList(new Object[][] { { TestSnapshots.SUN_JDK6_32BIT, Stacks.NONE },
+						{ TestSnapshots.SUN_JDK5_64BIT, Stacks.NONE },
+						{ TestSnapshots.SUN_JDK6_18_32BIT, Stacks.FRAMES_AND_OBJECTS },
+						{ TestSnapshots.SUN_JDK6_18_64BIT, Stacks.FRAMES_AND_OBJECTS },
+						{ TestSnapshots.SUN_JDK5_13_32BIT, Stacks.NONE },
+						{ TestSnapshots.IBM_JDK6_32BIT_HEAP, Stacks.NONE },
+						{ TestSnapshots.IBM_JDK6_32BIT_JAVA, Stacks.FRAMES },
+						{ TestSnapshots.IBM_JDK6_32BIT_HEAP_AND_JAVA, Stacks.FRAMES },
+						{ TestSnapshots.IBM_JDK6_32BIT_SYSTEM, Stacks.FRAMES_AND_OBJECTS },
+						{ "allMethods", Stacks.FRAMES_AND_OBJECTS },
+						{ "runningMethods", Stacks.FRAMES_AND_OBJECTS },
+						{ "framesOnly", Stacks.FRAMES_AND_OBJECTS },
+						{ "noMethods", Stacks.FRAMES_AND_OBJECTS },
+						{ TestSnapshots.IBM_JDK142_32BIT_HEAP, Stacks.NONE },
+						{ TestSnapshots.IBM_JDK142_32BIT_JAVA, Stacks.FRAMES },
+						{ TestSnapshots.IBM_JDK142_32BIT_HEAP_AND_JAVA,
+								DTFJreadJavacore142 ? Stacks.FRAMES : Stacks.NONE },
+						{ TestSnapshots.IBM_JDK142_32BIT_SYSTEM, Stacks.FRAMES },
+						{ TestSnapshots.ORACLE_JDK7_21_64BIT, Stacks.FRAMES_AND_OBJECTS },
+						{ TestSnapshots.ORACLE_JDK8_05_64BIT, Stacks.FRAMES_AND_OBJECTS }, });
 	}
 
 	public GeneralSnapshotTests(String snapshotname, Stacks s) {

@@ -186,6 +186,8 @@ public class HprofHeapObjectReader implements IObjectReader {
 					"Issue on objectId=" + objectId
 							+ " snapshot="
 							+ snapshot
+							+ " o2hprof.size()="
+							+ o2hprof.size()
 							+ " allIndexes="
 							+ Arrays.toString(o2hprof.getNext(0, o2hprof.size())),
 					e);
