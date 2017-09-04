@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 import com.google.common.annotations.Beta;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
-import com.google.common.math.LongMath;
 
 import blasd.apex.core.memory.IApexMemoryConstants;
 
@@ -52,8 +51,6 @@ public class ApexLogHelper {
 
 	public static final int THOUSAND = 1000;
 	public static final int TEN_F = 10;
-
-	private static final long LIMIT_ENTRY_PER_XXX = 10;
 
 	protected ApexLogHelper() {
 		// hidden
