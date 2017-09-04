@@ -24,7 +24,7 @@
 
 	<!-- Make a release -->
 	<!-- mvn release:clean release:prepare -Darguments="-DskipTests" -->
-	<!-- mvn release:perform -Darguments="-DskipTests -Dmaven.javadoc.skip=true" -->
+	<!-- mvn release:perform -Darguments="-DskipTests" -->
 	<!-- mvn release:rollback -->
 
 	<!-- Deployement -->
