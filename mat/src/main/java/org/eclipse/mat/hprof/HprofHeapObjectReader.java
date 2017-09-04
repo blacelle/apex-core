@@ -185,7 +185,9 @@ public class HprofHeapObjectReader implements IObjectReader {
 			throw new SnapshotException(
 					"Issue on objectId=" + objectId
 							+ " snapshot="
-							+ snapshot
+							+ snapshot.getSnapshotInfo().getPath()
+							+ " o2hprof="
+							+ o2hprof
 							+ " o2hprof.size()="
 							+ o2hprof.size()
 							+ " allIndexes="

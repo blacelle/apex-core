@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.lang.ref.SoftReference;
+import java.util.Arrays;
 
 import org.eclipse.mat.SnapshotException;
 import org.eclipse.mat.collect.ArrayIntCompressed;
@@ -562,6 +563,16 @@ public abstract class IndexReader {
 			LOGGER.warn("Openfor size={} file={}", size, indexFile);
 
 			open();
+		}
+
+		@Override
+		public String toString() {
+			return "LongIndexReader [indexFile=" + indexFile
+					+ ", size="
+					+ size
+					+ ", pageStart="
+					+ Arrays.toString(pageStart)
+					+ "]";
 		}
 
 		public LongIndexReader(File indexFile) throws IOException {
