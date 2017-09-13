@@ -373,7 +373,7 @@ public abstract class IndexWriter {
 			identifiers.runOptimize();
 			long bytesAfter = identifiers.serializedSizeInBytes();
 
-			LOGGER.info(".runOptimize moved from {} to {}. As long[], it would consume",
+			LOGGER.info(".runOptimize moved from {} to {}. As long[], it would consume {}",
 					ApexLogHelper.getNiceMemory(bytesBefore),
 					ApexLogHelper.getNiceMemory(bytesAfter),
 					ApexLogHelper.getNiceMemory(IApexMemoryConstants.LONG * identifiers.getLongCardinality()));
