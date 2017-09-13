@@ -36,11 +36,10 @@ import org.eclipse.mat.util.ConsoleProgressListener;
  */
 public class MainSnapshotPreparer {
 	public static void main(String[] args) throws SnapshotException {
-		// SnapshotFactory.openSnapshot(
-		// new File("D:\\blacelle112212\\HeapDUmp\\20170811 Grommet Equity\\crosstie.77831.hprof"),
-		// new ConsoleProgressListener(System.out));
+		String path = "D:\\blacelle112212\\HeapDUmp\\20170811 Grommet Equity\\grommet.77831.hprof";
+		// path = "C:\\NB5419\\HeapDumps\\java_pid21052.hprof";
 
-		SnapshotFactory.openSnapshot(new File("C:\\NB5419\\HeapDumps\\java_pid21052.hprof"),
-				new ConsoleProgressListener(System.out));
+		SnapshotFactory.openSnapshot(new File(path), new ConsoleProgressListener(System.out));
+
 	}
 }

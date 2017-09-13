@@ -29,8 +29,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.apache.commons.logging.impl.AvalonLogger;
-import org.mockito.exceptions.misusing.NullInsteadOfMockException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.SnappyOutputStream;

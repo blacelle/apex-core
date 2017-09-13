@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.lang.ref.SoftReference;
 import java.nio.ByteBuffer;
@@ -47,6 +46,7 @@ import org.eclipse.mat.parser.io.BitInputStream;
 import org.eclipse.mat.parser.io.BitOutputStream;
 import org.eclipse.mat.util.IProgressListener;
 import org.eclipse.mat.util.MessageUtil;
+import org.roaringbitmap.FastRankRoaringBitmap;
 import org.roaringbitmap.RoaringBitmapSupplier;
 import org.roaringbitmap.longlong.LongIterator;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
@@ -54,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import blasd.apex.core.logging.ApexLogHelper;
+import blasd.apex.core.memory.IApexMemoryConstants;
 import io.cormoran.buffer.ApexBufferHelper;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
@@ -214,7 +215,7 @@ public abstract class IndexWriter {
 			addedAfterSort = true;
 
 			if (identifiers == null) {
-				identifiers = new Roaring64NavigableMap(true, new RoaringBitmapSupplier());
+				identifiers = new Roaring64NavigableMap(true, () -> new FastRankRoaringBitmap());
 				if (Boolean.getBoolean("mat.assert")) {
 					guarantee = new RawIdentifier();
 				}
@@ -372,9 +373,10 @@ public abstract class IndexWriter {
 			identifiers.runOptimize();
 			long bytesAfter = identifiers.serializedSizeInBytes();
 
-			LOGGER.info(".runOptimize moved from {} to {}",
+			LOGGER.info(".runOptimize moved from {} to {}. As long[], it would consume",
 					ApexLogHelper.getNiceMemory(bytesBefore),
-					ApexLogHelper.getNiceMemory(bytesAfter));
+					ApexLogHelper.getNiceMemory(bytesAfter),
+					ApexLogHelper.getNiceMemory(IApexMemoryConstants.LONG * identifiers.getLongCardinality()));
 
 			addedAfterSort = false;
 

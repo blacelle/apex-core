@@ -19,7 +19,6 @@ import org.eclipse.mat.collect.BitField;
 import org.eclipse.mat.collect.HashMapIntObject;
 import org.eclipse.mat.parser.IObjectReader;
 import org.eclipse.mat.parser.index.IndexManager;
-import org.eclipse.mat.parser.internal.util.ParserRegistry;
 import org.eclipse.mat.parser.internal.util.ParserRegistry.Parser;
 import org.eclipse.mat.parser.model.ClassImpl;
 import org.eclipse.mat.parser.model.XGCRootInfo;
