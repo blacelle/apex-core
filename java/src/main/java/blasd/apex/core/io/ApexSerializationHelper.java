@@ -34,6 +34,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.security.DigestInputStream;
@@ -406,9 +407,8 @@ public class ApexSerializationHelper {
 	}
 
 	public static List<String> parseList(String asString) {
-		return Splitter.on(',')
-				.trimResults()
-				.splitToList(asString.substring(asString.indexOf('[') + 1, asString.lastIndexOf(']')));
+		return Splitter.on(',').trimResults().splitToList(
+				asString.substring(asString.indexOf('[') + 1, asString.lastIndexOf(']')));
 	}
 
 	/**
@@ -423,6 +423,12 @@ public class ApexSerializationHelper {
 
 	public static <T extends Serializable> T fromBytes(byte[] data) throws IOException, ClassNotFoundException {
 		try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
+			return (T) ois.readObject();
+		}
+	}
+
+	public static <T extends Serializable> T fromBytes(ByteBuffer data) throws IOException, ClassNotFoundException {
+		try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data.array()))) {
 			return (T) ois.readObject();
 		}
 	}
