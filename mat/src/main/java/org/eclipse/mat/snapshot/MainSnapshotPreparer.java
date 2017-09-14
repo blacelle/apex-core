@@ -24,8 +24,13 @@ package org.eclipse.mat.snapshot;
 
 import java.io.File;
 
+import javax.management.InstanceNotFoundException;
+import javax.management.MalformedObjectNameException;
+
 import org.eclipse.mat.SnapshotException;
 import org.eclipse.mat.util.ConsoleProgressListener;
+
+import blasd.apex.core.jvm.GCInspector;
 
 /**
  * Typically used to parse a heap-dump. While trying to diminish the heap of mat: -XX:+HeapDumpOnOutOfMemoryError
@@ -35,7 +40,10 @@ import org.eclipse.mat.util.ConsoleProgressListener;
  *
  */
 public class MainSnapshotPreparer {
-	public static void main(String[] args) throws SnapshotException {
+	public static void main(String[] args)
+			throws SnapshotException, MalformedObjectNameException, InstanceNotFoundException {
+		new GCInspector().afterPropertiesSet();
+
 		String path = "D:\\blacelle112212\\HeapDUmp\\20170811 Grommet Equity\\grommet.77831.hprof";
 		// path = "C:\\NB5419\\HeapDumps\\java_pid21052.hprof";
 

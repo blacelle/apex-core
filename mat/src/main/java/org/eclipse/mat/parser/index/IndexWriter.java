@@ -25,6 +25,7 @@ import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.stream.IntStream;
 
 import org.eclipse.mat.collect.ArrayInt;
 import org.eclipse.mat.collect.ArrayIntCompressed;
@@ -47,7 +48,6 @@ import org.eclipse.mat.parser.io.BitOutputStream;
 import org.eclipse.mat.util.IProgressListener;
 import org.eclipse.mat.util.MessageUtil;
 import org.roaringbitmap.FastRankRoaringBitmap;
-import org.roaringbitmap.RoaringBitmapSupplier;
 import org.roaringbitmap.longlong.LongIterator;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
 import org.slf4j.Logger;
@@ -56,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import blasd.apex.core.logging.ApexLogHelper;
 import blasd.apex.core.memory.IApexMemoryConstants;
 import io.cormoran.buffer.ApexBufferHelper;
+import io.cormoran.buffer.CloseableIntBuffer;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 
@@ -335,6 +336,7 @@ public abstract class IndexWriter {
 				}
 
 			};
+
 		}
 
 		@Override
@@ -390,12 +392,13 @@ public abstract class IndexWriter {
 	public static class IntIndexCollectorUncompressed {
 
 		FileChannel fc;
+		private final CloseableIntBuffer closeable;
 		private final IntBuffer dataElements;
 
 		public IntIndexCollectorUncompressed(int size) {
 			try {
-				dataElements = ApexBufferHelper.makeIntBuffer(size);
-				// this.dataElements = IntBuffer.allocate(size);
+				this.closeable = ApexBufferHelper.makeIntBuffer(size);
+				this.dataElements = this.closeable.asIntBuffer();
 			} catch (RuntimeException | IOException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
@@ -660,7 +663,7 @@ public abstract class IndexWriter {
 	}
 
 	static class IntIndexIterator implements IteratorInt {
-		IntIndex<?> intArray;
+		final IntIndex<?> intArray;
 		long nextIndex = 0;
 
 		public IntIndexIterator(IntIndex<?> intArray) {
@@ -679,11 +682,34 @@ public abstract class IndexWriter {
 	}
 
 	public static class IntIndexCollector extends IntIndex<ArrayIntCompressed> implements IOne2OneIndex {
-		int mostSignificantBit;
+		final int mostSignificantBit;
+		final int[] classIndexToClassId;
 
 		public IntIndexCollector(int size, int mostSignificantBit) {
 			super(size);
 			this.mostSignificantBit = mostSignificantBit;
+			this.classIndexToClassId = IntStream.range(0, size).toArray();
+		}
+
+		public IntIndexCollector(int nbIds, int[] classIndexToClassId) {
+			super(nbIds);
+			this.mostSignificantBit = IndexWriter.mostSignificantBit(classIndexToClassId.length);
+			this.classIndexToClassId = classIndexToClassId;
+		}
+
+		@Override
+		public int[] getNext(int index, int length) {
+			throw new UnsupportedOperationException("Is it used?");
+		}
+
+		@Override
+		public void set(int index, int value) {
+			super.set(index, Arrays.binarySearch(classIndexToClassId, value));
+		}
+
+		@Override
+		public int get(int index) {
+			return classIndexToClassId[super.get(index)];
 		}
 
 		@Override
@@ -856,6 +882,7 @@ public abstract class IndexWriter {
 	}
 
 	public static class IntArray1NWriter {
+		CloseableIntBuffer closeable;
 		IntBuffer header;
 		// Used to expand the range of values stored in the header up to 2^40
 		ByteBuffer header2;
@@ -866,7 +893,12 @@ public abstract class IndexWriter {
 
 		public IntArray1NWriter(int size, File indexFile) throws IOException {
 			try {
-				this.header = ApexBufferHelper.makeIntBuffer(size);
+				this.closeable = ApexBufferHelper.makeIntBuffer(size);
+				this.header = this.closeable.asIntBuffer();
+
+				LOGGER.info("Use a mapped intBuffer of size={}, memory={}",
+						header.capacity(),
+						ApexLogHelper.getNiceMemory(IApexMemoryConstants.INT * header.capacity()));
 				// this.header = IntBuffer.allocate(size);
 			} catch (RuntimeException | IOException e) {
 				e.printStackTrace();
@@ -1991,6 +2023,7 @@ public abstract class IndexWriter {
 		public File getIndexFile() {
 			return indexFile;
 		}
+
 	}
 
 	// //////////////////////////////////////////////////////////////
@@ -2017,6 +2050,8 @@ public abstract class IndexWriter {
 	}
 
 	public static int mostSignificantBit(int x) {
+		int javaAnswer = 32 - Integer.numberOfLeadingZeros(x);
+
 		int length = 0;
 		if ((x & 0xffff0000) != 0) {
 			length += 16;
@@ -2043,12 +2078,18 @@ public abstract class IndexWriter {
 			// x >>= 1;
 		}
 
+		assert javaAnswer == length;
+
 		return length - 1;
 	}
 
 	public static int mostSignificantBit(long x) {
 		long lead = x >>> 32;
 		return lead == 0x0 ? mostSignificantBit((int) x) : 32 + mostSignificantBit((int) lead);
+	}
+
+	public static int lessSignificantBit(int x) {
+		return Integer.numberOfTrailingZeros(x);
 	}
 
 	private static IteratorInt asIntIterator(IntBuffer header) {

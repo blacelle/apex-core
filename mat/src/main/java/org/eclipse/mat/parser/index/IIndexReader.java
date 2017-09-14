@@ -25,8 +25,6 @@ public interface IIndexReader {
 	interface IOne2OneIndex extends IIndexReader {
 		int get(int index);
 
-		int[] getAll(int index[]);
-
 		int[] getNext(int index, int length);
 	}
 

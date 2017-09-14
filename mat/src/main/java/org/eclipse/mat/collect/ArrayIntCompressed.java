@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.mat.collect;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This class compresses fixed-size int[] in a very fast and memory efficient manner if many leading and/or trailing
  * bits of the stored ints are not used commonly. The internal data is never copied during the process of retrieving or
@@ -18,6 +21,7 @@ package org.eclipse.mat.collect;
  * data structure is kept at a minimum to build efficient int[] caches.
  */
 public class ArrayIntCompressed {
+	protected static final Logger LOGGER = LoggerFactory.getLogger(ArrayIntCompressed.class);
 	private static final int BIT_LENGTH = 0x20;
 
 	private byte[] data;
@@ -78,9 +82,18 @@ public class ArrayIntCompressed {
 	public ArrayIntCompressed(int[] ints, int offset, int length) {
 		// Determine leading and trailing clear bits
 		int mask = 0x0;
+		int maskAll = -1;
+		assert 0 == Integer.bitCount(mask);
+		assert Integer.SIZE == Integer.bitCount(maskAll);
 		for (int i = 0; i < length; i++) {
 			mask |= ints[offset + i];
+			maskAll &= ints[offset + i];
 		}
+
+		if (maskAll != 0 && length >= 100) {
+			LOGGER.info("{} bytes are always present", Integer.bitCount(maskAll));
+		}
+
 		int leadingClearBits = 0;
 		int trailingClearBits = 0;
 		while ((mask & (1 << (BIT_LENGTH - leadingClearBits - 1))) == 0 && leadingClearBits < BIT_LENGTH) {
@@ -116,6 +129,8 @@ public class ArrayIntCompressed {
 	 *            value to be set at the given index
 	 */
 	public void set(int index, int value) {
+		assert Integer.numberOfTrailingZeros(value) >= trailingClearBits;
+
 		value >>>= trailingClearBits;
 		final long pos = (long) (index) * varyingBits;
 		int idx = 2 + (int) (pos >>> 3);

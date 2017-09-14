@@ -297,14 +297,6 @@ public abstract class IndexReader {
 		 * Delegate to the int index.
 		 */
 		@Override
-		public int[] getAll(int[] index) {
-			return idx.getAll(index);
-		}
-
-		/**
-		 * Delegate to the int index.
-		 */
-		@Override
 		public int[] getNext(int index, int length) {
 			return idx.getNext(index, length);
 		}

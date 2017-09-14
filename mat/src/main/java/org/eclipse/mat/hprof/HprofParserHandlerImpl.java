@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.mat.SnapshotException;
 import org.eclipse.mat.collect.HashMapIntObject;
@@ -58,6 +59,7 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 	private HashMapLongObject<String> constantPool = new HashMapLongObject<String>(10000);
 	private Map<String, List<ClassImpl>> classesByName = new HashMap<String, List<ClassImpl>>();
 	private HashMapLongObject<ClassImpl> classesByAddress = new HashMapLongObject<ClassImpl>();
+	private HashMapLongObject<List<IClass>> classHierarchyByAddress = new HashMapLongObject<>();
 
 	private HashMapLongObject<List<XGCRootInfo>> gcRoots = new HashMapLongObject<List<XGCRootInfo>>(200);
 
@@ -122,6 +124,8 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 
 		int maxClassId = 0;
 
+		Set<Integer> classIds = new TreeSet<>();
+
 		// calculate instance size for all classes
 		for (Iterator<?> e = classesByAddress.values(); e.hasNext();) {
 			ClassImpl clazz = (ClassImpl) e.next();
@@ -129,19 +133,23 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 			clazz.setObjectId(index);
 
 			maxClassId = Math.max(maxClassId, index);
+			classIds.add(index);
 
 			clazz.setHeapSizePerInstance(calculateInstanceSize(clazz));
 			clazz.setUsedHeapSize(calculateClassSize(clazz));
 		}
 
+		// Default MAT behaviour: index values from 0 to maxClassid: however, if the maxClassId has a high identifier
+		// (e.g. class object is at the end of the dump: the idnex will be much bigger than necessary)
+		int[] classIndexToClassId = classIds.stream().mapToInt(Integer::intValue).toArray();
+
 		// create index writers
-		outbound = new IndexWriter.IntArray1NWriter(this.identifiers.size(),
-				Index.OUTBOUND.getFile(info.getPrefix() + "temp."));
-		object2classId =
-				new IndexWriter.IntIndexCollector(this.identifiers.size(), IndexWriter.mostSignificantBit(maxClassId));
-		object2position = new IndexWriter.LongIndexCollector(this.identifiers.size(),
+		int nbIds = this.identifiers.size();
+		outbound = new IndexWriter.IntArray1NWriter(nbIds, Index.OUTBOUND.getFile(info.getPrefix() + "temp."));
+		object2classId = new IndexWriter.IntIndexCollector(nbIds, classIndexToClassId);
+		object2position = new IndexWriter.LongIndexCollector(nbIds,
 				IndexWriter.mostSignificantBit(new File(this.info.getPath()).length()));
-		array2size = new IndexWriter.SizeIndexCollectorUncompressed(this.identifiers.size());
+		array2size = new IndexWriter.SizeIndexCollectorUncompressed(nbIds);
 
 		// java.lang.Class needs some special treatment so that object2classId
 		// is written correctly
@@ -481,12 +489,11 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void addGCRoot(long id, long referrer, int rootType) {
 		if (referrer != 0) {
-			HashMapLongObject localAddressToRootInfo = threadAddressToLocals.get(referrer);
+			HashMapLongObject<List<XGCRootInfo>> localAddressToRootInfo = threadAddressToLocals.get(referrer);
 			if (localAddressToRootInfo == null) {
-				localAddressToRootInfo = new HashMapLongObject();
+				localAddressToRootInfo = new HashMapLongObject<>();
 				threadAddressToLocals.put(referrer, localAddressToRootInfo);
 			}
 			List<XGCRootInfo> gcRootInfo = (List<XGCRootInfo>) localAddressToRootInfo.get(id);
@@ -607,14 +614,20 @@ public class HprofParserHandlerImpl implements IHprofParserHandler {
 
 	@Override
 	public List<IClass> resolveClassHierarchy(long classId) {
-		List<IClass> answer = new ArrayList<IClass>();
+		List<IClass> answer = classHierarchyByAddress.get(classId);
 
-		ClassImpl clazz = classesByAddress.get(classId);
-		answer.add(clazz);
+		if (answer == null) {
+			answer = new ArrayList<IClass>();
 
-		while (clazz.hasSuperClass()) {
-			clazz = classesByAddress.get(clazz.getSuperClassAddress());
+			ClassImpl clazz = classesByAddress.get(classId);
 			answer.add(clazz);
+
+			while (clazz.hasSuperClass()) {
+				clazz = classesByAddress.get(clazz.getSuperClassAddress());
+				answer.add(clazz);
+			}
+
+			classHierarchyByAddress.put(classId, answer);
 		}
 
 		return answer;
