@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.joda.time.LocalDateTime;
@@ -45,6 +46,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -86,14 +88,29 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	 */
 	public static final int CACHE_MAX_SIZE = 1000;
 
+	/**
+	 * Frequency at which we check for long tasks
+	 */
 	public static final int DEFAULT_LONGRUNNINGCHECK_SECONDS = 10;
 	protected int longRunningCheckSeconds = DEFAULT_LONGRUNNINGCHECK_SECONDS;
 
 	// By default, it means 3*10=30 seconds
 	private static final int FACTOR_FOR_OLD = 3;
+	/**
+	 * Frequency at which we consider a task is lasting too long.
+	 * 
+	 * 
+	 * This is multiplied with longRunningCheckSeconds. Above this time, a task is regularly logged as info
+	 */
+	protected int factorForOld = FACTOR_FOR_OLD;
 
-	// By default, it means 12*10= 2 minutes
-	private static final int FACTOR_FOR_TOO_OLD = 12;
+	// By default, it means 4*3*10 = 2 minutes
+	private static final int FACTOR_FOR_TOO_OLD = 4;
+	/**
+	 * This is multiplied with factorForOld and longRunningCheckSeconds. Above this time, a task is regularly logged as
+	 * warn
+	 */
+	protected int factorForTooOld = FACTOR_FOR_TOO_OLD;
 
 	private static final String LOG_MESSAGE = "Task active since {} ({}): {}";
 	private static final String LOG_MESSAGE_PROGRESS = "Task active since {} ({} since {}): {}";
@@ -103,6 +120,9 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	 */
 	protected final LoadingCache<StartMetricEvent, LocalDateTime> activeTasks;
 	protected final LoadingCache<StartMetricEvent, StartMetricEvent> verySlowTasks;
+
+	@VisibleForTesting
+	protected final AtomicLong endEventNotReceivedExplicitely = new AtomicLong();
 
 	// We expect a single longRunningTask to be active at a time
 	protected final AtomicReference<ScheduledFuture<?>> scheduledFuture = new AtomicReference<>();
@@ -139,6 +159,7 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	protected void logOnFarTooMuchLongTask(StartMetricEvent startEvent) {
 		String threadDump = apexThreadDumper.getSmartThreadDumpAsString(false);
 
+		// Log in error as it could be very important, and we will not report about it anymore
 		LOGGER.error("Task still active after {} {}. We stop monitoring it: {}. ThreadDump: {}",
 				CACHE_TIMEOUT_MINUTES,
 				TimeUnit.MINUTES,
@@ -162,13 +183,14 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 
 			long longRunningInMillis = TimeUnit.SECONDS.toMillis(longRunningCheckSeconds);
 			Object lazyToString = ApexLogHelper.lazyToString(() -> endEvent.get().startEvent.toStringNoStack());
-			if (timeInMs > FACTOR_FOR_TOO_OLD * longRunningInMillis) {
-				LOGGER.info("End of very-long {}", lazyToString);
+			Object niceTime = ApexLogHelper.getNiceTime(timeInMs);
+			if (timeInMs > factorForTooOld * longRunningInMillis) {
+				LOGGER.info("After {}, end of very-long {}", niceTime, lazyToString);
 			} else if (timeInMs > longRunningInMillis) {
-				LOGGER.info("End of long {} ended", lazyToString);
+				LOGGER.info("After {}, end of long {} ended", niceTime, lazyToString);
 			} else {
 				// Prevent building the .toString too often
-				LOGGER.trace("End of {} ended", lazyToString);
+				LOGGER.trace("After {}, end of {} ended", niceTime, lazyToString);
 			}
 		}
 	}
@@ -187,6 +209,26 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 		if (scheduledFuture.get() != null) {
 			scheduleLogLongRunningTasks();
 		}
+	}
+
+	@ManagedAttribute
+	public int getFactorForOld() {
+		return factorForOld;
+	}
+
+	@ManagedAttribute
+	public void setFactorForOld(int factorForOld) {
+		this.factorForOld = factorForOld;
+	}
+
+	@ManagedAttribute
+	public int getFactorForTooOld() {
+		return factorForTooOld;
+	}
+
+	@ManagedAttribute
+	public void setFactorForTooOld(int factorForTooOld) {
+		this.factorForTooOld = factorForTooOld;
 	}
 
 	@Override
@@ -211,11 +253,11 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 		// By default: log in debug until 30 seconds
 		LocalDateTime oldBarrier = now.minusSeconds(longRunningCheckSeconds);
 		// By default: log in in info from 30 seconds
-		LocalDateTime tooOldBarrier = now.minusSeconds(FACTOR_FOR_OLD * longRunningCheckSeconds);
+		LocalDateTime tooOldBarrier = now.minusSeconds(factorForOld * longRunningCheckSeconds);
 		// By default: log in warn if above 1min30
-		LocalDateTime muchtooOldBarrier = now.minusSeconds(FACTOR_FOR_TOO_OLD * longRunningCheckSeconds);
+		LocalDateTime muchtooOldBarrier = now.minusSeconds(factorForTooOld * longRunningCheckSeconds);
 
-		activeTasks.asMap().forEach((startEvent, activeSince) -> {
+		cleanAndGetActiveTasks().asMap().forEach((startEvent, activeSince) -> {
 			int seconds = Seconds.secondsBetween(activeSince, now).getSeconds();
 			Object time = ApexLogHelper.getNiceTime(seconds, TimeUnit.SECONDS);
 
@@ -225,41 +267,43 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 				Object rate =
 						ApexLogHelper.getNiceRate(startEvent.getProgress().getAsLong(), seconds, TimeUnit.SECONDS);
 
-				if (activeSince.isBefore(oldBarrier)) {
-					if (activeSince.isBefore(muchtooOldBarrier)) {
-						// This task is active since more than XXX seconds
-						LOGGER.warn(LOG_MESSAGE_PROGRESS, time, rate, activeSince, cleanKey);
-
-						// If this is the first encounter as verySLow, we may have additional operations
-						verySlowTasks.refresh(startEvent);
-					} else if (activeSince.isBefore(tooOldBarrier)) {
-						LOGGER.info(LOG_MESSAGE_PROGRESS, activeSince, rate, time, cleanKey);
-					} else {
-						LOGGER.debug(LOG_MESSAGE_PROGRESS, activeSince, rate, time, cleanKey);
-					}
-				} else {
+				if (activeSince.isAfter(oldBarrier)) {
 					LOGGER.trace(LOG_MESSAGE_PROGRESS, activeSince, rate, time, cleanKey);
+				} else if (activeSince.isBefore(muchtooOldBarrier)) {
+					// This task is active since more than XXX seconds
+					LOGGER.warn(LOG_MESSAGE_PROGRESS, time, rate, activeSince, cleanKey);
+
+					// If this is the first encounter as verySLow, we may have additional operations
+					verySlowTasks.refresh(startEvent);
+				} else if (activeSince.isBefore(tooOldBarrier)) {
+					LOGGER.info(LOG_MESSAGE_PROGRESS, activeSince, rate, time, cleanKey);
+				} else {
+					LOGGER.debug(LOG_MESSAGE_PROGRESS, activeSince, rate, time, cleanKey);
 				}
 			} else {
-				if (activeSince.isBefore(oldBarrier)) {
-					if (activeSince.isBefore(muchtooOldBarrier)) {
-						// This task is active since more than XXX seconds
-						LOGGER.warn(LOG_MESSAGE, activeSince, time, cleanKey);
-
-						// If this is the first encounter as verySLow, we may have additional operations
-						verySlowTasks.refresh(startEvent);
-
-					} else if (activeSince.isBefore(tooOldBarrier)) {
-						LOGGER.info(LOG_MESSAGE, activeSince, time, cleanKey);
-					} else {
-						LOGGER.debug(LOG_MESSAGE, activeSince, time, cleanKey);
-					}
-				} else {
+				if (activeSince.isAfter(oldBarrier)) {
 					LOGGER.trace(LOG_MESSAGE, activeSince, time, cleanKey);
+				} else if (activeSince.isBefore(muchtooOldBarrier)) {
+					// This task is active since more than XXX seconds
+					LOGGER.warn(LOG_MESSAGE, activeSince, time, cleanKey);
+
+					// If this is the first encounter as verySLow, we may have additional operations
+					verySlowTasks.refresh(startEvent);
+
+				} else if (activeSince.isBefore(tooOldBarrier)) {
+					LOGGER.info(LOG_MESSAGE, activeSince, time, cleanKey);
+				} else {
+					LOGGER.debug(LOG_MESSAGE, activeSince, time, cleanKey);
 				}
 			}
 		});
 
+	}
+
+	protected LoadingCache<StartMetricEvent, LocalDateTime> cleanAndGetActiveTasks() {
+		checkForEndEvents();
+
+		return activeTasks;
 	}
 
 	protected Object noNewLine(StartMetricEvent key) {
@@ -312,13 +356,16 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	@Subscribe
 	@AllowConcurrentEvents
 	public void onThrowable(Throwable t) {
-		LOGGER.error("Not managed exception", t);
+		// Wrap in RuntimeException for a cleaner stack-trace
+		LOGGER.warn("Not managed exception", new RuntimeException(t));
 	}
 
 	protected void invalidateStartEvent(StartMetricEvent startEvent) {
 		if (activeTasks.getIfPresent(startEvent) == null) {
-			LOGGER.debug("And EndEvent has been submitted without its StartEvent having been registered"
-					+ ", or after having been already invalidated: {}", startEvent);
+			LOGGER.debug(
+					"And EndEvent has been submitted without its StartEvent having been registered"
+							+ ", or after having been already invalidated: {}",
+					startEvent);
 		} else {
 			invalidate(startEvent);
 		}
@@ -327,7 +374,15 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	@ManagedAttribute
 	@Override
 	public long getActiveTasksSize() {
-		return activeTasks.size();
+		return cleanAndGetActiveTasks().size();
+	}
+
+	protected void checkForEndEvents() {
+		activeTasks.asMap().keySet().forEach(sme -> sme.getEndEvent().ifPresent(endEvent -> {
+			// Record for test purposes
+			endEventNotReceivedExplicitely.incrementAndGet();
+			this.onEndEvent(endEvent);
+		}));
 	}
 
 	@ManagedAttribute
@@ -418,4 +473,8 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 		return apexThreadDumper.getThreadDumpAsString(!withoutMonitors);
 	}
 
+	@ManagedAttribute
+	public long getEndedBeforeReceivingEndEvent() {
+		return endEventNotReceivedExplicitely.get();
+	}
 }

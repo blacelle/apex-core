@@ -257,4 +257,29 @@ public class TestApexMetricsTowerControl {
 		// We should have no active task as the end event arrives
 		Assert.assertEquals(0, mtc.getActiveTasksSize());
 	}
+
+	@Test
+	public void testNeverReceiveEndEventButClosed() {
+		ApexMetricsTowerControl mtc = makeApexMetricsTowerControl();
+
+		// Happens if the event is stopped out of the eventBus workflow
+		StartMetricEvent start = new StartMetricEvent(this, "testEndEventNeverReceived");
+
+		// We receive the start
+		mtc.onStartEvent(start);
+
+		// But the end is never published
+		// It may also represent the race-condition of the end happing during the start registration
+		EndMetricEvent end = EndMetricEvent.buildEndEvent(start);
+		Assert.assertNotNull(end);
+
+		// Run a log operation
+		mtc.logLongRunningTasks();
+
+		// Check the log have detected the event is ended
+		Assert.assertEquals(0, mtc.activeTasks.size());
+
+		// Check we recorded the endEvent by detected from the known startEvent
+		Assert.assertEquals(1, mtc.endEventNotReceivedExplicitely.get());
+	}
 }
