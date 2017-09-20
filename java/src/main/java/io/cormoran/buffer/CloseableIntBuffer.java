@@ -1,14 +1,17 @@
 package io.cormoran.buffer;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 
-import com.google.common.annotations.Beta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import sun.nio.ch.DirectBuffer;
+import com.google.common.annotations.Beta;
 
 @Beta
 public class CloseableIntBuffer implements AutoCloseable {
+	protected static final Logger LOGGER = LoggerFactory.getLogger(CloseableIntBuffer.class);
 
 	protected final MappedByteBuffer buffer;
 	protected final IntBuffer heapBuffer;
@@ -29,8 +32,21 @@ public class CloseableIntBuffer implements AutoCloseable {
 	public void close() {
 		// We clean the hook to the mapped file, else even a shutdown-hook would not remove the mapped-file
 		if (this.buffer != null) {
-			sun.misc.Cleaner cleaner = ((DirectBuffer) buffer).cleaner();
-			cleaner.clean();
+			try {
+				// sun.misc.Cleaner cleaner = ((DirectBuffer) buffer).cleaner();
+				// cleaner.clean();
+				Class<?> directBufferClass = Class.forName("sun.nio.ch.DirectBuffer");
+				Object cleaner = directBufferClass.getMethod("cleaner").invoke(buffer);
+
+				Class<?> cleanerClass = Class.forName("sun.misc.Cleaner");
+				cleanerClass.getMethod("clean").invoke(cleaner);
+			} catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				LOGGER.trace("Ouch", e);
+				// JDK9?
+				return;
+			}
+
 		}
 	}
 
