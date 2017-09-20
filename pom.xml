@@ -134,7 +134,7 @@
 		<!-- Port Eclipse MAT in an autonomous module -->
 		<!-- Not official module as it does not comply with quality standards yet -->
 		<module>mat</module>
-
+		
 		<!-- a JConsole plugin to facilitate tracking of off-heap -->
 		<!-- Excluded as it is an experimental project -->
 		<!-- <module>buffermonitor</module> -->
