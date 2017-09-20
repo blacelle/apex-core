@@ -24,6 +24,7 @@ package blasd.apex.core.jvm;
 
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.ThreadMXBean;
+import java.lang.reflect.InvocationTargetException;
 import java.util.OptionalDouble;
 
 import com.google.common.annotations.Beta;
@@ -45,7 +46,16 @@ public class ApexForOracleJVM {
 	public static final String GARBAGE_COLLECTION_NOTIFICATION = "com.sun.management.gc.notification";
 
 	public static long maxDirectMemory() {
-		return sun.misc.VM.maxDirectMemory();
+		try {
+			// return sun.misc.VM.maxDirectMemory();
+			Class<?> VM = Class.forName("sun.misc.VM");
+
+			return ((Long) VM.getMethod("maxDirectMemory").invoke(null)).longValue();
+		} catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			// JDK9?
+			return 0;
+		}
 	}
 
 	public static OptionalDouble getCpu(OperatingSystemMXBean osMbean) {
