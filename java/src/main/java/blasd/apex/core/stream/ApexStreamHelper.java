@@ -29,6 +29,7 @@ import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
@@ -191,5 +192,17 @@ public class ApexStreamHelper {
 			Function<? super T, ? extends U> valueMapper,
 			Supplier<M> mapSupplier) {
 		return Collectors.toMap(keyMapper, valueMapper, throwingMerger(), mapSupplier);
+	}
+
+	/**
+	 * persons.stream().filter(distinctByKey(p -> p.getName());
+	 * 
+	 * @param keyExtractor
+	 * @return a Predicate to be used in Stream.filter It will behaves like having a distinct on given property
+	 */
+	// https://stackoverflow.com/questions/23699371/java-8-distinct-by-property
+	public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+		Map<Object, Boolean> seen = new ConcurrentHashMap<>();
+		return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
 	}
 }
