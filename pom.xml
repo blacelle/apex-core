@@ -112,6 +112,42 @@
 				<cpd.skip>true</cpd.skip>
 				<maven.javadoc.skip>true</maven.javadoc.skip>
 			</properties>
+		</profile><profile>
+			<id>jdk9</id>
+			<activation>
+				<jdk>9</jdk>
+			</activation>
+			<build>
+				<pluginManagement>
+					<!-- https://stackoverflow.com/questions/36583118/is-maven-ready-for-jdk9 -->
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<version>2.4.1</version>
+							<dependencies>
+								<dependency>
+									<groupId>org.codehaus.plexus</groupId>
+									<artifactId>plexus-archiver</artifactId>
+									<version>2.4.4</version>
+								</dependency>
+							</dependencies>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-jar-plugin</artifactId>
+							<version>2.6</version>
+							<dependencies>
+								<dependency>
+									<groupId>org.codehaus.plexus</groupId>
+									<artifactId>plexus-archiver</artifactId>
+									<version>2.4.4</version>
+								</dependency>
+							</dependencies>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
 		</profile>
 	</profiles>
 
