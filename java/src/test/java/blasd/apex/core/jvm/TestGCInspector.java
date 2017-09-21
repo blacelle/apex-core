@@ -171,10 +171,14 @@ public class TestGCInspector implements IApexMemoryConstants {
 
 		String outputMsg = gcInspector.saveHeapDump(heapFile);
 
-		Assertions.assertThat(outputMsg).startsWith("Heap dump file created");
+		if (IS_JDK_9) {
+			Assertions.assertThat(outputMsg).startsWith("Heap Histogram is not available");
+		} else {
+			Assertions.assertThat(outputMsg).startsWith("Heap dump file created");
 
-		// Check we have written data
-		Assert.assertTrue(heapFile.toFile().length() > 0);
+			// Check we have written data
+			Assert.assertTrue(heapFile.toFile().length() > 0);
+		}
 	}
 
 	@Test

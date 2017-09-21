@@ -25,6 +25,7 @@ package net.bull.javamelody;
 import org.junit.Assert;
 import org.junit.Test;
 
+import blasd.apex.core.jvm.TestGCInspector;
 import blasd.apex.core.memory.histogram.HeapHistogram;
 import blasd.apex.core.memory.histogram.IHeapHistogram;
 
@@ -33,6 +34,10 @@ public class TestHeapHistogram {
 	public void testHeapHistogramm() throws Exception {
 		IHeapHistogram heapHisto = HeapHistogram.createHeapHistogram();
 
-		Assert.assertTrue(heapHisto.getTotalHeapBytes() > 0);
+		if (TestGCInspector.IS_JDK_9) {
+			Assert.assertNull(heapHisto);
+		} else {
+			Assert.assertTrue(heapHisto.getTotalHeapBytes() > 0);
+		}
 	}
 }
