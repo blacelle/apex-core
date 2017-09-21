@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -12,8 +13,7 @@
 	<packaging>jar</packaging>
 
 	<properties>
-		<!-- There is barely no code, leading most branches to be rare edge cases, 
-			which are tough to be unit-tested -->
+		<!-- There is barely no code, leading most branches to be rare edge cases, which are tough to be unit-tested -->
 		<jacoco.instruction.ratio>0.40</jacoco.instruction.ratio>
 		<jacoco.branch.ratio>0.25</jacoco.branch.ratio>
 
@@ -23,6 +23,19 @@
 		<sizeof.version>0.3.0</sizeof.version>
 	</properties>
 
+	<profiles>
+		<profile>
+			<id>jdk9</id>
+			<activation>
+				<jdk>9</jdk>
+			</activation>
+			<properties>
+				<!-- We have many tests deactivated in JDK9 -->
+				<jacoco.instruction.ratio>0.30</jacoco.instruction.ratio>
+			</properties>
+		</profile>
+	</profiles>
+
 	<dependencies>
 
 		<dependency>
@@ -31,7 +44,7 @@
 			<artifactId>guava</artifactId>
 			<!-- https://github.com/google/guava/wiki/Compatibility -->
 			<!-- Guava for JDK6 srops at 20.0 -->
-			<version>20.0</version><!--$NO-MVN-MAN-VER$-->
+			<version>20.0</version><!--$NO-MVN-MAN-VER$ -->
 		</dependency>
 
 		<dependency>
