@@ -52,22 +52,22 @@ public class SnappyCmpressHprof {
 
 		OutputStream out = new FileOutputStream(new File(folder, file + ".snappy"));
 
-		OutputStream nullStream = new OutputStream() {
+		try (OutputStream nullStream = new OutputStream() {
 
 			@Override
 			public void write(int b) throws IOException {
 				// do nothing like '/dev/null'
 			}
-		};
+		}) {
+			CountingOutputStream cos = new CountingOutputStream(out);
 
-		CountingOutputStream cos = new CountingOutputStream(out);
+			File inputFile = new File(folder, file);
+			ByteStreams.copy(new FileInputStream(inputFile), new SnappyOutputStream(cos));
 
-		File inputFile = new File(folder, file);
-		ByteStreams.copy(new FileInputStream(inputFile), new SnappyOutputStream(cos));
-
-		LOGGER.info("Input={} Snappy={} -> {}%",
-				inputFile.length(),
-				cos.getCount(),
-				cos.getCount() * 100L / inputFile.length());
+			LOGGER.info("Input={} Snappy={} -> {}%",
+					inputFile.length(),
+					cos.getCount(),
+					cos.getCount() * 100L / inputFile.length());
+		}
 	}
 }
