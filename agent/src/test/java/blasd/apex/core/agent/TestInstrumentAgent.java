@@ -38,11 +38,7 @@ public class TestInstrumentAgent {
 	public static final boolean IS_JDK_9;
 
 	static {
-		System.out.println(Runtime.class.getPackage().getImplementationVersion());
-		System.out.println(Runtime.class.getPackage().getSpecificationVersion());
-		System.out.println(System.getProperty("java.specification.version"));
-		System.out.println(System.getProperty("java.version"));
-		IS_JDK_9 = Runtime.class.getPackage().getSpecificationVersion().contains("1.9.");
+		IS_JDK_9 = "9".equals(System.getProperty("java.specification.version"));
 	}
 
 	@Test
