@@ -28,6 +28,7 @@ import java.net.MalformedURLException;
 
 import org.ehcache.sizeof.impl.AgentLoaderApexSpy;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import com.google.common.base.Charsets;
@@ -47,6 +48,8 @@ public class TestVirtualMachineWithoutToolsJar {
 
 	@Test
 	public void testHeapHisto() throws Exception {
+		Assume.assumeTrue("TODO JDK9", TestInstrumentAgent.IS_JDK_9);
+
 		InputStream is = VirtualMachineWithoutToolsJar.heapHisto().get();
 		String asString = CharStreams.toString(new InputStreamReader(is, Charsets.UTF_8));
 		Assert.assertNotNull(asString);

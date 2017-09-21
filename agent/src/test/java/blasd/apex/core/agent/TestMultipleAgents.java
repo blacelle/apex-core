@@ -22,18 +22,23 @@
  */
 package blasd.apex.core.agent;
 
+import org.junit.Assume;
 import org.junit.Test;
 
 // We used to have issues related to class-loading leading to issues with Library loading
 public class TestMultipleAgents {
 	@Test
 	public void testVMThenAgent() {
+		Assume.assumeTrue("TODO JDK9", TestInstrumentAgent.IS_JDK_9);
+
 		VirtualMachineWithoutToolsJar.getJvmVirtualMachine().get();
 		InstrumentationAgent.getInstrumentation().get();
 	}
 
 	@Test
 	public void testAgentThenVM() {
+		Assume.assumeTrue("TODO JDK9", TestInstrumentAgent.IS_JDK_9);
+
 		InstrumentationAgent.getInstrumentation().get();
 		VirtualMachineWithoutToolsJar.getJvmVirtualMachine().get();
 	}
