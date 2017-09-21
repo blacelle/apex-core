@@ -35,7 +35,15 @@ public class TestInstrumentAgent {
 	protected static final Logger LOGGER = Logger.getLogger(TestInstrumentAgent.class.getName());
 
 	// https://stackoverflow.com/questions/2591083/getting-java-version-at-runtime
-	public static final boolean IS_JDK_9 = Runtime.class.getPackage().getImplementationVersion().contains("1.9.");
+	public static final boolean IS_JDK_9;
+
+	static {
+		System.out.println(Runtime.class.getPackage().getImplementationVersion());
+		System.out.println(Runtime.class.getPackage().getSpecificationVersion());
+		System.out.println(System.getProperty("java.specification.version"));
+		System.out.println(System.getProperty("java.version"));
+		IS_JDK_9 = Runtime.class.getPackage().getSpecificationVersion().contains("1.9.");
+	}
 
 	@Test
 	public void test_ctor() {
