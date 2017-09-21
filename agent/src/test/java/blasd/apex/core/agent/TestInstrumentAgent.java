@@ -48,7 +48,7 @@ public class TestInstrumentAgent {
 
 	@Test
 	public void testGetInstrument() {
-		Assume.assumeTrue("TODO JDK9", TestInstrumentAgent.IS_JDK_9);
+		Assume.assumeFalse("TODO JDK9", TestInstrumentAgent.IS_JDK_9);
 
 		Optional<Instrumentation> instrument = InstrumentationAgent.getInstrumentation();
 

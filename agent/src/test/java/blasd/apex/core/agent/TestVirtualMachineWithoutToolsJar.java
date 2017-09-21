@@ -48,7 +48,7 @@ public class TestVirtualMachineWithoutToolsJar {
 
 	@Test
 	public void testHeapHisto() throws Exception {
-		Assume.assumeTrue("TODO JDK9", TestInstrumentAgent.IS_JDK_9);
+		Assume.assumeFalse("TODO JDK9", TestInstrumentAgent.IS_JDK_9);
 
 		InputStream is = VirtualMachineWithoutToolsJar.heapHisto().get();
 		String asString = CharStreams.toString(new InputStreamReader(is, Charsets.UTF_8));
