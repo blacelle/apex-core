@@ -210,11 +210,13 @@ public class HeapHistogram implements IHeapHistogram, Serializable {
 	 * @throws Exception
 	 */
 	public static String saveHeapDump(File file) throws IOException {
-		final String output;
-
-		try (InputStream input = VirtualMachineWithoutToolsJar.heapDump(file, true).get()) {
-			output = CharStreams.toString(new InputStreamReader(input));
-		}
+		final String output = VirtualMachineWithoutToolsJar.heapDump(file, true).transform(is -> {
+			try (InputStream input = is) {
+				return CharStreams.toString(new InputStreamReader(input));
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}).or("Heap Histogram is not available");
 
 		if (output.startsWith("Heap dump file created")) {
 			LOGGER.info("Heap-Dump seems to have been successfully generated in {}", file);
