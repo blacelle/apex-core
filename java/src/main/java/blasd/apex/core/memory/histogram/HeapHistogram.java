@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -182,14 +183,23 @@ public class HeapHistogram implements IHeapHistogram, Serializable {
 	 * @throws IOException
 	 */
 	public static HeapHistogram createHeapHistogram() throws IOException {
-		try (InputStream input = VirtualMachineWithoutToolsJar.heapHisto().get()) {
-			return new HeapHistogram(input, VirtualMachineWithoutToolsJar.isJRockit());
-		}
+		return VirtualMachineWithoutToolsJar.heapHisto().transform(is -> {
+			try (InputStream input = is) {
+				return new HeapHistogram(input, VirtualMachineWithoutToolsJar.isJRockit());
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}).orNull();
 	}
 
 	public static String createHeapHistogramAsString() throws IOException {
-		byte[] byteArray = ByteStreams.toByteArray(VirtualMachineWithoutToolsJar.heapHisto().get());
-		return new String(byteArray, JMAP_CHARSET);
+		return VirtualMachineWithoutToolsJar.heapHisto().transform(is -> {
+			try {
+				return new String(ByteStreams.toByteArray(is), JMAP_CHARSET);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}).or("Heap Histogram is not available");
 	}
 
 	/**
