@@ -231,6 +231,10 @@
 			</activation>
 			<properties>
 				<plexus-archiver.version>2.4.4</plexus-archiver.version>
+
+				<!-- As of 3.1.0, coveralls is not compatible with JDK9 -->
+				<!-- https://github.com/trautonen/coveralls-maven-plugin/issues/112 -->
+				<coveralls.skip>true</coveralls.skip>
 			</properties>
 			<dependencyManagement>
 				<dependencies>
@@ -307,6 +311,7 @@
 				<groupId>org.eluder.coveralls</groupId>
 				<artifactId>coveralls-maven-plugin</artifactId>
 				<version>4.3.0</version>
+				<configuration></configuration>
 			</plugin>
 		</plugins>
 	</build>
