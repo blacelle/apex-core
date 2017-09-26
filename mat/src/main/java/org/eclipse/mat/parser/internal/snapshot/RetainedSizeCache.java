@@ -33,6 +33,7 @@ public class RetainedSizeCache implements IIndexReader {
 
 	/**
 	 * File is expected to exist, and is read in the new format.
+	 * 
 	 * @param f
 	 */
 	public RetainedSizeCache(File f) {
@@ -41,9 +42,8 @@ public class RetainedSizeCache implements IIndexReader {
 	}
 
 	/**
-	 * Reads file i2sv2.index in new format,
-	 * or file i2s.index in the old format,
-	 * or creates an empty map.
+	 * Reads file i2sv2.index in new format, or file i2s.index in the old format, or creates an empty map.
+	 * 
 	 * @param snapshotInfo
 	 */
 	public RetainedSizeCache(XSnapshotInfo snapshotInfo) {
@@ -70,23 +70,17 @@ public class RetainedSizeCache implements IIndexReader {
 		if (!isDirty)
 			return;
 
-		try {
-			File file = new File(filename);
-
-			DataOutputStream out = new DataOutputStream(new FileOutputStream(file));
-
+		File file = new File(filename);
+		try (DataOutputStream out = new DataOutputStream(new FileOutputStream(file))) {
 			for (int key : id2size.getAllKeys()) {
 				out.writeInt(key);
 				out.writeLong(id2size.get(key));
 			}
 
-			out.close();
-
 			isDirty = false;
 		} catch (IOException e) {
-			Logger.getLogger(RetainedSizeCache.class.getName()).log(Level.WARNING,
-					Messages.RetainedSizeCache_Warning_IgnoreError,
-					e);
+			Logger.getLogger(RetainedSizeCache.class.getName())
+					.log(Level.WARNING, Messages.RetainedSizeCache_Warning_IgnoreError, e);
 		}
 	}
 
@@ -107,9 +101,8 @@ public class RetainedSizeCache implements IIndexReader {
 				id2size.put(key, value);
 			}
 		} catch (IOException e) {
-			Logger.getLogger(RetainedSizeCache.class.getName()).log(Level.WARNING,
-					Messages.RetainedSizeCache_ErrorReadingRetainedSizes,
-					e);
+			Logger.getLogger(RetainedSizeCache.class.getName())
+					.log(Level.WARNING, Messages.RetainedSizeCache_ErrorReadingRetainedSizes, e);
 
 			// might have read corrupt data
 			id2size.clear();
