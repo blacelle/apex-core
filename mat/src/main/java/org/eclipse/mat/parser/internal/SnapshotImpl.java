@@ -666,6 +666,7 @@ public final class SnapshotImpl implements ISnapshot {
 		try {
 			marker.markMultiThreaded(availableProcessors);
 		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 			throw new SnapshotException(e);
 		}
 

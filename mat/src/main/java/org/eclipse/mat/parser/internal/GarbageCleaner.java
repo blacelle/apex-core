@@ -76,6 +76,7 @@ import org.eclipse.mat.util.SilentProgressListener;
 				try {
 					marker.markMultiThreaded(numProcessors);
 				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
 					IOException ioe = new IOException(e.getMessage());
 					ioe.initCause(e);
 					throw ioe;
@@ -566,6 +567,7 @@ import org.eclipse.mat.util.SilentProgressListener;
 			try {
 				marker2.markMultiThreaded(numProcessors);
 			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 				OperationCanceledException oc = new IProgressListener.OperationCanceledException();
 				oc.initCause(e);
 				throw oc;
