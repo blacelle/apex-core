@@ -7,7 +7,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-dependencies</artifactId>
 		<!-- http://stackoverflow.com/questions/6003831/parent-relativepath-points-at-my-com-mycompanymyproject-instead-of-org-apache -->
-		<version>1.5.4.RELEASE</version>
+		<version>1.5.7.RELEASE</version>
 		<relativePath />
 	</parent>
 
@@ -231,10 +231,6 @@
 			</activation>
 			<properties>
 				<plexus-archiver.version>2.4.4</plexus-archiver.version>
-
-				<!-- As of 3.1.0, coveralls is not compatible with JDK9 -->
-				<!-- https://github.com/trautonen/coveralls-maven-plugin/issues/112 -->
-				<coveralls.skip>true</coveralls.skip>
 			</properties>
 			<dependencyManagement>
 				<dependencies>
@@ -285,6 +281,26 @@
 								</dependency>
 							</dependencies>
 						</plugin>
+
+						<plugin>
+							<!-- https://github.com/trautonen/coveralls-maven-plugin -->
+							<groupId>org.eluder.coveralls</groupId>
+							<artifactId>coveralls-maven-plugin</artifactId>
+							<version>4.3.0</version>
+							<dependencies>
+								<!-- We need to ensure the plugin is functional, even if we want to skip its execution -->
+								<dependency>
+									<groupId>org.codehaus.plexus</groupId>
+									<artifactId>plexus-archiver</artifactId>
+									<version>${plexus-archiver.version}</version>
+								</dependency>
+							</dependencies>
+							<configuration>
+								<!-- As of 3.1.0, coveralls is not compatible with JDK9 -->
+								<!-- https://github.com/trautonen/coveralls-maven-plugin/issues/112 -->
+								<skip>true</skip>
+							</configuration>
+						</plugin>
 					</plugins>
 				</pluginManagement>
 			</build>
@@ -311,7 +327,6 @@
 				<groupId>org.eluder.coveralls</groupId>
 				<artifactId>coveralls-maven-plugin</artifactId>
 				<version>4.3.0</version>
-				<configuration></configuration>
 			</plugin>
 		</plugins>
 	</build>
