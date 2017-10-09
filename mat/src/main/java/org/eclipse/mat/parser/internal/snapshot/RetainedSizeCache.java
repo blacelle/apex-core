@@ -79,8 +79,9 @@ public class RetainedSizeCache implements IIndexReader {
 
 			isDirty = false;
 		} catch (IOException e) {
-			Logger.getLogger(RetainedSizeCache.class.getName())
-					.log(Level.WARNING, Messages.RetainedSizeCache_Warning_IgnoreError, e);
+			Logger.getLogger(RetainedSizeCache.class.getName()).log(Level.WARNING,
+					Messages.RetainedSizeCache_Warning_IgnoreError,
+					e);
 		}
 	}
 
@@ -101,8 +102,9 @@ public class RetainedSizeCache implements IIndexReader {
 				id2size.put(key, value);
 			}
 		} catch (IOException e) {
-			Logger.getLogger(RetainedSizeCache.class.getName())
-					.log(Level.WARNING, Messages.RetainedSizeCache_ErrorReadingRetainedSizes, e);
+			Logger.getLogger(RetainedSizeCache.class.getName()).log(Level.WARNING,
+					Messages.RetainedSizeCache_ErrorReadingRetainedSizes,
+					e);
 
 			// might have read corrupt data
 			id2size.clear();
