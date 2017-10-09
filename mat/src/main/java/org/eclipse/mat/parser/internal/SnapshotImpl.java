@@ -1826,7 +1826,6 @@ public final class SnapshotImpl implements ISnapshot {
 	 * @return the extra data
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public <A> A getSnapshotAddons(Class<A> addon) throws SnapshotException {
 		// if (addon == UnreachableObjectsHistogram.class)
 		// {

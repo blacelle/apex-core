@@ -87,12 +87,13 @@ public class CreateCollectionDump {
 				values[COUNT - samehash.length + i] = prefix + ":" + samehash[i];
 			}
 			for (int i = 1; i <= COUNT; ++i) {
-				//System.out.println(values[i] + " " + values[i].hashCode());
+				// System.out.println(values[i] + " " + values[i].hashCode());
 			}
 		}
 
 		public abstract boolean accept(Class<? extends Collection> c);
 
+		@SuppressWarnings("unchecked")
 		public CollectionTestData() {
 			List<Collection> cols = new ArrayList<Collection>();
 			String ls[] = new String[] { "java.util.AbstractCollection",
@@ -130,6 +131,7 @@ public class CreateCollectionDump {
 
 			values = new String[COUNT];
 			for (String cn : ls) {
+				@SuppressWarnings("rawtypes")
 				Class<? extends Collection> c = null;
 				try {
 					c = Class.forName(cn).asSubclass(Collection.class);
@@ -153,6 +155,7 @@ public class CreateCollectionDump {
 								cl.remove(values[i]);
 							}
 							if (cl instanceof List) {
+								@SuppressWarnings("rawtypes")
 								List l = (List) cl;
 								int i;
 								for (i = to - 1; i > 0; i -= 3) {
@@ -189,7 +192,7 @@ public class CreateCollectionDump {
 	}
 
 	/**
-	 * Collections which are not lists but do have COUNT entries 
+	 * Collections which are not lists but do have COUNT entries
 	 */
 	public static class NonListCollectionTestData extends CollectionTestData {
 		@Override
@@ -209,7 +212,7 @@ public class CreateCollectionDump {
 	}
 
 	/**
-	 * Lists which do have COUNT entries 
+	 * Lists which do have COUNT entries
 	 */
 	public static class ListCollectionTestData extends CollectionTestData {
 
@@ -230,7 +233,7 @@ public class CreateCollectionDump {
 	}
 
 	/**
-	 * Maps which do have COUNT entries 
+	 * Maps which do have COUNT entries
 	 */
 	public static class MapTestData {
 		private static final int SAMEHASH = 256;
@@ -266,11 +269,12 @@ public class CreateCollectionDump {
 				keys[COUNT - samehash.length + i] = "" + samehash[i];
 			}
 			for (int i = 1; i <= COUNT; ++i) {
-				//System.out.println(keys[i] + " " + keys[i].hashCode());
-				//System.out.println(values[i] + " " + values[i].hashCode());
+				// System.out.println(keys[i] + " " + keys[i].hashCode());
+				// System.out.println(values[i] + " " + values[i].hashCode());
 			}
 		}
 
+		@SuppressWarnings("unchecked")
 		public MapTestData() {
 			List<Map> ms = new ArrayList<Map>();
 			String ls[] = new String[] { "java.util.AbstractMap",
@@ -295,6 +299,7 @@ public class CreateCollectionDump {
 
 			keys = new String[COUNT];
 			for (String cn : ls) {
+				@SuppressWarnings("rawtypes")
 				Class<? extends Map> c = null;
 
 				try {
