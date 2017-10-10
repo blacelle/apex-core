@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -182,14 +183,23 @@ public class HeapHistogram implements IHeapHistogram, Serializable {
 	 * @throws IOException
 	 */
 	public static HeapHistogram createHeapHistogram() throws IOException {
-		try (InputStream input = VirtualMachineWithoutToolsJar.heapHisto().get()) {
-			return new HeapHistogram(input, VirtualMachineWithoutToolsJar.isJRockit());
-		}
+		return VirtualMachineWithoutToolsJar.heapHisto().transform(is -> {
+			try (InputStream input = is) {
+				return new HeapHistogram(input, VirtualMachineWithoutToolsJar.isJRockit());
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}).orNull();
 	}
 
 	public static String createHeapHistogramAsString() throws IOException {
-		byte[] byteArray = ByteStreams.toByteArray(VirtualMachineWithoutToolsJar.heapHisto().get());
-		return new String(byteArray, JMAP_CHARSET);
+		return VirtualMachineWithoutToolsJar.heapHisto().transform(is -> {
+			try {
+				return new String(ByteStreams.toByteArray(is), JMAP_CHARSET);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}).or("Heap Histogram is not available");
 	}
 
 	/**
@@ -200,11 +210,13 @@ public class HeapHistogram implements IHeapHistogram, Serializable {
 	 * @throws Exception
 	 */
 	public static String saveHeapDump(File file) throws IOException {
-		final String output;
-
-		try (InputStream input = VirtualMachineWithoutToolsJar.heapDump(file, true).get()) {
-			output = CharStreams.toString(new InputStreamReader(input));
-		}
+		final String output = VirtualMachineWithoutToolsJar.heapDump(file, true).transform(is -> {
+			try (InputStream input = is) {
+				return CharStreams.toString(new InputStreamReader(input));
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}).or("Heap Histogram is not available");
 
 		if (output.startsWith("Heap dump file created")) {
 			LOGGER.info("Heap-Dump seems to have been successfully generated in {}", file);

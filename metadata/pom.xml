@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -279,6 +280,25 @@
 									<version>${plexus-archiver.version}</version>
 								</dependency>
 							</dependencies>
+						</plugin>
+						<plugin>
+							<!-- https://github.com/trautonen/coveralls-maven-plugin -->
+							<groupId>org.eluder.coveralls</groupId>
+							<artifactId>coveralls-maven-plugin</artifactId>
+							<version>4.3.0</version>
+							<dependencies>
+								<!-- We need to ensure the plugin is functional, even if we want to skip its execution -->
+								<dependency>
+									<groupId>org.codehaus.plexus</groupId>
+									<artifactId>plexus-archiver</artifactId>
+									<version>${plexus-archiver.version}</version>
+								</dependency>
+							</dependencies>
+							<configuration>
+								<!-- As of 3.1.0, coveralls is not compatible with JDK9 -->
+								<!-- https://github.com/trautonen/coveralls-maven-plugin/issues/112 -->
+								<skip>true</skip>
+							</configuration>
 						</plugin>
 					</plugins>
 				</pluginManagement>

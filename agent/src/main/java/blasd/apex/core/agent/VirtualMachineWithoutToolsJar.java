@@ -259,7 +259,9 @@ public class VirtualMachineWithoutToolsJar {
 		});
 
 		if (!asInputStream.isPresent()) {
-			LOGGER.warn("'dumpHeap' seems not available. Java-version: {}", getJavaVendor());
+			LOGGER.warn("'dumpHeap' seems not available. Java-version: {} - {}",
+					getJavaVendor(),
+					getJavaSpecification());
 		}
 
 		return asInputStream;
@@ -330,6 +332,10 @@ public class VirtualMachineWithoutToolsJar {
 
 	private static String getJavaVendor() {
 		return System.getProperty("java.vendor");
+	}
+
+	private static String getJavaSpecification() {
+		return System.getProperty("java.specification.version");
 	}
 
 	public static boolean isVirtualMachineAvailable() {

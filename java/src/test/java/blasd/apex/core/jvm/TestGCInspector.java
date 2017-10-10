@@ -53,6 +53,9 @@ public class TestGCInspector implements IApexMemoryConstants {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(TestGCInspector.class);
 
+	// https://stackoverflow.com/questions/2591083/getting-java-version-at-runtime
+	public static final boolean IS_JDK_9 = "9".equals(System.getProperty("java.specification.version"));
+
 	/**
 	 * Test by monitoring an application doing stressful memory allocation
 	 * 
@@ -148,10 +151,16 @@ public class TestGCInspector implements IApexMemoryConstants {
 	public void testGetHeapHistogram() throws Exception {
 		GCInspector gcInspector = new GCInspector(Mockito.mock(IApexThreadDumper.class));
 
-		List<String> asList = Splitter.on('\n').splitToList(gcInspector.getHeapHistogram());
+		List<String> asList = Splitter.on(System.lineSeparator()).splitToList(gcInspector.getHeapHistogram());
 
-		// Check we have many rows
-		Assert.assertTrue(asList.size() > 5);
+		if (IS_JDK_9) {
+			LOGGER.error("Arg on JDK9: {}", asList);
+			Assert.assertEquals(1, asList.size());
+		} else {
+			// Check we have many rows
+			Assert.assertTrue(asList.size() > 5);
+		}
+
 	}
 
 	@Test
@@ -162,10 +171,14 @@ public class TestGCInspector implements IApexMemoryConstants {
 
 		String outputMsg = gcInspector.saveHeapDump(heapFile);
 
-		Assertions.assertThat(outputMsg).startsWith("Heap dump file created");
+		if (IS_JDK_9) {
+			Assertions.assertThat(outputMsg).startsWith("Heap Histogram is not available");
+		} else {
+			Assertions.assertThat(outputMsg).startsWith("Heap dump file created");
 
-		// Check we have written data
-		Assert.assertTrue(heapFile.toFile().length() > 0);
+			// Check we have written data
+			Assert.assertTrue(heapFile.toFile().length() > 0);
+		}
 	}
 
 	@Test
@@ -219,12 +232,18 @@ public class TestGCInspector implements IApexMemoryConstants {
 	public void limitedHeapHisto() {
 		String firstRows = GCInspector.getHeapHistogramAsString(5);
 
-		// We have skipped the initial empty row
-		// +1 as we added the last rows
-		Assert.assertEquals(5 + 1, firstRows.split(System.lineSeparator()).length);
+		if (IS_JDK_9) {
+			LOGGER.error("HeapHistogram in JDK9: {}", firstRows);
+			Assert.assertEquals(1, firstRows.split(System.lineSeparator()).length);
+		} else {
 
-		// The last row looks like: Total 1819064 141338008
-		Assert.assertTrue(firstRows.split(System.lineSeparator())[5].startsWith("Total "));
+			// We have skipped the initial empty row
+			// +1 as we added the last rows
+			Assert.assertEquals(5 + 1, firstRows.split(System.lineSeparator()).length);
+
+			// The last row looks like: Total 1819064 141338008
+			Assert.assertTrue(firstRows.split(System.lineSeparator())[5].startsWith("Total "));
+		}
 	}
 
 	// We check the getters and setters are valid according to Spring
