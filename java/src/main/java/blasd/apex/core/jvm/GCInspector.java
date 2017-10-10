@@ -727,13 +727,13 @@ public class GCInspector implements NotificationListener, InitializingBean, Disp
 
 		this.latestThreadDump.set(beforeThreadDump);
 
-		LOGGER.warn("Thread Dump: {}", threadDumpAsString);
+		LOGGER.info("Thread Dump: {}", threadDumpAsString);
 	}
 
 	protected void printHeapHistogram(int nbRows) {
 		String threadDumpAsString = getHeapHistogramAsString(nbRows);
 
-		LOGGER.warn("HeapHistogram: {}{}", System.lineSeparator(), threadDumpAsString);
+		LOGGER.info("HeapHistogram: {}{}", System.lineSeparator(), threadDumpAsString);
 	}
 
 	public static String getHeapHistogramAsString(int nbRows) {

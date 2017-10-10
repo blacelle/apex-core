@@ -91,11 +91,11 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	/**
 	 * Frequency at which we check for long tasks
 	 */
-	public static final int DEFAULT_LONGRUNNINGCHECK_SECONDS = 10;
+	public static final int DEFAULT_LONGRUNNINGCHECK_SECONDS = 60;
 	protected int longRunningCheckSeconds = DEFAULT_LONGRUNNINGCHECK_SECONDS;
 
-	// By default, it means 3*10=30 seconds
-	private static final int FACTOR_FOR_OLD = 3;
+	// By default, it means 2*60=120 seconds
+	private static final int FACTOR_FOR_OLD = 2;
 	/**
 	 * Frequency at which we consider a task is lasting too long.
 	 * 
@@ -104,8 +104,8 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	 */
 	protected int factorForOld = FACTOR_FOR_OLD;
 
-	// By default, it means 4*3*10 = 2 minutes
-	private static final int FACTOR_FOR_TOO_OLD = 4;
+	// By default, it means 5*2*60 = 10 minutes
+	private static final int FACTOR_FOR_TOO_OLD = 5;
 	/**
 	 * This is multiplied with factorForOld and longRunningCheckSeconds. Above this time, a task is regularly logged as
 	 * warn
@@ -362,8 +362,10 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 
 	protected void invalidateStartEvent(StartMetricEvent startEvent) {
 		if (activeTasks.getIfPresent(startEvent) == null) {
-			LOGGER.debug("And EndEvent has been submitted without its StartEvent having been registered"
-					+ ", or after having been already invalidated: {}", startEvent);
+			LOGGER.debug(
+					"An EndEvent has been submitted without its StartEvent having been registered"
+							+ ", or after having been already invalidated: {}",
+					startEvent);
 		} else {
 			invalidate(startEvent);
 		}
@@ -432,7 +434,7 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 	 * In some cases, we may have ghosts active tasks. One can invalidate them manually through this method
 	 * 
 	 * @param name
-	 *            the full name of the activeTask to invalidate. If '*', we cancel all tasks
+	 *            the full name of the activeTask to invalidate. If '*', we cancel all monitor-tasks
 	 * @return true if we succeeded removing this entry
 	 */
 	@ManagedOperation

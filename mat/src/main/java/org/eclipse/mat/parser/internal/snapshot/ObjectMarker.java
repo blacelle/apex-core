@@ -279,9 +279,12 @@ public class ObjectMarker {
 			waits++;
 			try {
 				while (waitingThreads < totalThreads && size() == 0) {
-					wait();
+					synchronized (this) {
+						wait();
+					}
 				}
 			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 				return -1;
 			}
 			long t2 = System.currentTimeMillis();

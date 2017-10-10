@@ -91,15 +91,12 @@ public final class SnapshotImpl implements ISnapshot {
 	@SuppressWarnings("unchecked")
 	public static SnapshotImpl readFromFile(File file, String prefix, IProgressListener listener)
 			throws SnapshotException, IOException {
-		FileInputStream fis = null;
-
 		listener.beginTask(Messages.SnapshotImpl_ReopeningParsedHeapDumpFile, 9);
 
-		try {
-			File indexFile = new File(prefix + "index");
-			fis = new FileInputStream(indexFile);
+		File indexFile = new File(prefix + "index");
+		try (FileInputStream fis = new FileInputStream(indexFile);
+				ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(fis));) {
 			listener.worked(1);
-			ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(fis));
 
 			String version = in.readUTF();
 			if (!VERSION.equals(version))
@@ -167,8 +164,6 @@ public final class SnapshotImpl implements ISnapshot {
 			ioe.initCause(e);
 			throw ioe;
 		} finally {
-			if (fis != null)
-				fis.close();
 			listener.done();
 		}
 	}
@@ -671,6 +666,7 @@ public final class SnapshotImpl implements ISnapshot {
 		try {
 			marker.markMultiThreaded(availableProcessors);
 		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 			throw new SnapshotException(e);
 		}
 
@@ -1831,7 +1827,6 @@ public final class SnapshotImpl implements ISnapshot {
 	 * @return the extra data
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public <A> A getSnapshotAddons(Class<A> addon) throws SnapshotException {
 		// if (addon == UnreachableObjectsHistogram.class)
 		// {
