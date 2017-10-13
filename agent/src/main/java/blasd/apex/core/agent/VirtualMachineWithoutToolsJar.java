@@ -34,7 +34,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.ehcache.sizeof.impl.AgentLoaderApexSpy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +41,9 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+
+import net.bytebuddy.agent.ByteBuddyAgent;
+import net.bytebuddy.agent.ByteBuddyAgent.AttachmentProvider.Accessor;
 
 /**
  * Gives access to the VirtualMachine object. It may not be available if tools.jar is not made available. Tools.jar is
@@ -64,6 +66,7 @@ public class VirtualMachineWithoutToolsJar {
 	// Switched to true if incompatible JVM, or attach failed
 	private static final AtomicBoolean WILL_NOT_WORK = new AtomicBoolean(false);
 
+	private static final AtomicReference<Class<?>> JVM_VIRTUAL_MACHINE_CLASS = new AtomicReference<Class<?>>();
 	private static final AtomicReference<Object> JVM_VIRTUAL_MACHINE = new AtomicReference<Object>();
 
 	protected VirtualMachineWithoutToolsJar() {
@@ -148,7 +151,8 @@ public class VirtualMachineWithoutToolsJar {
 			final Optional<? extends Class<?>> virtualMachineClass = findVirtualMachineClass();
 
 			if (virtualMachineClass.isPresent()) {
-				final Method attachMethod = virtualMachineClass.get().getMethod("attach", String.class);
+				Class<?> vmClass = virtualMachineClass.get();
+				final Method attachMethod = vmClass.getMethod("attach", String.class);
 				final String pid = ApexAgentHelper.getPIDForAgent();
 				try {
 					JVM_VIRTUAL_MACHINE.set(attachMethod.invoke(null, pid));
@@ -157,7 +161,6 @@ public class VirtualMachineWithoutToolsJar {
 						LOGGER.warn("Failure attaching VirtualMachine");
 						WILL_NOT_WORK.set(true);
 					} else {
-						Class<? extends Object> vmClass = JVM_VIRTUAL_MACHINE.get().getClass();
 						LOGGER.trace("VirtualMachine has been loaded: {}. Available methods: {}",
 								vmClass.getName(),
 								Arrays.asList(vmClass.getMethods()));
@@ -173,14 +176,21 @@ public class VirtualMachineWithoutToolsJar {
 	 * 
 	 * @return if available, the Class of the VirtualMachine object
 	 */
-	public static Optional<? extends Class<?>> findVirtualMachineClass() {
-		try {
-			return AgentLoaderApexSpy.getVirtualMachineClass();
-		} catch (Throwable e) {
-			// We log in trace to prevent showing this alarming stack too often
-			LOGGER.trace("Issue while getting VirtualMachine class", e);
-			return Optional.absent();
+	public static synchronized Optional<? extends Class<?>> findVirtualMachineClass() {
+		if (JVM_VIRTUAL_MACHINE_CLASS.get() == null) {
+			try {
+				Accessor attempt = ByteBuddyAgent.AttachmentProvider.DEFAULT.attempt();
+				if (attempt.isAvailable()) {
+					JVM_VIRTUAL_MACHINE_CLASS.set(attempt.getVirtualMachineType());
+				}
+			} catch (Throwable e) {
+				// We log in trace to prevent showing this alarming stack too often
+				LOGGER.trace("Issue while getting VirtualMachine class", e);
+				return Optional.absent();
+			}
 		}
+
+		return Optional.fromNullable(JVM_VIRTUAL_MACHINE_CLASS.get());
 	}
 
 	/**
@@ -248,7 +258,7 @@ public class VirtualMachineWithoutToolsJar {
 				if (!allObjectsElseLive) {
 					LOGGER.warn(".heapDump with allObjectsElseLive=false will trigger a full-GC");
 				}
-				String option = getAllorLiveOption(allObjectsElseLive);
+				String option = getAllOrLiveOption(allObjectsElseLive);
 				try {
 					return invokeForInputStream(vm, "dumpHeap", absoluteFile.getPath(), option);
 				} catch (Throwable e) {
@@ -272,7 +282,7 @@ public class VirtualMachineWithoutToolsJar {
 	 *            object, which will require a full GC
 	 * @return the jmap String option associated to the expected behavior
 	 */
-	protected static String getAllorLiveOption(boolean allObjectsElseLive) {
+	protected static String getAllOrLiveOption(boolean allObjectsElseLive) {
 		if (allObjectsElseLive) {
 			return ALL_OBJECTS_OPTION;
 		} else {

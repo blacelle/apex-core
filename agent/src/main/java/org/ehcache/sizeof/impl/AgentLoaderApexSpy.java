@@ -33,6 +33,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
+import net.bytebuddy.agent.ByteBuddyAgent;
+import net.bytebuddy.agent.ByteBuddyAgent.AttachmentProvider.Accessor;
+
 /**
  * Introspect org.ehcache.sizeof.impl.AgentLoader to retrieve a reference to Instrumentation
  * 
@@ -45,18 +48,14 @@ public class AgentLoaderApexSpy {
 
 	private static final AtomicBoolean HAS_TRIED_LOADING_AGENT = new AtomicBoolean();
 
-	// AgentLoader loads the VirutalMachine in a brand new URLClassLoader on each try: it leads to stacks like:
-	// java.lang.UnsatisfiedLinkError: Native Library attach.dll already loaded in another classloader
-	// or
-	// Caused by: com.sun.tools.attach.AttachNotSupportedException: no providers installed
-	private static final AtomicReference<Class<?>> VM_CLASS_CACHE = new AtomicReference<Class<?>>();
-
 	public static boolean loadAgent() {
 		return AgentLoader.loadAgent();
 	}
 
 	public static Optional<Instrumentation> getInstrumentation()
 			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		// ByteBuddyAgent.install();
+
 		if (HAS_TRIED_LOADING_AGENT.compareAndSet(false, true)) {
 			LOGGER.info("Initializing Agent to provide a reference to {}", Instrumentation.class.getName());
 
@@ -68,37 +67,5 @@ public class AgentLoaderApexSpy {
 		f.setAccessible(true);
 
 		return Optional.fromNullable((Instrumentation) f.get(null));
-	}
-
-	/**
-	 * Soft access to com.sun.tools.attach.VirtualMachine, as it may not be available in the classpath
-	 * 
-	 * @return if available, the Class of the VirtualMachine object
-	 */
-	public static Optional<? extends Class<?>> getVirtualMachineClass()
-			throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-		Class<?> clazz = VM_CLASS_CACHE.get();
-
-		if (clazz == null) {
-			// !!! Do not call getVirtualMachineClass else it would load the VirtualMachine in a different
-			// URLClassLoader (see AgentLoader.getVirtualMachineClass implementation)
-			Field f = AgentLoader.class.getDeclaredField("VIRTUAL_MACHINE_ATTACH");
-
-			f.setAccessible(true);
-
-			// AgentLoader has filled a filled with a Method object
-			Object rawAttachMethod = f.get(null);
-
-			if (rawAttachMethod instanceof Method) {
-				Method attachMethod = (Method) rawAttachMethod;
-
-				// The VirtualMachine class in the class declaring the method '.attach'
-				Class<?> vmClass = attachMethod.getDeclaringClass();
-
-				VM_CLASS_CACHE.compareAndSet(null, vmClass);
-			}
-		}
-
-		return Optional.fromNullable(VM_CLASS_CACHE.get());
 	}
 }

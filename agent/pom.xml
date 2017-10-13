@@ -12,8 +12,7 @@
 	<packaging>jar</packaging>
 
 	<properties>
-		<!-- There is barely no code, leading most branches to be rare edge cases, 
-			which are tough to be unit-tested -->
+		<!-- There is barely no code, leading most branches to be rare edge cases, which are tough to be unit-tested -->
 		<jacoco.instruction.ratio>0.40</jacoco.instruction.ratio>
 		<jacoco.branch.ratio>0.25</jacoco.branch.ratio>
 
@@ -31,7 +30,7 @@
 			<artifactId>guava</artifactId>
 			<!-- https://github.com/google/guava/wiki/Compatibility -->
 			<!-- Guava for JDK6 srops at 20.0 -->
-			<version>20.0</version><!--$NO-MVN-MAN-VER$-->
+			<version>20.0</version><!--$NO-MVN-MAN-VER$ -->
 		</dependency>
 
 		<dependency>
@@ -44,6 +43,12 @@
 			<groupId>org.ehcache</groupId>
 			<artifactId>sizeof</artifactId>
 			<version>${sizeof.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy-agent</artifactId>
+			<version>1.7.6</version>
 		</dependency>
 
 	</dependencies>

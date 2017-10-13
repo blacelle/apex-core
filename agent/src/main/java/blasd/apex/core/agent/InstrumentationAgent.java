@@ -23,12 +23,14 @@
 package blasd.apex.core.agent;
 
 import java.lang.instrument.Instrumentation;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.ehcache.sizeof.impl.AgentLoaderApexSpy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+
+import net.bytebuddy.agent.ByteBuddyAgent;
 
 /**
  * The entry point for the instrumentation agent.
@@ -43,6 +45,8 @@ public class InstrumentationAgent {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(InstrumentationAgent.class);
 
+	protected static final AtomicBoolean BYTE_BUDDY_IS_INSTALLED = new AtomicBoolean();
+
 	/**
 	 * It may not be available for many reasons (tools.jar no in the class path, or "Failed to attach to VM and load the
 	 * agent: class java.lang.UnsatisfiedLinkError: Native Library /usr/lib/jvm/java-8-oracle/jre/lib/amd64/libattach.so
@@ -51,9 +55,14 @@ public class InstrumentationAgent {
 	 * @return an {@link Instrumentation} instance as instantiated by the JVM itself.
 	 */
 	// Rely on Guava Optional to enable compatibility with JDK6
-	public static Optional<Instrumentation> getInstrumentation() {
+	public static synchronized Optional<Instrumentation> getInstrumentation() {
 		try {
-			return AgentLoaderApexSpy.getInstrumentation();
+			if (BYTE_BUDDY_IS_INSTALLED.get()) {
+				return Optional.of(ByteBuddyAgent.getInstrumentation());
+			} else {
+				BYTE_BUDDY_IS_INSTALLED.set(true);
+				return Optional.of(ByteBuddyAgent.install());
+			}
 		} catch (Throwable e) {
 			LOGGER.warn("Issue while getting instrumentation", e);
 			return Optional.absent();
