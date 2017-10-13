@@ -179,7 +179,7 @@ public class VirtualMachineWithoutToolsJar {
 	public static synchronized Optional<? extends Class<?>> findVirtualMachineClass() {
 		if (JVM_VIRTUAL_MACHINE_CLASS.get() == null) {
 			try {
-				Accessor attempt = ByteBuddyAgent.AttachmentProvider.DEFAULT.attempt();
+				Accessor attempt = InstrumentationAgent.DEFAULT_ATTEMPT.get();
 				if (attempt.isAvailable()) {
 					JVM_VIRTUAL_MACHINE_CLASS.set(attempt.getVirtualMachineType());
 				}

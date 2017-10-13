@@ -24,6 +24,7 @@ package blasd.apex.core.agent;
 
 import java.lang.instrument.Instrumentation;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 
 import net.bytebuddy.agent.ByteBuddyAgent;
+import net.bytebuddy.agent.ByteBuddyAgent.AttachmentProvider;
+import net.bytebuddy.agent.ByteBuddyAgent.AttachmentProvider.Accessor;
 
 /**
  * The entry point for the instrumentation agent.
@@ -47,6 +50,10 @@ public class InstrumentationAgent {
 
 	protected static final AtomicBoolean BYTE_BUDDY_IS_INSTALLED = new AtomicBoolean();
 
+	// Ensure we do a single attemps, else we may receive issue like:
+	// java.lang.UnsatisfiedLinkError: Native Library ...\jre\bin\attach.dll already loaded in another classloader
+	protected static final AtomicReference<Accessor> DEFAULT_ATTEMPT = new AtomicReference<Accessor>();
+
 	/**
 	 * It may not be available for many reasons (tools.jar no in the class path, or "Failed to attach to VM and load the
 	 * agent: class java.lang.UnsatisfiedLinkError: Native Library /usr/lib/jvm/java-8-oracle/jre/lib/amd64/libattach.so
@@ -61,7 +68,22 @@ public class InstrumentationAgent {
 				return Optional.of(ByteBuddyAgent.getInstrumentation());
 			} else {
 				BYTE_BUDDY_IS_INSTALLED.set(true);
-				return Optional.of(ByteBuddyAgent.install());
+
+				final Accessor singleAttempt = ByteBuddyAgent.AttachmentProvider.DEFAULT.attempt();
+				DEFAULT_ATTEMPT.set(singleAttempt);
+
+				if (singleAttempt.isAvailable()) {
+					return Optional.of(ByteBuddyAgent.install(new AttachmentProvider() {
+
+						@Override
+						public Accessor attempt() {
+							return singleAttempt;
+						}
+
+					}));
+				} else {
+					return Optional.absent();
+				}
 			}
 		} catch (Throwable e) {
 			LOGGER.warn("Issue while getting instrumentation", e);
