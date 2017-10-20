@@ -152,8 +152,6 @@ public class ApexLogHelper {
 				if (size <= limitSize) {
 					return iterable.toString();
 				} else {
-					// Iterable<?> limited = Iterables.limit(iterable, limitSize);
-
 					return "[" + Streams.stream(iterable).limit(limitSize).map(Object::toString).collect(
 							Collectors.joining(", ")) + ", (" + (size - limitSize) + " more elements)]";
 				}
@@ -302,6 +300,10 @@ public class ApexLogHelper {
 	}
 
 	public static Object getFirstChars(Object toString, int limitChars) {
+		if (toString == null) {
+			// Stick to default behavior for null objects
+			return String.valueOf(toString);
+		}
 		return lazyToString(() -> {
 			String asString = toString.toString();
 			if (asString.length() <= limitChars) {

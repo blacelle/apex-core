@@ -208,19 +208,27 @@ public class TestApexLogHelper {
 	}
 
 	@Test
-	public void testSingleRow() {
-		Assert.assertEquals("a b", ApexLogHelper.getSingleRow("a\rb", true).toString());
-		Assert.assertEquals("a b", ApexLogHelper.getSingleRow("a\nb", true).toString());
-		Assert.assertEquals("a b", ApexLogHelper.getSingleRow("a\r\nb", true).toString());
+	public void testLimitChars_null() {
+		Assert.assertEquals("null", ApexLogHelper.getFirstChars(null, 5).toString());
+	}
+
+	@Test
+	public void testRemoveNewLines() {
+		Assert.assertEquals("a b", ApexLogHelper.removeNewLines("a\rb").toString());
+		Assert.assertEquals("a b", ApexLogHelper.removeNewLines("a\nb").toString());
+		Assert.assertEquals("a b", ApexLogHelper.removeNewLines("a\r\nb").toString());
 
 		// \n\r leads to 2 whitespaces
-		Assert.assertEquals("a  b", ApexLogHelper.getSingleRow("a\n\rb", true).toString());
+		Assert.assertEquals("a  b", ApexLogHelper.removeNewLines("a\n\rb").toString());
 
-		Assert.assertEquals(" a b c ", ApexLogHelper.getSingleRow("\na\rb\r\nc\r", true).toString());
+		Assert.assertEquals(" a b c ", ApexLogHelper.removeNewLines("\na\rb\r\nc\r").toString());
+	}
 
-		Assert.assertEquals("a\\rb", ApexLogHelper.getSingleRow("a\rb", false).toString());
-		Assert.assertEquals("a\\nb", ApexLogHelper.getSingleRow("a\nb", false).toString());
-		Assert.assertEquals("a\\r\\nb", ApexLogHelper.getSingleRow("a\r\nb", false).toString());
+	@Test
+	public void testEscapeNewLines() {
+		Assert.assertEquals("a\\rb", ApexLogHelper.escapeNewLines("a\rb").toString());
+		Assert.assertEquals("a\\nb", ApexLogHelper.escapeNewLines("a\nb").toString());
+		Assert.assertEquals("a\\r\\nb", ApexLogHelper.escapeNewLines("a\r\nb").toString());
 	}
 
 	@Test

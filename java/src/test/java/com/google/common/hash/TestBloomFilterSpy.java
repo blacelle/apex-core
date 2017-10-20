@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class TestBloomFilterSpy {
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testEstimateCardinality() {
 		BloomFilter<Integer> bf = BloomFilter.create(Funnels.integerFunnel(), 1000);

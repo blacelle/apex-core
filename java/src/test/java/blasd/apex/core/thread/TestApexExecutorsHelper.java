@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -39,8 +38,6 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-
-import blasd.apex.core.thread.ApexExecutorsHelper;
 
 public class TestApexExecutorsHelper {
 	@Test
@@ -74,25 +71,17 @@ public class TestApexExecutorsHelper {
 				ApexExecutorsHelper.makeRejectedExecutionHandler(1, TimeUnit.SECONDS));
 
 		for (int i = 0; i < 1000; i++) {
-			ListenableFuture<Object> future = es.submit(new Callable<Object>() {
-
-				@Override
-				public Object call() throws Exception {
-					Thread.sleep(1);
-					return new Object();
-				}
+			ListenableFuture<Object> future = es.submit(() -> {
+				Thread.sleep(1);
+				return new Object();
 			});
 
-			future.addListener(new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+			future.addListener(() -> {
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}, es);
 		}
@@ -150,14 +139,10 @@ public class TestApexExecutorsHelper {
 
 		List<Runnable> runnables = new ArrayList<>();
 		for (int i = 0; i < 10 * 1000; i++) {
-			runnables.add(new Runnable() {
+			runnables.add(() -> {
+				int coucou = 2;
 
-				@Override
-				public void run() {
-					int coucou = 2;
-
-					coucou *= coucou;
-				}
+				coucou *= coucou;
 			});
 		}
 
