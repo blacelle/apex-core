@@ -115,7 +115,8 @@ public class ArrayIntCompressed {
 	private void init(int size, int varyingBits, int trailingClearBits) {
 		// Allocate memory for header and data structure and put decompression
 		// information into header
-		data = new byte[2 + (int) ((((long) size) * varyingBits) - 1) / 0x8 + 1];
+		long intermediateSize = (((long) size) * varyingBits) - 1 / 0x8;
+		data = new byte[2 + (int) intermediateSize + 1];
 		this.varyingBits = data[0] = (byte) varyingBits;
 		this.trailingClearBits = data[1] = (byte) trailingClearBits;
 	}
