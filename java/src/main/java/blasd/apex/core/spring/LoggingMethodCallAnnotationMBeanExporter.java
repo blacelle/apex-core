@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.SpringModelMBean;
 import org.springframework.jmx.export.annotation.AnnotationMBeanExporter;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
+import org.springframework.jmx.export.annotation.ManagedResource;
 
 /**
  * Extends {@link MBeanExporter} to add logging when a remote call failed. Else, the exception is forwarded to the
@@ -42,11 +44,13 @@ import org.springframework.jmx.export.annotation.AnnotationMBeanExporter;
  * @author Benoit Lacelle
  */
 // http://docs.spring.io/autorepo/docs/spring/3.2.x/spring-framework-reference/html/jmx.html
+@ManagedResource
 public class LoggingMethodCallAnnotationMBeanExporter extends AnnotationMBeanExporter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LoggingMethodCallAnnotationMBeanExporter.class);
 
 	protected final AtomicLong nbErrors = new AtomicLong();
 
+	@ManagedAttribute
 	public long getNbErrors() {
 		return nbErrors.get();
 	}

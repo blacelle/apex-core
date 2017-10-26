@@ -52,6 +52,7 @@ public class TestBloomFilterSpy {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testEstimateCardinalityOnNull() {
 		Assert.assertEquals(0, BloomFilterSpy.estimateCardinality(null));

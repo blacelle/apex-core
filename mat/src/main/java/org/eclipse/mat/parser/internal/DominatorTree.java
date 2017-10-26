@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 import org.eclipse.mat.SnapshotException;
+import org.eclipse.mat.collect.ArrayIntCompressed;
 import org.eclipse.mat.collect.ArrayUtils;
 import org.eclipse.mat.collect.BitField;
 import org.eclipse.mat.collect.IteratorInt;
@@ -47,8 +48,10 @@ public class DominatorTree {
 		private int r, n;
 		private int[] dom;
 		private int[] parent;
+		private ArrayIntCompressed compressedParent;
 		private int[] anchestor;
 		private int[] vertex;
+		private ArrayIntCompressed compressedVertex;
 		private int[] label;
 		private int[] semi;
 
@@ -81,9 +84,7 @@ public class DominatorTree {
 			n = snapshot.getSnapshotInfo().getNumberOfObjects() + 1;
 			r = 1;
 
-			parent = new int[n + 1];
 			anchestor = new int[n + 1];
-			vertex = new int[n + 1];
 			label = new int[n + 1];
 			semi = new int[n + 1];
 
@@ -95,6 +96,10 @@ public class DominatorTree {
 			bucket = new int[n + 1];
 			dom = null;
 			bucket = null;
+			
+			// vertex and parent are read-only once dfs() is completed: it can be compressed after dfs() completion
+			vertex = new int[n + 1];
+			parent = new int[n + 1];
 		}
 
 		public void compute() throws IOException, SnapshotException, IProgressListener.OperationCanceledException {
@@ -103,6 +108,11 @@ public class DominatorTree {
 
 			n = 0;
 			dfs(r);
+			compressedVertex = new ArrayIntCompressed(vertex);
+			vertex = null;
+			compressedParent = new ArrayIntCompressed(parent);
+			parent = null;
+			
 
 			outboundIndex.unload();
 
@@ -118,7 +128,7 @@ public class DominatorTree {
 			Arrays.fill(bucket, -1);
 
 			for (int i = n; i >= 2; i--) {
-				int w = vertex[i];
+				int w = compressedVertex.get(i);
 				for (int v : getPredecessors(w)) {
 					v += 2;
 					if (v < 0)
@@ -130,22 +140,22 @@ public class DominatorTree {
 				}
 				// add w to bucket(vertex(semi(w)))
 				// create the bucket if needed
-				bucket[w] = bucket[vertex[semi[w]]]; // serves as next(w)
-				bucket[vertex[semi[w]]] = w; // serves as
+				bucket[w] = bucket[compressedVertex.get(semi[w])]; // serves as next(w)
+				bucket[compressedVertex.get(semi[w])] = w; // serves as
 				// first(vertex[semi[w]])
-				link(parent[w], w);
+				link(compressedParent.get(w), w);
 
-				int v = bucket[parent[w]];
+				int v = bucket[compressedParent.get(w)];
 				while (v != -1) {
 					int u = eval(v);
 					if (semi[u] < semi[v]) {
 						dom[v] = u;
 					} else {
-						dom[v] = parent[w];
+						dom[v] = compressedParent.get(w);
 					}
 					v = bucket[v]; // here bucket serves as next[]
 				}
-				bucket[parent[w]] = -1;
+				bucket[compressedParent.get(w)] = -1;
 				// }
 				if (i % 1000 == 0) {
 					if (progressListener.isCanceled())
@@ -156,7 +166,7 @@ public class DominatorTree {
 
 			for (int i = 2; i <= n; i++) {
 				int w = vertex[i];
-				if (dom[w] != vertex[semi[w]]) {
+				if (dom[w] != compressedVertex.get(semi[w])) {
 					dom[w] = dom[dom[w]];
 				}
 			}
@@ -165,6 +175,8 @@ public class DominatorTree {
 			progressListener.done();
 
 			parent = anchestor = vertex = label = semi = bucket = null;
+			compressedVertex = null;
+			compressedParent = null;
 			inboundIndex.unload();
 
 			if (progressListener0.isCanceled())

@@ -2,6 +2,12 @@ package org.roaringbitmap;
 
 import java.util.Arrays;
 
+/**
+ * Enable faster .rank and .select by caching the cardinality of underlying buckets
+ * 
+ * @author Benoit Lacelle
+ *
+ */
 public class FastRankRoaringBitmap extends RoaringBitmap {
 	private int[] highToCumulatedCardinality = null;
 

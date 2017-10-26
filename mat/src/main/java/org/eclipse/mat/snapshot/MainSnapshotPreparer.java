@@ -44,8 +44,7 @@ public class MainSnapshotPreparer {
 			throws SnapshotException, MalformedObjectNameException, InstanceNotFoundException {
 		new GCInspector().afterPropertiesSet();
 
-		String path = "D:\\blacelle112212\\HeapDUmp\\20170811 Grommet Equity\\grommet.77831.hprof";
-		// path = "C:\\NB5419\\HeapDumps\\java_pid21052.hprof";
+		String path = args[0];
 
 		SnapshotFactory.openSnapshot(new File(path), new ConsoleProgressListener(System.out));
 
