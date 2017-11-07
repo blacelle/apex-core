@@ -22,12 +22,13 @@
  */
 package blasd.apex.core.stream;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -103,7 +104,7 @@ public class ApexStreamHelper {
 	}
 
 	/**
-	 * Enable consuming a stream by blocks of size controlled by the Queue
+	 * Enable consuming a stream by blocks of given size
 	 * 
 	 * @param queueSupplier
 	 *            we may need multiple queues if the stream is parallel
@@ -114,13 +115,62 @@ public class ApexStreamHelper {
 	 * @return how many entries have been processed
 	 */
 	@Beta
-	public static <T> long consumeByPartition(Stream<T> stream, Consumer<Queue<T>> consumer, int partitionSize) {
-		return consumeByPartition(() -> new ArrayBlockingQueue<>(partitionSize), stream, consumer);
+	public static <T> long consumeByPartition(Stream<T> stream, Consumer<Collection<T>> consumer, int partitionSize) {
+		return consumeByPartition(stream, consumer, () -> new ArrayList<T>(partitionSize), partitionSize);
 	}
 
-	/**
-	 * @deprecated as one may provide a queueSupplier with queues without no bounded capacity
-	 */
+	@Beta
+	private static <T> long consumeByPartition(Stream<T> stream,
+			Consumer<Collection<T>> consumer,
+			Supplier<? extends Collection<T>> queueSupplier,
+			int partitionSize) {
+		if (partitionSize <= 0) {
+			throw new IllegalArgumentException("The partitionSize has to be strictly positive");
+		}
+
+		AtomicLong nbConsumed = new AtomicLong();
+
+		Collection<T> leftOvers = stream.collect(queueSupplier, (queue, tuple) -> {
+			queue.add(tuple);
+			if (queue.size() >= partitionSize) {
+				consumer.accept(queue);
+				nbConsumed.addAndGet(queue.size());
+				queue.clear();
+			}
+		}, (l, r) -> {
+			Iterator<T> toDrain = r.iterator();
+
+			// r has to be drained to l
+			int nbDrained = 0;
+			while (toDrain.hasNext()) {
+				nbDrained++;
+				l.add(toDrain.next());
+
+				if (l.size() >= partitionSize) {
+					// We need to submit a batch
+					consumer.accept(l);
+					nbConsumed.addAndGet(l.size());
+					l.clear();
+				}
+			}
+
+			// Just for the sake of helping GC. Might be counter-productive
+			r.clear();
+
+			if (nbDrained < 0) {
+				// Just for the sake of sonar warning about .drainTo result not used
+				// TODO: is there something to do with this information?
+				LOGGER.trace("nbDrained: {}", nbDrained);
+			}
+		});
+
+		// The last transaction
+		consumer.accept(leftOvers);
+		nbConsumed.addAndGet(leftOvers.size());
+
+		return nbConsumed.get();
+	}
+
 	@Beta
 	@Deprecated
 	public static <T> long consumeByPartition(Supplier<? extends BlockingQueue<T>> queueSupplier,
@@ -164,7 +214,7 @@ public class ApexStreamHelper {
 	}
 
 	/**
-	 * Prevfent the requirement for a diamond
+	 * Prevent the requirement for a diamond
 	 * 
 	 * @return an empty Stream
 	 */

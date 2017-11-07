@@ -37,6 +37,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.primitives.Booleans;
 
 public class TestApexStreamHelper {
 	@Test
@@ -85,5 +86,23 @@ public class TestApexStreamHelper {
 
 		// We have blocks with size 100, and a left-over
 		Assert.assertEquals(ImmutableSet.of(100, 45), consumedSizes);
+	}
+
+	@Test
+	public void testPartitionConsume_limit100_parallel_large() {
+		int problemSize = 100 * 1000 * 1000;
+
+		boolean[] checked = new boolean[problemSize];
+		// Check that we have false by default
+		Assert.assertFalse(checked[0]);
+
+		long nbDone = ApexStreamHelper.consumeByPartition(
+				IntStream.range(0, problemSize).parallel().mapToObj(Integer::valueOf),
+				c -> c.forEach(i -> checked[i] = true),
+				100);
+
+		Assert.assertEquals(problemSize, nbDone);
+
+		Assert.assertEquals(-1, Booleans.indexOf(checked, false));
 	}
 }

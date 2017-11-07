@@ -71,6 +71,7 @@ public class ApexExecutorsHelper {
 
 	// See TransactionManager.addAll: We split on task of size 1024, so the
 	// maximum nice partition size is 1023
+	@Deprecated
 	public static final int DEFAULT_PARTITION_TASK_SIZE = 1023;
 
 	public static final int DEFAULT_MINIMUM_QUEUE_SIZE = 16;
@@ -346,6 +347,7 @@ public class ApexExecutorsHelper {
 		return invokeAll(Collections2.transform(tasks, RUNNABLE_TO_CALLABLE), executorService, timeout, unit);
 	}
 
+	@Deprecated
 	public static <T, V> Iterator<? extends Supplier<V>> partitions(Iterator<T> input,
 			Function<? super List<T>, V> function) {
 		return partitions(input, function, DEFAULT_PARTITION_TASK_SIZE);
@@ -370,6 +372,7 @@ public class ApexExecutorsHelper {
 		};
 	}
 
+	@Deprecated
 	public static <T, V> Iterator<? extends Runnable> partitions(Iterator<T> input,
 			final Consumer<? super List<T>> consumer) {
 		return partitions(input, consumer, DEFAULT_PARTITION_TASK_SIZE);
