@@ -92,7 +92,20 @@ public class TestApexStreamHelper {
 	public void testPartitionConsume_limit100_parallel_large() {
 		int problemSize = 100 * 1000 * 1000;
 
-		boolean[] checked = new boolean[problemSize];
+		boolean[] checked;
+		{
+			boolean[] tmpChecked = null;
+			do {
+				try {
+					tmpChecked = new boolean[problemSize];
+				} catch (OutOfMemoryError e) {
+					// In some environment, the available memory could be low
+					problemSize /= 2;
+				}
+			} while (tmpChecked == null);
+			checked = tmpChecked;
+		}
+
 		// Check that we have false by default
 		Assert.assertFalse(checked[0]);
 

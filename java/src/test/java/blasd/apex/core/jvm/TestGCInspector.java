@@ -151,7 +151,8 @@ public class TestGCInspector implements IApexMemoryConstants {
 	public void testGetHeapHistogram() throws Exception {
 		GCInspector gcInspector = new GCInspector(Mockito.mock(IApexThreadDumper.class));
 
-		List<String> asList = Splitter.on(System.lineSeparator()).splitToList(gcInspector.getHeapHistogram());
+		// It appears that even under windows, the separator is '\n', not System.lineSeparator()
+		List<String> asList = Splitter.on("\n").splitToList(gcInspector.getHeapHistogram());
 
 		if (IS_JDK_9) {
 			LOGGER.error("Arg on JDK9: {}", asList);

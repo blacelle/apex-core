@@ -116,6 +116,8 @@ public class ApexStreamHelper {
 	 */
 	@Beta
 	public static <T> long consumeByPartition(Stream<T> stream, Consumer<Collection<T>> consumer, int partitionSize) {
+		// No need to return a thread-safe Collection as thread-safety is managed by the Stream API
+		// ArrayList is about 5 times faster than ArrayBlockingQueue
 		return consumeByPartition(stream, consumer, () -> new ArrayList<T>(partitionSize), partitionSize);
 	}
 
