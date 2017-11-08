@@ -24,8 +24,12 @@ import org.eclipse.mat.collect.ArrayInt;
 import org.eclipse.mat.collect.HashMapIntObject;
 import org.eclipse.mat.snapshot.ISnapshot;
 import org.eclipse.mat.snapshot.model.IThreadStack;
+import org.eclipse.mat.util.MessageUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /* package */class ThreadStackHelper {
+	protected static final Logger LOGGER = LoggerFactory.getLogger(ThreadStackHelper.class);
 
 	/* package */static HashMapIntObject<IThreadStack> loadThreadsData(ISnapshot snapshot) throws SnapshotException {
 		String fileName = snapshot.getSnapshotInfo().getPrefix() + "threads";
@@ -72,9 +76,16 @@ import org.eclipse.mat.snapshot.model.IThreadStack;
 					}
 
 					if (threadAddress != -1) {
-						int threadId = snapshot.mapAddressToId(threadAddress);
-						IThreadStack stack = new ThreadStackImpl(threadId, buildFrames(lines, line2locals));
-						threadId2stack.put(threadId, stack);
+						try {
+							int threadId = snapshot.mapAddressToId(threadAddress);
+							IThreadStack stack = new ThreadStackImpl(threadId, buildFrames(lines, line2locals));
+							threadId2stack.put(threadId, stack);
+						} catch (SnapshotException se) {
+							// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=520908
+							LOGGER.warn(MessageUtil.format("Invalid thread {0}: {1}",
+									"0x" + Long.toHexString(threadAddress),
+									se.getLocalizedMessage()));
+						}
 					}
 				}
 
