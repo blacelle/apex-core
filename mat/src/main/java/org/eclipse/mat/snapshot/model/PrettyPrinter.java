@@ -19,8 +19,11 @@ import org.eclipse.mat.SnapshotException;
 public final class PrettyPrinter {
 	/**
 	 * Convert a <code>java.lang.String</code> object into a String.
-	 * @param stringObject the String object in the dump
-	 * @param limit maximum number of characters to return
+	 * 
+	 * @param stringObject
+	 *            the String object in the dump
+	 * @param limit
+	 *            maximum number of characters to return
 	 * @return the value of the string from the dump, as a String
 	 * @throws SnapshotException
 	 */
@@ -41,22 +44,27 @@ public final class PrettyPrinter {
 			if (count.intValue() == 0)
 				return "";
 
+			// IBM java.lang.String implementation may have count but not offset
+			Integer offset = 0;
 			Object offsetObj = stringObject.resolveValue("offset");
-			if (!(offsetObj instanceof Integer))
-				return null;
-			Integer offset = (Integer) offsetObj;
+			if ((offsetObj instanceof Integer)) {
+				offset = (Integer) offsetObj;
+			}
 
 			return arrayAsString(charArray, offset, count, limit);
 		}
 	}
 
 	/**
-	 * Convert a <code>char[]</code> object into a String.
-	 * Unprintable characters are returned as \\unnnn values
+	 * Convert a <code>char[]</code> object into a String. Unprintable characters are returned as \\unnnn values
+	 * 
 	 * @param charArray
-	 * @param offset where to start
-	 * @param count how many characters to read
-	 * @param limit the maximum number of characters to read
+	 * @param offset
+	 *            where to start
+	 * @param count
+	 *            how many characters to read
+	 * @param limit
+	 *            the maximum number of characters to read
 	 * @return the characters as a string
 	 */
 	public static String arrayAsString(IPrimitiveArray charArray, int offset, int count, int limit) {
