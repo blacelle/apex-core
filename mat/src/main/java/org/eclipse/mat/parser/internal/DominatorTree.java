@@ -96,7 +96,7 @@ public class DominatorTree {
 			bucket = new int[n + 1];
 			dom = null;
 			bucket = null;
-			
+
 			// vertex and parent are read-only once dfs() is completed: it can be compressed after dfs() completion
 			vertex = new int[n + 1];
 			parent = new int[n + 1];
@@ -112,7 +112,6 @@ public class DominatorTree {
 			vertex = null;
 			compressedParent = new ArrayIntCompressed(parent);
 			parent = null;
-			
 
 			outboundIndex.unload();
 
@@ -165,7 +164,7 @@ public class DominatorTree {
 			}
 
 			for (int i = 2; i <= n; i++) {
-				int w = vertex[i];
+				int w = compressedVertex.get(i);
 				if (dom[w] != compressedVertex.get(semi[w])) {
 					dom[w] = dom[dom[w]];
 				}
