@@ -38,6 +38,9 @@ import blasd.apex.core.agent.InstrumentationAgent;
 import blasd.apex.core.memory.ApexMemoryHelper;
 
 public class TestApexMemoryMeter {
+
+	public static final boolean IS_JDK_9 = "9".equals(System.getProperty("java.specification.version"));
+
 	@BeforeClass
 	public static void assumeAgentLoaded() {
 		Assume.assumeTrue("We failed retrieving an Instrumentation",
@@ -46,7 +49,12 @@ public class TestApexMemoryMeter {
 
 	@Test
 	public void testStringWeight() {
-		Assert.assertEquals(56, ApexMemoryHelper.deepSize("Youpi"));
+		if (IS_JDK_9) {
+			// Lower in JDK9: good!
+			Assert.assertEquals(48, ApexMemoryHelper.deepSize("Youpi"));
+		} else {
+			Assert.assertEquals(56, ApexMemoryHelper.deepSize("Youpi"));
+		}
 
 		if (false) {
 			// Adding a single char add 2 bytes. As the JVM packes by block of 8 bytes, it may not be enough to grow the
@@ -69,7 +77,12 @@ public class TestApexMemoryMeter {
 		recursiveMap.put("myself", recursiveMap);
 
 		long deepSize = ApexMemoryHelper.deepSize(recursiveMap);
-		Assert.assertEquals(216, deepSize);
+		if (IS_JDK_9) {
+			// Lower in JDK9: good!
+			Assert.assertEquals(208, deepSize);
+		} else {
+			Assert.assertEquals(216, deepSize);
+		}
 
 		// Change the Map so it does not reference itself: the object graph should have the same size
 		Map<String, Object> withoutRecursivity = new HashMap<>();
