@@ -254,4 +254,14 @@ public class TestApexLogHelper {
 
 		Assert.assertEquals("{k=(this Map), k2=v2(java.lang.String)}", ApexLogHelper.getObjectAndClass(map).toString());
 	}
+
+	@Test
+	public void testGetNiceMemory() {
+		Assert.assertEquals("789B", ApexLogHelper.getNiceMemory(789L).toString());
+		Assert.assertEquals("607KB", ApexLogHelper.getNiceMemory(789L * 789).toString());
+		Assert.assertEquals("468MB", ApexLogHelper.getNiceMemory(789L * 789 * 789).toString());
+		Assert.assertEquals("360GB", ApexLogHelper.getNiceMemory(789L * 789 * 789 * 789).toString());
+		Assert.assertEquals("278TB", ApexLogHelper.getNiceMemory(789L * 789 * 789 * 789 * 789).toString());
+		Assert.assertEquals("214PB", ApexLogHelper.getNiceMemory(789L * 789 * 789 * 789 * 789 * 789).toString());
+	}
 }

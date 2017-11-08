@@ -48,6 +48,10 @@ public interface IApexMemoryConstants {
 	long TB = KB * KB * KB * KB;
 	int TB_INT = Ints.saturatedCast(TB);
 
+	/** One terabyte */
+	long PB = KB * KB * KB * KB * KB;
+	int PB_INT = Ints.saturatedCast(PB);
+
 	long CHAR = Character.BYTES;
 	long INT = Integer.BYTES;
 	long LONG = Long.BYTES;

@@ -111,8 +111,10 @@ public class ApexLogHelper {
 				return (size / IApexMemoryConstants.MB) + "MB";
 			} else if (absSize < BARRIER_FOR_SIZE_IN_LOG * IApexMemoryConstants.TB) {
 				return (size / IApexMemoryConstants.GB) + "GB";
-			} else {
+			} else if (absSize < BARRIER_FOR_SIZE_IN_LOG * IApexMemoryConstants.PB) {
 				return (size / IApexMemoryConstants.TB) + "TB";
+			} else {
+				return (size / IApexMemoryConstants.PB) + "PB";
 			}
 		});
 	}
