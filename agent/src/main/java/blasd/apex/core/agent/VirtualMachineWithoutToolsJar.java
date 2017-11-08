@@ -42,7 +42,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
-import net.bytebuddy.agent.ByteBuddyAgent;
 import net.bytebuddy.agent.ByteBuddyAgent.AttachmentProvider.Accessor;
 
 /**
@@ -179,7 +178,7 @@ public class VirtualMachineWithoutToolsJar {
 	public static synchronized Optional<? extends Class<?>> findVirtualMachineClass() {
 		if (JVM_VIRTUAL_MACHINE_CLASS.get() == null) {
 			try {
-				Accessor attempt = InstrumentationAgent.DEFAULT_ATTEMPT.get();
+				Accessor attempt = InstrumentationAgent.safeGetDefaultAttempt();
 				if (attempt.isAvailable()) {
 					JVM_VIRTUAL_MACHINE_CLASS.set(attempt.getVirtualMachineType());
 				}

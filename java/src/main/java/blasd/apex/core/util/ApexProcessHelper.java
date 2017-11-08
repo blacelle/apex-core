@@ -99,7 +99,10 @@ public class ApexProcessHelper {
 			memoryBuilder = new ProcessBuilder("tasklist.exe", "/fi", "PID eq " + pidAsString, "/fo", "csv", "/nh");
 		} else {
 			// In heroku, no need for sudo
-			memoryBuilder = new ProcessBuilder("pmap", pidAsString);
+			// We need -X to be able to find the resident memory
+			// https://stackoverflow.com/questions/131303/how-to-measure-actual-memory-usage-of-an-application-or-process
+			// https://linux.die.net/man/1/pmap
+			memoryBuilder = new ProcessBuilder("pmap", "-x", pidAsString);
 		}
 
 		// SImplify output by redirecting all stream in the same place
@@ -238,11 +241,28 @@ public class ApexProcessHelper {
 					throw new RuntimeException("Issue when extracting memory from '" + lastLine + "'", e);
 				}
 			} else {
-				// Last line is like ' total 65512K'
+				// With 'pmap -x':
+				// Address Kbytes RSS Dirty Mode Mapping
+				// ...
+				// ---------------- ------- ------- -------
+				//
+				// total kB 4824728 390624 377220
+
+				// With 'pmap', without '-x', Last line is like ' total 65512K'
 				lastLine = lastLine.trim();
 				if (lastLine.startsWith("total")) {
-					lastLine = lastLine.substring("total".length()).trim();
-					long memory = ApexMemoryHelper.memoryAsLong(lastLine);
+					lastLine = lastLine.substring("total".length()).replaceAll("\\s+", " ").trim();
+
+					int betweenTotalAndKbytes = lastLine.indexOf(' ');
+					String unit = lastLine.substring(0, betweenTotalAndKbytes);
+
+					int betweenKBytesAndRSS = lastLine.indexOf(' ', betweenTotalAndKbytes + 1);
+					// String kBytes = lastLine.substring(betweenKBytesAndRSS + 1, betweenKBytesAndRSS);
+
+					int betweenRSSAndDirty = lastLine.indexOf(' ', betweenKBytesAndRSS + 1);
+					String rss = lastLine.substring(betweenKBytesAndRSS + 1, betweenRSSAndDirty);
+
+					long memory = ApexMemoryHelper.memoryAsLong(rss + unit);
 					return OptionalLong.of(memory);
 				} else {
 					LOGGER.trace("Unexpected row: {}", lastLine);

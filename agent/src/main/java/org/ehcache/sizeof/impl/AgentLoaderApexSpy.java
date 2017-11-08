@@ -24,17 +24,12 @@ package org.ehcache.sizeof.impl;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
-
-import net.bytebuddy.agent.ByteBuddyAgent;
-import net.bytebuddy.agent.ByteBuddyAgent.AttachmentProvider.Accessor;
 
 /**
  * Introspect org.ehcache.sizeof.impl.AgentLoader to retrieve a reference to Instrumentation

@@ -69,9 +69,7 @@ public class InstrumentationAgent {
 			} else {
 				BYTE_BUDDY_IS_INSTALLED.set(true);
 
-				final Accessor singleAttempt = ByteBuddyAgent.AttachmentProvider.DEFAULT.attempt();
-				DEFAULT_ATTEMPT.set(singleAttempt);
-
+				final Accessor singleAttempt = safeGetDefaultAttempt();
 				if (singleAttempt.isAvailable()) {
 					return Optional.of(ByteBuddyAgent.install(new AttachmentProvider() {
 
@@ -89,5 +87,16 @@ public class InstrumentationAgent {
 			LOGGER.warn("Issue while getting instrumentation", e);
 			return Optional.absent();
 		}
+	}
+
+	/**
+	 * Also referred by {blasd.apex.core.agent.VirtualMachineWithoutToolsJar#findVirtualMachineClass()}
+	 */
+	synchronized static Accessor safeGetDefaultAttempt() {
+		if (DEFAULT_ATTEMPT.get() == null) {
+			final Accessor singleAttempt = ByteBuddyAgent.AttachmentProvider.DEFAULT.attempt();
+			DEFAULT_ATTEMPT.compareAndSet(null, singleAttempt);
+		}
+		return DEFAULT_ATTEMPT.get();
 	}
 }

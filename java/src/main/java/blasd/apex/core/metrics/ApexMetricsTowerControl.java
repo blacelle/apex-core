@@ -362,10 +362,8 @@ public class ApexMetricsTowerControl implements IApexMetricsTowerControl, Initia
 
 	protected void invalidateStartEvent(StartMetricEvent startEvent) {
 		if (activeTasks.getIfPresent(startEvent) == null) {
-			LOGGER.debug(
-					"An EndEvent has been submitted without its StartEvent having been registered"
-							+ ", or after having been already invalidated: {}",
-					startEvent);
+			LOGGER.debug("An EndEvent has been submitted without its StartEvent having been registered"
+					+ ", or after having been already invalidated: {}", startEvent);
 		} else {
 			invalidate(startEvent);
 		}

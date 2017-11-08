@@ -37,22 +37,19 @@ import blasd.apex.core.memory.IApexMemoryConstants;
 public class TestApexProcessHelper {
 	@Test
 	public void testMemoryOnMac() throws IOException {
-		String macMemoryOutput = Arrays
-				.asList("mapped file 32.9M 10.7M 32K 0K 0K 0K 0K 139",
-						"shared memory 44K 44K 44K 0K 0K 0K 0K 6",
-						"=========== ======= ======== ===== ======= ======== ====== ===== =======",
-						"TOTAL 2.2G 538.2M 377.3M 0K 0K 16K 0K 845",
-						"TOTAL, minus reserved VM space 2.2G 538.2M 377.3M 0K 0K 16K 0K 845",
-						"",
-						"VIRTUAL RESIDENT DIRTY SWAPPED ALLOCATION BYTES DIRTY+SWAP REGION",
-						"MALLOC ZONE SIZE SIZE SIZE SIZE COUNT ALLOCATED FRAG SIZE % FRAG COUNT",
-						"=========== ======= ========= ========= ========= ========= ========= ========= ======",
-						"DefaultMallocZone_0x10b7b6000 203.0M 148.4M 87.4M 0K 167902 64.5M 22.9M 27% 19",
-						"GFXMallocZone_0x10b7e7000 0K 0K 0K 0K 0 0K 0K 0% 0",
-						"=========== ======= ========= ========= ========= ========= ========= ========= ======",
-						"TOTAL 203.0M 148.4M 87.4M 0K 167902 64.5M 22.9M 27% 19")
-				.stream()
-				.collect(Collectors.joining("\r"));
+		String macMemoryOutput = Arrays.asList("mapped file 32.9M 10.7M 32K 0K 0K 0K 0K 139",
+				"shared memory 44K 44K 44K 0K 0K 0K 0K 6",
+				"=========== ======= ======== ===== ======= ======== ====== ===== =======",
+				"TOTAL 2.2G 538.2M 377.3M 0K 0K 16K 0K 845",
+				"TOTAL, minus reserved VM space 2.2G 538.2M 377.3M 0K 0K 16K 0K 845",
+				"",
+				"VIRTUAL RESIDENT DIRTY SWAPPED ALLOCATION BYTES DIRTY+SWAP REGION",
+				"MALLOC ZONE SIZE SIZE SIZE SIZE COUNT ALLOCATED FRAG SIZE % FRAG COUNT",
+				"=========== ======= ========= ========= ========= ========= ========= ========= ======",
+				"DefaultMallocZone_0x10b7b6000 203.0M 148.4M 87.4M 0K 167902 64.5M 22.9M 27% 19",
+				"GFXMallocZone_0x10b7e7000 0K 0K 0K 0K 0 0K 0K 0% 0",
+				"=========== ======= ========= ========= ========= ========= ========= ========= ======",
+				"TOTAL 203.0M 148.4M 87.4M 0K 167902 64.5M 22.9M 27% 19").stream().collect(Collectors.joining("\r"));
 
 		long nbBytes = ApexProcessHelper
 				.extractMemory(ApexProcessHelper.OS_MARKER_MAC, new ByteArrayInputStream(macMemoryOutput.getBytes()))
@@ -72,8 +69,19 @@ public class TestApexProcessHelper {
 	}
 
 	@Test
-	public void testMemoryOnLinux() throws IOException {
+	public void testMemoryOnLinux_MissingDashX() throws IOException {
 		String macMemoryOutput = Arrays.asList(" total 65512K").stream().collect(Collectors.joining("\n"));
+
+		long nbBytes = ApexProcessHelper
+				.extractMemory(ApexProcessHelper.OS_MARKER_LINUX, new ByteArrayInputStream(macMemoryOutput.getBytes()))
+				.getAsLong();
+		Assert.assertEquals(65512 * IApexMemoryConstants.KB, nbBytes);
+	}
+
+	@Test
+	public void testMemoryOnLinux_WithDashX() throws IOException {
+		String macMemoryOutput =
+				Arrays.asList("total kB         4824728  390544  377152").stream().collect(Collectors.joining("\n"));
 
 		long nbBytes = ApexProcessHelper
 				.extractMemory(ApexProcessHelper.OS_MARKER_LINUX, new ByteArrayInputStream(macMemoryOutput.getBytes()))
@@ -89,22 +97,28 @@ public class TestApexProcessHelper {
 		// "/fo table"
 		// String windowsMemoryOutput = "chrome.exe 6740 Console 1 108,760 K";
 
-		long nbBytes = ApexProcessHelper.extractMemory(ApexProcessHelper.OS_MARKER_WINDOWS,
-				new ByteArrayInputStream(windowsMemoryOutput.getBytes())).getAsLong();
+		long nbBytes =
+				ApexProcessHelper
+						.extractMemory(ApexProcessHelper.OS_MARKER_WINDOWS,
+								new ByteArrayInputStream(windowsMemoryOutput.getBytes()))
+						.getAsLong();
 		Assert.assertEquals(107940 * IApexMemoryConstants.KB, nbBytes);
 	}
 
 	// French has no comma as thousands separator
 	@Test
-	public void testMemoryOnWindows_FranchLocal() throws IOException {
+	public void testMemoryOnWindows_FrenchLocal() throws IOException {
 		// "/fo csv"
 		String windowsMemoryOutput = "\"chrome.exe\",\"6740\",\"Console\",\"1\",\"78 332 K\"";
 
 		// "/fo table"
 		// String windowsMemoryOutput = "chrome.exe 6740 Console 1 108,760 K";
 
-		long nbBytes = ApexProcessHelper.extractMemory(ApexProcessHelper.OS_MARKER_WINDOWS,
-				new ByteArrayInputStream(windowsMemoryOutput.getBytes())).getAsLong();
+		long nbBytes =
+				ApexProcessHelper
+						.extractMemory(ApexProcessHelper.OS_MARKER_WINDOWS,
+								new ByteArrayInputStream(windowsMemoryOutput.getBytes()))
+						.getAsLong();
 		Assert.assertEquals(78332 * IApexMemoryConstants.KB, nbBytes);
 	}
 
