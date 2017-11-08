@@ -65,6 +65,16 @@ public class TestApexMemoryHelper {
 		Assert.assertEquals(123 * IApexMemoryConstants.GB, ApexMemoryHelper.memoryAsLong("123g"));
 	}
 
+	@Test
+	public void testParseMemory_EndsKB() {
+		Assert.assertEquals(123 * IApexMemoryConstants.KB, ApexMemoryHelper.memoryAsLong("123kB"));
+	}
+
+	@Test
+	public void testParseMemory_Edge_B() {
+		Assert.assertEquals(0, ApexMemoryHelper.memoryAsLong("B"));
+	}
+
 	// Happens on vmmap|pmap. See ApexProcessHelper.getProcessResidentMemory(long)
 	@Test
 	public void testParseMemory_withDot() {

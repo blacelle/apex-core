@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 
-import org.ehcache.sizeof.impl.AgentLoaderApexSpy;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
@@ -70,8 +69,8 @@ public class TestVirtualMachineWithoutToolsJar {
 	@Test
 	public void testSameVMClass()
 			throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException {
-		Assert.assertSame(AgentLoaderApexSpy.getVirtualMachineClass().get(),
-				AgentLoaderApexSpy.getVirtualMachineClass().get());
+		Assert.assertSame(VirtualMachineWithoutToolsJar.findVirtualMachineClass().get(),
+				VirtualMachineWithoutToolsJar.findVirtualMachineClass().get());
 	}
 
 	@Test

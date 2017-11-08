@@ -281,11 +281,22 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 		String digits;
 		long multiplier;
 
-		char lastChar = targetMax.charAt(targetMax.length() - 1);
+		int lastDigit = targetMax.length();
+		char lastChar = targetMax.charAt(lastDigit - 1);
 		if (CharMatcher.javaDigit().matches(lastChar)) {
 			multiplier = 1L;
 			digits = targetMax;
 		} else {
+			lastDigit -= 1;
+
+			if (lastChar == 'b' || lastChar == 'B') {
+				if (targetMax.length() <= 1) {
+					return 0;
+				}
+				lastChar = targetMax.charAt(targetMax.length() - 2);
+				lastDigit -= 1;
+			}
+
 			if (lastChar == 'k' || lastChar == 'K') {
 				multiplier = IApexMemoryConstants.KB;
 			} else if (lastChar == 'm' || lastChar == 'M') {
@@ -297,7 +308,7 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 						"Can not parse " + targetMax + ". It should end by a digit or one of 'k', 'm','g'");
 			}
 
-			digits = targetMax.substring(0, targetMax.length() - 1).trim();
+			digits = targetMax.substring(0, lastDigit).trim();
 		}
 
 		// Something like "123,456" or ""123 456""
