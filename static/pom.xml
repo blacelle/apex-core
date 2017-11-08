@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>com.github.blasd.apex</groupId>
 		<artifactId>apex-core-metadata</artifactId>
-		<version>1.8-SNAPSHOT</version>
+		<version>1.8</version>
 		<relativePath>../metadata</relativePath>
 	</parent>
 
