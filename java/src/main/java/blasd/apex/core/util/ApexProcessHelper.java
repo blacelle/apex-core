@@ -254,15 +254,22 @@ public class ApexProcessHelper {
 					lastLine = lastLine.substring("total".length()).replaceAll("\\s+", " ").trim();
 
 					int betweenTotalAndKbytes = lastLine.indexOf(' ');
-					String unit = lastLine.substring(0, betweenTotalAndKbytes);
 
-					int betweenKBytesAndRSS = lastLine.indexOf(' ', betweenTotalAndKbytes + 1);
-					// String kBytes = lastLine.substring(betweenKBytesAndRSS + 1, betweenKBytesAndRSS);
+					long memory;
+					if (betweenTotalAndKbytes < 0) {
+						memory = ApexMemoryHelper.memoryAsLong(lastLine);
+					} else {
+						String unit = lastLine.substring(0, betweenTotalAndKbytes);
 
-					int betweenRSSAndDirty = lastLine.indexOf(' ', betweenKBytesAndRSS + 1);
-					String rss = lastLine.substring(betweenKBytesAndRSS + 1, betweenRSSAndDirty);
+						int betweenKBytesAndRSS = lastLine.indexOf(' ', betweenTotalAndKbytes + 1);
+						// String kBytes = lastLine.substring(betweenKBytesAndRSS + 1, betweenKBytesAndRSS);
 
-					long memory = ApexMemoryHelper.memoryAsLong(rss + unit);
+						int betweenRSSAndDirty = lastLine.indexOf(' ', betweenKBytesAndRSS + 1);
+						String rss = lastLine.substring(betweenKBytesAndRSS + 1, betweenRSSAndDirty);
+
+						memory = ApexMemoryHelper.memoryAsLong(rss + unit);
+					}
+
 					return OptionalLong.of(memory);
 				} else {
 					LOGGER.trace("Unexpected row: {}", lastLine);
