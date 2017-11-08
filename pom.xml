@@ -36,7 +36,7 @@
 	<!-- Needs 2 hours to appear in http://search.maven.org/ -->
 
 	<properties>
-		<guava.version>23.1-jre</guava.version>
+		<guava.version>23.3-jre</guava.version>
 		<javolution.version>6.0.0</javolution.version>
 
 		<awaitility.version>3.0.0</awaitility.version>
