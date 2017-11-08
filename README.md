@@ -60,3 +60,6 @@ ApexProcessHelper enables tracking the memory consumption of a process (would it
 # Apex-MAT
 A fork from Eclipse MAT for HeapDump analysis. It improves original MAT by lowering the heap required to prepare MAT index files, while keeping the produced indexes compatible with the original MAT.
 
+Original work:
+https://git.eclipse.org/c/mat/org.eclipse.mat.git
+
