@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010,2011 IBM Corporation.
+ * Copyright (c) 2010,2017 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *    IBM Corporation - initial API and implementation
+ *    Andrew Johnson - test class specific name for Strings etc.
  *******************************************************************************/
 package org.eclipse.mat.tests.snapshot;
 
@@ -14,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -27,6 +29,9 @@ import org.eclipse.mat.snapshot.model.IObject;
 import org.eclipse.mat.snapshot.model.IStackFrame;
 import org.eclipse.mat.snapshot.model.IThreadStack;
 import org.eclipse.mat.tests.TestSnapshots;
+import org.hamcrest.Matchers;
+import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -56,27 +61,26 @@ public class GeneralSnapshotTests {
 
 	@Parameters
 	public static Collection<Object[]> data() {
-		return Arrays
-				.asList(new Object[][] { { TestSnapshots.SUN_JDK6_32BIT, Stacks.NONE },
-						{ TestSnapshots.SUN_JDK5_64BIT, Stacks.NONE },
-						{ TestSnapshots.SUN_JDK6_18_32BIT, Stacks.FRAMES_AND_OBJECTS },
-						{ TestSnapshots.SUN_JDK6_18_64BIT, Stacks.FRAMES_AND_OBJECTS },
-						{ TestSnapshots.SUN_JDK5_13_32BIT, Stacks.NONE },
-						{ TestSnapshots.IBM_JDK6_32BIT_HEAP, Stacks.NONE },
-						{ TestSnapshots.IBM_JDK6_32BIT_JAVA, Stacks.FRAMES },
-						{ TestSnapshots.IBM_JDK6_32BIT_HEAP_AND_JAVA, Stacks.FRAMES },
-						{ TestSnapshots.IBM_JDK6_32BIT_SYSTEM, Stacks.FRAMES_AND_OBJECTS },
-						{ "allMethods", Stacks.FRAMES_AND_OBJECTS },
-						{ "runningMethods", Stacks.FRAMES_AND_OBJECTS },
-						{ "framesOnly", Stacks.FRAMES_AND_OBJECTS },
-						{ "noMethods", Stacks.FRAMES_AND_OBJECTS },
-						{ TestSnapshots.IBM_JDK142_32BIT_HEAP, Stacks.NONE },
-						{ TestSnapshots.IBM_JDK142_32BIT_JAVA, Stacks.FRAMES },
-						{ TestSnapshots.IBM_JDK142_32BIT_HEAP_AND_JAVA,
-								DTFJreadJavacore142 ? Stacks.FRAMES : Stacks.NONE },
-						{ TestSnapshots.IBM_JDK142_32BIT_SYSTEM, Stacks.FRAMES },
-						{ TestSnapshots.ORACLE_JDK7_21_64BIT, Stacks.FRAMES_AND_OBJECTS },
-						{ TestSnapshots.ORACLE_JDK8_05_64BIT, Stacks.FRAMES_AND_OBJECTS }, });
+		return Arrays.asList(new Object[][] { { TestSnapshots.SUN_JDK6_32BIT, Stacks.NONE },
+				{ TestSnapshots.SUN_JDK5_64BIT, Stacks.NONE },
+				{ TestSnapshots.SUN_JDK6_18_32BIT, Stacks.FRAMES_AND_OBJECTS },
+				{ TestSnapshots.SUN_JDK6_18_64BIT, Stacks.FRAMES_AND_OBJECTS },
+				{ TestSnapshots.SUN_JDK5_13_32BIT, Stacks.NONE },
+				{ TestSnapshots.IBM_JDK6_32BIT_HEAP, Stacks.NONE },
+				{ TestSnapshots.IBM_JDK6_32BIT_JAVA, Stacks.FRAMES },
+				{ TestSnapshots.IBM_JDK6_32BIT_HEAP_AND_JAVA, Stacks.FRAMES },
+				{ TestSnapshots.IBM_JDK6_32BIT_SYSTEM, Stacks.FRAMES_AND_OBJECTS },
+				{ "allMethods", Stacks.FRAMES_AND_OBJECTS },
+				{ "runningMethods", Stacks.FRAMES_AND_OBJECTS },
+				{ "framesOnly", Stacks.FRAMES_AND_OBJECTS },
+				{ "noMethods", Stacks.FRAMES_AND_OBJECTS },
+				{ TestSnapshots.IBM_JDK142_32BIT_HEAP, Stacks.NONE },
+				{ TestSnapshots.IBM_JDK142_32BIT_JAVA, Stacks.FRAMES },
+				{ TestSnapshots.IBM_JDK142_32BIT_HEAP_AND_JAVA, DTFJreadJavacore142 ? Stacks.FRAMES : Stacks.NONE },
+				{ TestSnapshots.IBM_JDK142_32BIT_SYSTEM, Stacks.FRAMES },
+				{ TestSnapshots.ORACLE_JDK7_21_64BIT, Stacks.FRAMES_AND_OBJECTS },
+				{ TestSnapshots.ORACLE_JDK8_05_64BIT, Stacks.FRAMES_AND_OBJECTS },
+				{ TestSnapshots.ORACLE_JDK9_01_64BIT, Stacks.FRAMES_AND_OBJECTS }, });
 	}
 
 	public GeneralSnapshotTests(String snapshotname, Stacks s) {
@@ -275,6 +279,81 @@ public class GeneralSnapshotTests {
 	@Test
 	public void testClassLoaders() throws SnapshotException {
 		assertTrue(snapshot.getSnapshotInfo().getNumberOfClassLoaders() > 1);
+	}
+
+	/**
+	 * Test value of Strings
+	 */
+	@Test
+	public void stringToString() throws SnapshotException {
+		int objects = 0;
+		int printables = 0;
+		int escaped = 0;
+		Assume.assumeThat(snapshot.getSnapshotInfo().getProperty("$heapFormat"),
+				Matchers.not(Matchers.equalTo((Serializable) "DTFJ-PHD")));
+		Collection<IClass> tClasses = snapshot.getClassesByName("java.lang.String", true);
+		for (IClass cls : tClasses) {
+			for (int id : cls.getObjectIds()) {
+				IObject o = snapshot.getObject(id);
+				++objects;
+				String cn = o.getClassSpecificName();
+				if (cn != null && cn.length() > 0) {
+					++printables;
+					if (cn.matches(".*\\\\u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f].*")) {
+						escaped++;
+					}
+				}
+			}
+		}
+		// Check most ofthe strings are printable
+		Assert.assertThat(printables, Matchers.greaterThanOrEqualTo(objects * 2 / 3));
+		// Check for at least one escape character if there are any Strings
+		Assert.assertThat(escaped, Matchers.either(Matchers.greaterThan(0)).or(Matchers.equalTo(objects)));
+	}
+
+	/**
+	 * Test value of Strings
+	 */
+	@Test
+	public void stringBuilderToString() throws SnapshotException {
+		int objects = 0;
+		int printables = 0;
+		Assume.assumeThat(snapshot.getSnapshotInfo().getProperty("$heapFormat"),
+				Matchers.not(Matchers.equalTo((Serializable) "DTFJ-PHD")));
+		Collection<IClass> tClasses = snapshot.getClassesByName("java.lang.StringBuilder", true);
+		if (tClasses != null)
+			for (IClass cls : tClasses) {
+				for (int id : cls.getObjectIds()) {
+					IObject o = snapshot.getObject(id);
+					String cn = o.getClassSpecificName();
+					if (cn != null && cn.length() > 0) {
+						++printables;
+					}
+				}
+			}
+		Assert.assertThat(printables, Matchers.greaterThanOrEqualTo(objects * 2 / 3));
+	}
+
+	/**
+	 * Test value of StringBuffers
+	 */
+	@Test
+	public void stringBufferToString() throws SnapshotException {
+		int objects = 0;
+		int printables = 0;
+		Assume.assumeThat(snapshot.getSnapshotInfo().getProperty("$heapFormat"),
+				Matchers.not(Matchers.equalTo((Serializable) "DTFJ-PHD")));
+		Collection<IClass> tClasses = snapshot.getClassesByName("java.lang.StringBuffer", true);
+		for (IClass cls : tClasses) {
+			for (int id : cls.getObjectIds()) {
+				IObject o = snapshot.getObject(id);
+				String cn = o.getClassSpecificName();
+				if (cn != null && cn.length() > 0) {
+					++printables;
+				}
+			}
+		}
+		Assert.assertThat(printables, Matchers.greaterThanOrEqualTo(objects * 2 / 3));
 	}
 
 }
