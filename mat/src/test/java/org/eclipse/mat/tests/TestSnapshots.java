@@ -82,6 +82,8 @@ public class TestSnapshots {
 	public static final String IBM_JDK142_32BIT_JAVA = "dumps/javacore.20100209.165721.4484.txt";
 	public static final String IBM_JDK142_32BIT_HEAP_AND_JAVA = IBM_JDK142_32BIT_HEAP + ";" + IBM_JDK142_32BIT_JAVA;
 
+	public static final String ORACLE_JDK7_75_64BIT_DIRECT_MEMORY = "dumps/oracle_jdk7_75_x64_directmemory.hprof";
+
 	private static DirDeleter deleterThread;
 	private static Map<String, ISnapshot> snapshots = new HashMap<String, ISnapshot>();
 	private static List<ISnapshot> pristineSnapshots = new ArrayList<ISnapshot>();

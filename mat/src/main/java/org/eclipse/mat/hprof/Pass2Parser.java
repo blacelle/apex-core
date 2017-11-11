@@ -28,15 +28,17 @@ import org.eclipse.mat.snapshot.model.IClass;
 import org.eclipse.mat.snapshot.model.IObject;
 import org.eclipse.mat.snapshot.model.IPrimitiveArray;
 import org.eclipse.mat.util.IProgressListener;
+import org.eclipse.mat.util.IProgressListener.Severity;
 import org.eclipse.mat.util.MessageUtil;
 import org.eclipse.mat.util.SimpleMonitor;
-import org.eclipse.mat.util.IProgressListener.Severity;
 
 /**
  * Parser used to read the hprof formatted heap dump
  */
 
 public class Pass2Parser extends AbstractParser {
+	private static final String DIRECT_BYTE_BUFFER_CLASS_NAME = "java.nio.DirectByteBuffer";
+
 	private IHprofParserHandler handler;
 	private SimpleMonitor.Listener monitor;
 
@@ -180,6 +182,46 @@ public class Pass2Parser extends AbstractParser {
 		in.skipBytes((idSize + 1) * numInstanceFields);
 	}
 
+	private boolean hasAllocatedDirectMemory(ClassImpl thisClazz) {
+		try {
+			// If thisClazz.getName equals java.nio.DirectByteBuffer, then this returns true
+			if (thisClazz.getSnapshot() != null) {
+				return thisClazz.doesExtend(DIRECT_BYTE_BUFFER_CLASS_NAME);
+			} else {
+				// Check if the class has DirectByteBuffer as parent class
+				ClassImpl currentClazz = thisClazz.getClazz();
+
+				while (currentClazz != null) {
+					if (currentClazz.getName().equals(DIRECT_BYTE_BUFFER_CLASS_NAME)) {
+						return true;
+					} else {
+						// getSuperClass needs thisClazz.getSnapshot() != null
+						if (true) {
+							return false;
+						} else {
+							// TODO
+							if (currentClazz == currentClazz.getSuperClass()) {
+								// Prevent infinite loop if parentClass ==
+								// currentClass
+								return false;
+							} else {
+								currentClazz = currentClazz.getSuperClass();
+							}
+						}
+					}
+				}
+
+				return false;
+			}
+		} catch (SnapshotException e) {
+			// Keep loading the heap-dump
+			return false;
+		} catch (RuntimeException e) {
+			// Keep loading the heap-dump
+			return false;
+		}
+	}
+
 	private void readInstanceDump(long segmentStartPos) throws IOException {
 		long id = readID();
 		in.skipBytes(4);
@@ -196,15 +238,48 @@ public class Pass2Parser extends AbstractParser {
 		heapObject.references.add(thisClazz.getObjectAddress());
 
 		// extract outgoing references
-		for (IClass clazz : hierarchy) {
-			for (FieldDescriptor field : clazz.getFieldDescriptors()) {
-				int type = field.getType();
-				if (type == IObject.Type.OBJECT) {
-					long refId = readID();
-					if (refId != 0)
-						heapObject.references.add(refId);
-				} else {
-					skipValue(type);
+		if (hasAllocatedDirectMemory(thisClazz)) {
+			int capacity = -1;
+
+			// extract outgoing references
+			for (IClass clazz : hierarchy) {
+				for (FieldDescriptor field : clazz.getFieldDescriptors()) {
+					int type = field.getType();
+					if (type == IObject.Type.OBJECT) {
+						long refId = readID();
+						if (refId != 0)
+							heapObject.references.add(refId);
+					} else {
+						// The DirectMemory allocated capacity is hold in the Buffer parent class
+						if (clazz.getName().equals("java.nio.Buffer") && field.getName().equals("capacity")
+								&& type == IObject.Type.INT) {
+							capacity = in.readInt();
+						} else {
+							skipValue(type);
+						}
+					}
+				}
+			}
+
+			if (capacity > 0) {
+				// Add the DirectMemory footprint to the usedHeapSize
+				// TODO: Should we have a dedicated field for offHeap?
+				heapObject.usedHeapSize += IPrimitiveArray.ELEMENT_SIZE[IObject.Type.BYTE] * capacity;
+
+				// Set isArray=true as each DirectByteBuffer has its own directMemorySize
+				heapObject.isArray = true;
+			}
+		} else {
+			for (IClass clazz : hierarchy) {
+				for (FieldDescriptor field : clazz.getFieldDescriptors()) {
+					int type = field.getType();
+					if (type == IObject.Type.OBJECT) {
+						long refId = readID();
+						if (refId != 0)
+							heapObject.references.add(refId);
+					} else {
+						skipValue(type);
+					}
 				}
 			}
 		}
