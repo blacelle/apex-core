@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.mat.SnapshotException;
+import org.eclipse.mat.inspections.CommonNameResolver;
 import org.eclipse.mat.internal.Messages;
 import org.eclipse.mat.snapshot.extension.IClassSpecificNameResolver;
 import org.eclipse.mat.snapshot.model.IClass;
@@ -76,7 +77,12 @@ public final class ClassSpecificNameResolverRegistry {
 		}
 
 		private IClassSpecificNameResolver lookup(String name) {
-			throw new UnsupportedOperationException("Apex MAT: TODO");
+			// TODO We have deactivate the plugins mechanism
+			if (String.class.getName().equals(name)) {
+				return new CommonNameResolver.StringResolver();
+			} else {
+				throw new UnsupportedOperationException("Apex MAT: TODO");
+			}
 		}
 
 	}

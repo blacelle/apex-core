@@ -305,7 +305,7 @@ public class GeneralSnapshotTests {
 				}
 			}
 		}
-		// Check most ofthe strings are printable
+		// Check most of the strings are printable
 		Assert.assertThat(printables, Matchers.greaterThanOrEqualTo(objects * 2 / 3));
 		// Check for at least one escape character if there are any Strings
 		Assert.assertThat(escaped, Matchers.either(Matchers.greaterThan(0)).or(Matchers.equalTo(objects)));
