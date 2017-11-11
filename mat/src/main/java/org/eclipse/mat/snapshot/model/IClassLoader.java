@@ -22,11 +22,14 @@ import org.eclipse.mat.util.IProgressListener;
  */
 public interface IClassLoader extends IInstance {
 	/**
-	 * Returns the retained size of all objects and classes loaded by this class
-	 * loader.
-	 * @param calculateIfNotAvailable if false only return a cached version of the size
-	 * @param calculateMinRetainedSize if true then when calculating use an approximation
-	 * @param listener to indicate progress and errors
+	 * Returns the retained size of all objects and classes loaded by this class loader.
+	 * 
+	 * @param calculateIfNotAvailable
+	 *            if false only return a cached version of the size
+	 * @param calculateMinRetainedSize
+	 *            if true then when calculating use an approximation
+	 * @param listener
+	 *            to indicate progress and errors
 	 * @return the retained size, negative if approximate
 	 * @throws SnapshotException
 	 */

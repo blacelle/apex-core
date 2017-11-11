@@ -90,13 +90,8 @@ public class TestApexTimeHelper {
 		String simpleName = getClass().getSimpleName();
 
 		// First call: this is a max
-		Assert.assertTrue(ApexTimeHelper.updateOutlierDetectorStatistics(nb,
-				max,
-				317,
-				simpleName,
-				"methodName",
-				"more",
-				"evenMore"));
+		Assert.assertTrue(ApexTimeHelper
+				.updateOutlierDetectorStatistics(nb, max, 317, simpleName, "methodName", "more", "evenMore"));
 
 		// We should have logged once as nb was NB_OCCURENCES_FOR_INFO
 		Assert.assertEquals(1L, ApexTimeHelper.NB_LOG_FOR_OUTLIER.get());

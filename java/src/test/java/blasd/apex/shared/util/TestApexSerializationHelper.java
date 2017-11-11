@@ -121,10 +121,8 @@ public class TestApexSerializationHelper {
 	public void testEscapeDoubleQuotesNoMax() throws IOException {
 		StringWriter sw = new StringWriter();
 
-		ApexSerializationHelper.rawAppendLineInCSVFile(sw,
-				Arrays.asList("In\"Middle", null, "\"Wrapped\""),
-				true,
-				Integer.MAX_VALUE);
+		ApexSerializationHelper
+				.rawAppendLineInCSVFile(sw, Arrays.asList("In\"Middle", null, "\"Wrapped\""), true, Integer.MAX_VALUE);
 
 		Assert.assertEquals("\"In\"\"Middle\";;\"Wrapped\"", sw.toString());
 	}

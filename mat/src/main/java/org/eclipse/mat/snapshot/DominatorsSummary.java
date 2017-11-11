@@ -20,10 +20,8 @@ import org.eclipse.mat.collect.SetInt;
 import org.eclipse.mat.snapshot.model.IObject;
 
 /**
- * This class holds the data of a dominators summary (see
- * ISnapshot.getDominatorsOf()). For a given list of objects the summary
- * contains the dominators of the single objects grouped by class or by class
- * loader.#
+ * This class holds the data of a dominators summary (see ISnapshot.getDominatorsOf()). For a given list of objects the
+ * summary contains the dominators of the single objects grouped by class or by class loader.#
  * 
  * @noinstantiate
  */
@@ -45,16 +43,14 @@ public final class DominatorsSummary {
 	}
 
 	/**
-	 * Returns data object attached to the summary. Needed for UI elements to
-	 * store context.
+	 * Returns data object attached to the summary. Needed for UI elements to store context.
 	 */
 	public Object getData() {
 		return data;
 	}
 
 	/**
-	 * Attaches arbitrary data object to the summary. Needed for UI elements to
-	 * store context.
+	 * Attaches arbitrary data object to the summary. Needed for UI elements to store context.
 	 */
 	public void setData(Object data) {
 		this.data = data;
@@ -72,8 +68,7 @@ public final class DominatorsSummary {
 	/**
 	 * Get the dominators summary grouped by class loaders
 	 * 
-	 * @return ClassloaderDominatorRecord[] the array of
-	 *         ClassloaderDominatorRecords
+	 * @return ClassloaderDominatorRecord[] the array of ClassloaderDominatorRecords
 	 */
 	public ClassloaderDominatorRecord[] getClassloaderDominatorRecords() {
 		return getClassloaderDominatorRecords(ClassloaderDominatorRecord.class);
@@ -127,8 +122,7 @@ public final class DominatorsSummary {
 	}
 
 	/**
-	 * A record containing information for objects loaded by one class loader
-	 * dominating a set of other objects
+	 * A record containing information for objects loaded by one class loader dominating a set of other objects
 	 */
 	public static class ClassloaderDominatorRecord {
 		protected List<ClassDominatorRecord> records = new ArrayList<ClassDominatorRecord>();
@@ -205,8 +199,7 @@ public final class DominatorsSummary {
 	}
 
 	/**
-	 * A record containing information for objects of one class dominating a set
-	 * of other objects
+	 * A record containing information for objects of one class dominating a set of other objects
 	 */
 	public static class ClassDominatorRecord {
 		DominatorsSummary summary;

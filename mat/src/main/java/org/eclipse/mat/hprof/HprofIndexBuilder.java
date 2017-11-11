@@ -59,10 +59,8 @@ public class HprofIndexBuilder implements IIndexBuilder {
 	public void fill(IPreliminaryIndex preliminary, IProgressListener listener) throws SnapshotException, IOException {
 		HprofPreferences.HprofStrictness strictnessPreference = HprofPreferences.getCurrentStrictness();
 
-		SimpleMonitor monitor = new SimpleMonitor(
-				MessageUtil.format(Messages.HprofIndexBuilder_Parsing, new Object[] { file.getAbsolutePath() }),
-				listener,
-				new int[] { 500, 1500 });
+		SimpleMonitor monitor = new SimpleMonitor(MessageUtil.format(Messages.HprofIndexBuilder_Parsing,
+				new Object[] { file.getAbsolutePath() }), listener, new int[] { 500, 1500 });
 
 		listener.beginTask(MessageUtil.format(Messages.HprofIndexBuilder_Parsing, file.getName()), 3000);
 
@@ -90,8 +88,10 @@ public class HprofIndexBuilder implements IIndexBuilder {
 		handler.beforePass2(listener);
 
 		mon = (SimpleMonitor.Listener) monitor.nextMonitor();
-		mon.beginTask(MessageUtil.format(Messages.HprofIndexBuilder_ExtractingObjects,
-				new Object[] { file.getAbsolutePath() }), (int) (file.length() / 1000));
+		mon.beginTask(
+				MessageUtil.format(Messages.HprofIndexBuilder_ExtractingObjects,
+						new Object[] { file.getAbsolutePath() }),
+				(int) (file.length() / 1000));
 
 		Pass2Parser pass2 = new Pass2Parser(handler, mon, strictnessPreference);
 		pass2.read(file, dumpNrToRead);

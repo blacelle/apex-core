@@ -15,18 +15,21 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A way of describing which references should not be followed when calculating retained sets 
- * and other queries involving paths.
+ * A way of describing which references should not be followed when calculating retained sets and other queries
+ * involving paths.
  */
 public final class ExcludedReferencesDescriptor {
 	private int[] objectIds;
 	private Set<String> fields;
 
 	/**
-	 * Constructor based on objects and fields.
-	 * Excluded reference if the reference is from one of these objects going through the named fields.
-	 * @param objectIds don't go through these objects
-	 * @param fields then though these fields. null means all fields.
+	 * Constructor based on objects and fields. Excluded reference if the reference is from one of these objects going
+	 * through the named fields.
+	 * 
+	 * @param objectIds
+	 *            don't go through these objects
+	 * @param fields
+	 *            then though these fields. null means all fields.
 	 */
 	public ExcludedReferencesDescriptor(int[] objectIds, Set<String> fields) {
 		this.fields = fields;
@@ -40,6 +43,7 @@ public final class ExcludedReferencesDescriptor {
 
 	/**
 	 * The excluded fields
+	 * 
 	 * @return a set of field names
 	 */
 	public Set<String> getFields() {
@@ -48,6 +52,7 @@ public final class ExcludedReferencesDescriptor {
 
 	/**
 	 * See if this object is excluded.
+	 * 
 	 * @param objectId
 	 * @return true if excluded
 	 */
@@ -57,6 +62,7 @@ public final class ExcludedReferencesDescriptor {
 
 	/**
 	 * All the excluded object ids.
+	 * 
 	 * @return an array of object ids.
 	 */
 	public int[] getObjectIds() {

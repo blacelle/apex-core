@@ -26,9 +26,8 @@ public interface IClass extends IObject {
 	String JAVA_LANG_CLASSLOADER = "java.lang.ClassLoader";
 
 	/**
-	 * Returns the fully qualified class name of this class.
-	 * The package components are separated by dots '.'.
-	 * Inner classes use $ to separate the parts.
+	 * Returns the fully qualified class name of this class. The package components are separated by dots '.'. Inner
+	 * classes use $ to separate the parts.
 	 */
 	String getName();
 
@@ -53,38 +52,33 @@ public interface IClass extends IObject {
 	long getClassLoaderAddress();
 
 	/**
-	 * Returns field descriptors for all member variables of instances of this
-	 * class.
-	 * If the snapshot data format does not contain field data then this will be an
-	 * empty list.
+	 * Returns field descriptors for all member variables of instances of this class. If the snapshot data format does
+	 * not contain field data then this will be an empty list.
 	 */
 	List<FieldDescriptor> getFieldDescriptors();
 
 	/**
-	 * Returns the static fields and it values.
-	 * If the snapshot data format does not contain field data then this will be an
-	 * empty list.
+	 * Returns the static fields and it values. If the snapshot data format does not contain field data then this will
+	 * be an empty list.
 	 */
 	List<Field> getStaticFields();
 
 	/**
-	 * Returns the heap size of one instance of this class. Not valid if this
-	 * class represents an array.
+	 * Returns the heap size of one instance of this class. Not valid if this class represents an array.
+	 * 
 	 * @since 1.0
 	 */
 	long getHeapSizePerInstance();
 
 	/**
-	 * Returns the retained size of all objects of this instance including the
-	 * class instance.
+	 * Returns the retained size of all objects of this instance including the class instance.
 	 */
 	long getRetainedHeapSizeOfObjects(boolean calculateIfNotAvailable,
 			boolean calculateMinRetainedSize,
 			IProgressListener listener) throws SnapshotException;
 
 	/**
-	 * Returns the id of the super class. -1 if it has no super class, i.e. if
-	 * it is java.lang.Object.
+	 * Returns the id of the super class. -1 if it has no super class, i.e. if it is java.lang.Object.
 	 */
 	int getSuperClassId();
 
@@ -109,9 +103,9 @@ public interface IClass extends IObject {
 	List<IClass> getAllSubclasses();
 
 	/**
-	 * Does this class extend a class of the supplied name?
-	 * With multiple class loaders the supplied name might not 
-	 * be the class you were intending to find.
+	 * Does this class extend a class of the supplied name? With multiple class loaders the supplied name might not be
+	 * the class you were intending to find.
+	 * 
 	 * @param className
 	 * @return true if it does extend
 	 * @throws SnapshotException

@@ -19,12 +19,10 @@ package org.eclipse.mat.snapshot.model;
 public interface IThreadStack {
 
 	/**
-	 * Get the stack frames (i.e. the different method calls) of the thread
-	 * stack
+	 * Get the stack frames (i.e. the different method calls) of the thread stack
 	 * 
-	 * @return {@link IStackFrame}[] an array containing all stack frames. The
-	 *         first element of the array contains the top of the stack, and the
-	 *         last element the bottom of the stack
+	 * @return {@link IStackFrame}[] an array containing all stack frames. The first element of the array contains the
+	 *         top of the stack, and the last element the bottom of the stack
 	 */
 	IStackFrame[] getStackFrames();
 

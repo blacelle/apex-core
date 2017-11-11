@@ -25,8 +25,8 @@ public class ObjectReference implements Serializable {
 	private long address;
 
 	/**
-	 * Create a reference to an object based on its address but in a form
-	 * where the object id can be found.
+	 * Create a reference to an object based on its address but in a form where the object id can be found.
+	 * 
 	 * @param snapshot
 	 * @param address
 	 */
@@ -37,6 +37,7 @@ public class ObjectReference implements Serializable {
 
 	/**
 	 * The actual address of the object
+	 * 
 	 * @return the address
 	 */
 	public long getObjectAddress() {
@@ -45,6 +46,7 @@ public class ObjectReference implements Serializable {
 
 	/**
 	 * The id of the object
+	 * 
 	 * @return the object id
 	 * @throws SnapshotException
 	 */
@@ -54,6 +56,7 @@ public class ObjectReference implements Serializable {
 
 	/**
 	 * Get a detailed view of the object
+	 * 
 	 * @return the object detail
 	 * @throws SnapshotException
 	 */
@@ -63,6 +66,7 @@ public class ObjectReference implements Serializable {
 
 	/**
 	 * A simple view of the object as an address
+	 * 
 	 * @return the object address as a hexadecimal number.
 	 */
 	@Override

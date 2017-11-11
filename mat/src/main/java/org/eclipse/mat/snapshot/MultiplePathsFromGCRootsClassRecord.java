@@ -20,8 +20,7 @@ import org.eclipse.mat.collect.SetInt;
 import org.eclipse.mat.snapshot.model.IClass;
 
 /**
- * Holds one level of multiple paths from Garbage Collection roots
- * merged by class.
+ * Holds one level of multiple paths from Garbage Collection roots merged by class.
  */
 public class MultiplePathsFromGCRootsClassRecord {
 	private List<int[]> paths = new ArrayList<int[]>();
@@ -34,9 +33,12 @@ public class MultiplePathsFromGCRootsClassRecord {
 
 	/**
 	 * Constructor
-	 * @param clazz the class in question
+	 * 
+	 * @param clazz
+	 *            the class in question
 	 * @param level
-	 * @param fromRoots true means from roots, false means to roots
+	 * @param fromRoots
+	 *            true means from roots, false means to roots
 	 * @param snapshot
 	 */
 	public MultiplePathsFromGCRootsClassRecord(IClass clazz, int level, boolean fromRoots, ISnapshot snapshot) {
@@ -48,6 +50,7 @@ public class MultiplePathsFromGCRootsClassRecord {
 
 	/**
 	 * Go down to the next level
+	 * 
 	 * @return an array of records from the next level
 	 * @throws SnapshotException
 	 */
@@ -80,8 +83,7 @@ public class MultiplePathsFromGCRootsClassRecord {
 	}
 
 	/**
-	 * This method is used only when the record is built. Adds one path to the
-	 * set of paths
+	 * This method is used only when the record is built. Adds one path to the set of paths
 	 * 
 	 * @param path
 	 */
@@ -92,8 +94,7 @@ public class MultiplePathsFromGCRootsClassRecord {
 	/**
 	 * Get all the paths going through the object (getObjectId())
 	 * 
-	 * @return List&lt;int[]&gt; each element in the list is an int[] representing a
-	 *         path
+	 * @return List&lt;int[]&gt; each element in the list is an int[] representing a path
 	 */
 	public List<int[]> getPaths() {
 		return paths;
@@ -122,8 +123,7 @@ public class MultiplePathsFromGCRootsClassRecord {
 	}
 
 	/**
-	 * Get the total net heap size of all referenced objects (see
-	 * getReferencedObjects())
+	 * Get the total net heap size of all referenced objects (see getReferencedObjects())
 	 * 
 	 * @return - the total heap size of all referenced objects
 	 * @throws SnapshotException
@@ -136,8 +136,7 @@ public class MultiplePathsFromGCRootsClassRecord {
 	}
 
 	/**
-	 * Get the "end" objects for each path. This is equal to getting all the
-	 * paths and looking at their element [0]
+	 * Get the "end" objects for each path. This is equal to getting all the paths and looking at their element [0]
 	 * 
 	 * @return - an array with all the objects at the end of the paths
 	 */
@@ -168,8 +167,7 @@ public class MultiplePathsFromGCRootsClassRecord {
 	}
 
 	/**
-	 * Returns a Comparator ordering the records descending by the total size of
-	 * referenced objects.
+	 * Returns a Comparator ordering the records descending by the total size of referenced objects.
 	 */
 	public static Comparator<MultiplePathsFromGCRootsClassRecord> getComparatorByReferencedHeapSize() {
 		return new Comparator<MultiplePathsFromGCRootsClassRecord>() {

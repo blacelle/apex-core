@@ -27,6 +27,7 @@ import org.eclipse.mat.util.MessageUtil;
 
 /**
  * Implementation of a Java object array.
+ * 
  * @noextend
  */
 public class ObjectArrayImpl extends AbstractArrayImpl implements IObjectArray {
@@ -34,10 +35,15 @@ public class ObjectArrayImpl extends AbstractArrayImpl implements IObjectArray {
 
 	/**
 	 * Constructs an array of objects.
-	 * @param objectId the object id of the array
-	 * @param address the actual address
-	 * @param classInstance the type of the array
-	 * @param length the length of the array in elements
+	 * 
+	 * @param objectId
+	 *            the object id of the array
+	 * @param address
+	 *            the actual address
+	 * @param classInstance
+	 *            the type of the array
+	 * @param length
+	 *            the length of the array in elements
 	 */
 	public ObjectArrayImpl(int objectId, long address, ClassImpl classInstance, int length) {
 		super(objectId, address, classInstance, length);
@@ -54,8 +60,11 @@ public class ObjectArrayImpl extends AbstractArrayImpl implements IObjectArray {
 
 	/**
 	 * Calculates the size of an object array
-	 * @param clazz the type
-	 * @param length the length in elements
+	 * 
+	 * @param clazz
+	 *            the type
+	 * @param length
+	 *            the length in elements
 	 * @return the size in bytes
 	 * @since 1.0
 	 */

@@ -43,19 +43,15 @@ public class IndexManager {
 		/** Dominator of: object id to the id of its dominator */
 		DOMINATOR("domIn", IndexReader.IntIndexReader.class),
 		/**
-		 * Retained size cache.
-		 * Retained size cache for a class: class+all instances.
-		 * Retained size cache for a class loader: loader+all classes+all instances. 
+		 * Retained size cache. Retained size cache for a class: class+all instances. Retained size cache for a class
+		 * loader: loader+all classes+all instances.
+		 * 
 		 * @since 1.2
 		 */
 		I2RETAINED("i2sv2", RetainedSizeCache.class);
 		/*
-		 * Other indexes:
-		 * i2s
-		 *  Old version of class retained size cache
-		 * threads
-		 *  text file holding details of thread stacks and local variables
-		 * index - master index
+		 * Other indexes: i2s Old version of class retained size cache threads text file holding details of thread
+		 * stacks and local variables index - master index
 		 */
 
 		public String filename;

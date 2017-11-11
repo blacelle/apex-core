@@ -33,8 +33,11 @@ public final class FileUtils {
 
 	/**
 	 * Basic stream copy
-	 * @param in input stream
-	 * @param out output stream
+	 * 
+	 * @param in
+	 *            input stream
+	 * @param out
+	 *            output stream
 	 * @throws IOException
 	 */
 	public static void copy(InputStream in, OutputStream out) throws IOException {
@@ -52,6 +55,7 @@ public final class FileUtils {
 
 	/**
 	 * Create a temporary directory which should be deleted on application close.
+	 * 
 	 * @param prefix
 	 * @param parent
 	 * @return the temporary directory, to be deleted on shutdown
@@ -72,11 +76,14 @@ public final class FileUtils {
 	}
 
 	/**
-	 * Build a file name.
-	 * Convert non-letters or digits to underscore.
-	 * @param prefix the prefix of the file
-	 * @param suffix the suffix
-	 * @param extension the file extension
+	 * Build a file name. Convert non-letters or digits to underscore.
+	 * 
+	 * @param prefix
+	 *            the prefix of the file
+	 * @param suffix
+	 *            the suffix
+	 * @param extension
+	 *            the file extension
 	 * @return the combined file name
 	 */
 	public static String toFilename(String prefix, String suffix, String extension) {

@@ -203,6 +203,7 @@ public class ObjectMarker {
 
 	/**
 	 * A stack accessible by multiple threads
+	 * 
 	 * @author ajohnson
 	 *
 	 */
@@ -239,12 +240,10 @@ public class ObjectMarker {
 		}
 
 		/**
-		 * Calculate the number of ticks worked.
-		 * The total ticks is just the initial stack size
-		 * However, more items can be pushed later, so we calculate the 
-		 * items processed since last time, the total to do, and the 
-		 * remaining ticks.
-		 * Must have the lock on this stack.
+		 * Calculate the number of ticks worked. The total ticks is just the initial stack size However, more items can
+		 * be pushed later, so we calculate the items processed since last time, the total to do, and the remaining
+		 * ticks. Must have the lock on this stack.
+		 * 
 		 * @return new ticks worked
 		 */
 		int worked() {
@@ -267,11 +266,10 @@ public class ObjectMarker {
 		}
 
 		/**
-		 * When the stack is empty wait for another thread to
-		 * put something back onto the stack.
-		 * Must have lock on this stack.
-		 * @return object id 
-		 * -1 if all threads are waiting, so everything is done
+		 * When the stack is empty wait for another thread to put something back onto the stack. Must have lock on this
+		 * stack.
+		 * 
+		 * @return object id -1 if all threads are waiting, so everything is done
 		 */
 		int waitAndPop() {
 			waitingThreads++;
@@ -301,20 +299,17 @@ public class ObjectMarker {
 		}
 
 		/**
-		 * Push an item onto the stack if another thread is waiting
-		 * for something to be added and there aren't already 
+		 * Push an item onto the stack if another thread is waiting for something to be added and there aren't already
 		 * enough items on the stack for all the waiting threads.
+		 * 
 		 * @param z
-		 * @return true if the item has been pushed
-		 * false if the item has not been pushed and should be 
-		 * dealt with by the current thread
+		 * @return true if the item has been pushed false if the item has not been pushed and should be dealt with by
+		 *         the current thread
 		 */
 		boolean pushIfWaiting(int z) {
 			/*
-			 * Push up to RESERVED_WAITING = 20 items per waiting thread, 
-			 * RESERVED_RUNNING = 5 per non-waiting other threads,
-			 * so the threads have a chance of finding work waiting.
-			 * May require tuning.
+			 * Push up to RESERVED_WAITING = 20 items per waiting thread, RESERVED_RUNNING = 5 per non-waiting other
+			 * threads, so the threads have a chance of finding work waiting. May require tuning.
 			 */
 			if (waitingThreads * RESERVED_WAITING + (totalThreads - waitingThreads - 1) * RESERVED_RUNNING > size()) {
 				push(z);
@@ -353,8 +348,8 @@ public class ObjectMarker {
 			maxFree = runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory();
 		}
 		/*
-		 *  Guess as to how many objects with outbound refs we can support @ 30 bytes per ref.
-		 *  A better estimate would use the size of the outbound refs file.
+		 * Guess as to how many objects with outbound refs we can support @ 30 bytes per ref. A better estimate would
+		 * use the size of the outbound refs file.
 		 */
 		int n1 = (int) Math.min(bits.length, bits.length * maxFree / outboundMem);
 		// guess as to size for each thread so we don't use all of the memory - allow for overlaps
@@ -438,9 +433,8 @@ public class ObjectMarker {
 
 					for (int child : outbound.get(current)) {
 						/*
-						 * No synchronization here. It costs a lot of
-						 * performance It is possible that some bits are marked
-						 * more than once, but this is not a problem
+						 * No synchronization here. It costs a lot of performance It is possible that some bits are
+						 * marked more than once, but this is not a problem
 						 */
 						if (!bits[child]) {
 							bits[child] = true;
@@ -461,10 +455,8 @@ public class ObjectMarker {
 	}
 
 	/**
-	 * Depth first search thread - with locality.
-	 * Have a local stack for objects close to the current object.
-	 * Have a local queue for remaining objects.
-	 * Use the global stack for excess objects or when local stack & queue are empty.
+	 * Depth first search thread - with locality. Have a local stack for objects close to the current object. Have a
+	 * local queue for remaining objects. Use the global stack for excess objects or when local stack & queue are empty.
 	 */
 	public class LocalDfsThread extends DfsThread {
 		private static final int RESERVED =
@@ -582,10 +574,8 @@ public class ObjectMarker {
 							// Examine each outbound reference
 							for (int child : outbound.get(current)) {
 								/*
-								 * No synchronization here. It costs a lot of
-								 * performance It is possible that some bits are
-								 * marked more than once, but this is not a
-								 * problem
+								 * No synchronization here. It costs a lot of performance It is possible that some bits
+								 * are marked more than once, but this is not a problem
 								 */
 								if (!bits[child]) {
 									bits[child] = true;
@@ -625,6 +615,7 @@ public class ObjectMarker {
 
 		/**
 		 * Is the objectId in range for the local stack?
+		 * 
 		 * @param val
 		 * @return
 		 */
@@ -633,8 +624,8 @@ public class ObjectMarker {
 		}
 
 		/**
-		 * Select a suitable base for the local stack.
-		 * This is 1/4 range below and 3/4 range around the candidate item.
+		 * Select a suitable base for the local stack. This is 1/4 range below and 3/4 range around the candidate item.
+		 * 
 		 * @param v
 		 * @return
 		 */
@@ -644,8 +635,7 @@ public class ObjectMarker {
 		}
 
 		/**
-		 * Heuristic to vary size of range depending on GC pressure.
-		 * Slowly increase the range if no GC pressure.
+		 * Heuristic to vary size of range depending on GC pressure. Slowly increase the range if no GC pressure.
 		 * Cleared soft reference means we are running out of space, so reduce the range.
 		 */
 		private void calcRange() {

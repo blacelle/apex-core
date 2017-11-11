@@ -24,6 +24,7 @@ import org.eclipse.mat.snapshot.model.IObject;
 public interface IObjectReader {
 	/**
 	 * Open the dump file associated with the snapshot
+	 * 
 	 * @param snapshot
 	 * @throws SnapshotException
 	 * @throws IOException
@@ -33,9 +34,15 @@ public interface IObjectReader {
 
 	/**
 	 * Get detailed information about an object
-	 * @param objectId the object id
-	 * @param snapshot the snapshot
-	 * @return an IObject such as {@link org.eclipse.mat.parser.model.InstanceImpl}, {@link org.eclipse.mat.parser.model.ObjectArrayImpl}, {@link org.eclipse.mat.parser.model.PrimitiveArrayImpl}, {@link org.eclipse.mat.parser.model.ClassLoaderImpl}
+	 * 
+	 * @param objectId
+	 *            the object id
+	 * @param snapshot
+	 *            the snapshot
+	 * @return an IObject such as {@link org.eclipse.mat.parser.model.InstanceImpl},
+	 *         {@link org.eclipse.mat.parser.model.ObjectArrayImpl},
+	 *         {@link org.eclipse.mat.parser.model.PrimitiveArrayImpl},
+	 *         {@link org.eclipse.mat.parser.model.ClassLoaderImpl}
 	 * @throws SnapshotException
 	 * @throws IOException
 	 */
@@ -44,9 +51,13 @@ public interface IObjectReader {
 
 	/**
 	 * Get detailed information about a primitive array
-	 * @param array the array
-	 * @param offset where in the array to start
-	 * @param length how much to read
+	 * 
+	 * @param array
+	 *            the array
+	 * @param offset
+	 *            where in the array to start
+	 * @param length
+	 *            how much to read
 	 * @return a byte[], short[], int[], long[], boolean[], char[], float[], double[]
 	 * @throws IOException
 	 * @throws SnapshotException
@@ -56,10 +67,13 @@ public interface IObjectReader {
 
 	/**
 	 * Get detailed information about a object array
+	 * 
 	 * @param array
-	 * @param offset where in the array to start
-	 * @param length how much to read
-	 * @return an array of object addresses, with 0 for nulls 
+	 * @param offset
+	 *            where in the array to start
+	 * @param length
+	 *            how much to read
+	 * @return an array of object addresses, with 0 for nulls
 	 * @throws IOException
 	 * @throws SnapshotException
 	 */
@@ -68,7 +82,9 @@ public interface IObjectReader {
 
 	/**
 	 * Get additional information about the snapshot
-	 * @param addon type of the additional information
+	 * 
+	 * @param addon
+	 *            type of the additional information
 	 * @return the additional information
 	 * @throws SnapshotException
 	 */
@@ -77,6 +93,7 @@ public interface IObjectReader {
 
 	/**
 	 * tidy up when snapshot no longer required
+	 * 
 	 * @throws IOException
 	 */
 	void close() throws IOException;

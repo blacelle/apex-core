@@ -27,6 +27,7 @@ import org.eclipse.mat.util.MessageUtil;
 
 /**
  * The general implementation of any Java object (plain object, array, class, classloader).
+ * 
  * @noextend
  */
 public abstract class AbstractObjectImpl implements IObject, Serializable {
@@ -39,9 +40,13 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 
 	/**
 	 * Construct a general object, called from subclass.
-	 * @param objectId the index of the object
-	 * @param address the actual address
-	 * @param classInstance the type of the object
+	 * 
+	 * @param objectId
+	 *            the index of the object
+	 * @param address
+	 *            the actual address
+	 * @param classInstance
+	 *            the type of the object
 	 */
 	public AbstractObjectImpl(int objectId, long address, ClassImpl classInstance) {
 		this.objectId = objectId;
@@ -61,6 +66,7 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 
 	/**
 	 * Used to set the address, for example after reconstructing an object from a file.
+	 * 
 	 * @param address
 	 */
 	public void setObjectAddress(long address) {
@@ -69,7 +75,9 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 
 	/**
 	 * Set the index for the object
-	 * @param objectId the index into all the indexes for other object data
+	 * 
+	 * @param objectId
+	 *            the index into all the indexes for other object data
 	 */
 	public void setObjectId(int objectId) {
 		this.objectId = objectId;
@@ -81,7 +89,8 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 	}
 
 	/**
-	 * Returns the address of the class which is the type of this object. 
+	 * Returns the address of the class which is the type of this object.
+	 * 
 	 * @return the address
 	 */
 	public long getClassAddress() {
@@ -89,7 +98,8 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 	}
 
 	/**
-	 * Returns the id of the class which is the type of this object. 
+	 * Returns the id of the class which is the type of this object.
+	 * 
 	 * @return the id
 	 */
 	public int getClassId() {
@@ -97,8 +107,8 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 	}
 
 	/**
-	 * Changes the type of the object.
-	 * Used when constructing a ClassImpl for java.lang.Class.
+	 * Changes the type of the object. Used when constructing a ClassImpl for java.lang.Class.
+	 * 
 	 * @param classInstance
 	 */
 	public void setClassInstance(ClassImpl classInstance) {
@@ -106,9 +116,10 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 	}
 
 	/**
-	 * Set the snapshot for an object.
-	 * Used once the entire snapshot has been built, or an object has been deserialized.
-	 * @param dump the actual current snapshot
+	 * Set the snapshot for an object. Used once the entire snapshot has been built, or an object has been deserialized.
+	 * 
+	 * @param dump
+	 *            the actual current snapshot
 	 */
 	public void setSnapshot(ISnapshot dump) {
 		this.source = (SnapshotImpl) dump;
@@ -136,6 +147,7 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 
 	/**
 	 * Gets the outbound references from this object, as addresses.
+	 * 
 	 * @return a list of outbound references
 	 */
 	public abstract ArrayLong getReferences();
@@ -152,6 +164,7 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 
 	/**
 	 * Construct text information about this object.
+	 * 
 	 * @param buf
 	 * @return
 	 */
@@ -240,7 +253,9 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 
 	/**
 	 * Find the field of this object based on the name
-	 * @param name the name of the field
+	 * 
+	 * @param name
+	 *            the name of the field
 	 * @return the field, containing the value
 	 */
 	protected abstract Field internalGetField(String name);
@@ -261,8 +276,9 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 	}
 
 	/**
-	 * Gets a comparator for sorting objects by technical name - type plus address.
-	 * Appears to be unused, and currently only returns null, so do not use.
+	 * Gets a comparator for sorting objects by technical name - type plus address. Appears to be unused, and currently
+	 * only returns null, so do not use.
+	 * 
 	 * @return null
 	 */
 	@Deprecated
@@ -271,8 +287,9 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 	}
 
 	/**
-	 * Gets a comparator for sorting objects by resolved name description.
-	 * Appears to be unused, and currently only returns null, so do not use.
+	 * Gets a comparator for sorting objects by resolved name description. Appears to be unused, and currently only
+	 * returns null, so do not use.
+	 * 
 	 * @return null
 	 */
 	@Deprecated
@@ -281,8 +298,9 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 	}
 
 	/**
-	 * Gets a comparator for sorting objects by used heap size.
-	 * Appears to be unused, and currently only returns null, so do not use.
+	 * Gets a comparator for sorting objects by used heap size. Appears to be unused, and currently only returns null,
+	 * so do not use.
+	 * 
 	 * @return null
 	 */
 	@Deprecated
@@ -296,7 +314,9 @@ public abstract class AbstractObjectImpl implements IObject, Serializable {
 
 	/**
 	 * Helper for the net size calculation.
-	 * @param actual size
+	 * 
+	 * @param actual
+	 *            size
 	 * @return rounded up size
 	 * @since 1.0
 	 */

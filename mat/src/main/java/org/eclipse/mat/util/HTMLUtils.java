@@ -16,7 +16,8 @@ package org.eclipse.mat.util;
 public final class HTMLUtils {
 
 	/**
-	 * Escape input text so that characters are not misinterpreted by HTML parsers. 
+	 * Escape input text so that characters are not misinterpreted by HTML parsers.
+	 * 
 	 * @param text
 	 * @return the escaped text
 	 */

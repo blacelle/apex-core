@@ -14,8 +14,7 @@ import org.eclipse.mat.SnapshotException;
 import org.eclipse.mat.snapshot.ISnapshot;
 
 /**
- * Using this interface an implementor can provide additional information to a
- * HPROF snapshot
+ * Using this interface an implementor can provide additional information to a HPROF snapshot
  * 
  * See the documentation on the org.eclipse.mat.hprof.enhancer extension point
  * 
@@ -23,12 +22,13 @@ import org.eclipse.mat.snapshot.ISnapshot;
 public interface IRuntimeEnhancer {
 
 	/**
-	 * Returns addon information of certain type if such information is attached
-	 * to the HPROF snapshot
+	 * Returns addon information of certain type if such information is attached to the HPROF snapshot
 	 * 
-	 * @param <A> The type of the additional information
+	 * @param <A>
+	 *            The type of the additional information
 	 * @param snapshot
-	 * @param addon the class of the required extra information
+	 * @param addon
+	 *            the class of the required extra information
 	 * @return the extra information, or null
 	 * @throws SnapshotException
 	 */

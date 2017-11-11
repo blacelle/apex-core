@@ -22,9 +22,13 @@ public class NamedReference extends ObjectReference {
 
 	/**
 	 * Constructs a reference to a Java object with a description of why the reference occurred.
-	 * @param snapshot the whole dump
-	 * @param address the address of the target object
-	 * @param name the description of the reference, for example the field name, an array index
+	 * 
+	 * @param snapshot
+	 *            the whole dump
+	 * @param address
+	 *            the address of the target object
+	 * @param name
+	 *            the description of the reference, for example the field name, an array index
 	 */
 	public NamedReference(ISnapshot snapshot, long address, String name) {
 		super(snapshot, address);
@@ -33,6 +37,7 @@ public class NamedReference extends ObjectReference {
 
 	/**
 	 * Get the description of the reference.
+	 * 
 	 * @return the description
 	 */
 	public String getName() {

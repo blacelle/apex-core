@@ -82,7 +82,8 @@ public class ApexCartesianProductHelper {
 	}
 
 	public static <T, V> Set<? extends Map<T, ? extends Set<V>>> groupByKeyAndInValues(
-			Iterable<? extends Map<? extends T, ? extends V>> input, Consumer<Object> checkRegularly) {
+			Iterable<? extends Map<? extends T, ? extends V>> input,
+			Consumer<Object> checkRegularly) {
 		if (input instanceof Collection<?>) {
 			Collection<?> asCollection = (Collection<?>) input;
 			if (asCollection.size() >= 2) {
@@ -479,7 +480,8 @@ public class ApexCartesianProductHelper {
 	}
 
 	public static <T> Set<? extends Map<T, ?>> mergeCartesianProducts(
-			Iterable<? extends Set<? extends Map<? extends T, ?>>> templates, Consumer<Object> checkRegularly) {
+			Iterable<? extends Set<? extends Map<? extends T, ?>>> templates,
+			Consumer<Object> checkRegularly) {
 		if (!templates.iterator().hasNext()) {
 			return Collections.emptySet();
 		}

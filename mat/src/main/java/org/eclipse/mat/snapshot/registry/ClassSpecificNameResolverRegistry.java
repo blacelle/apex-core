@@ -24,9 +24,8 @@ import org.eclipse.mat.snapshot.model.IObject;
 import org.eclipse.mat.util.MessageUtil;
 
 /**
- * Registry for name resolvers which resolve the names for objects of specific
- * classes (found in an snapshot), e.g. String (where the char[] is evaluated)
- * or a specific class loader (where the appropriate field holding its name and
+ * Registry for name resolvers which resolve the names for objects of specific classes (found in an snapshot), e.g.
+ * String (where the char[] is evaluated) or a specific class loader (where the appropriate field holding its name and
  * thereby deployment unit is evaluated).
  */
 public final class ClassSpecificNameResolverRegistry {
@@ -102,12 +101,10 @@ public final class ClassSpecificNameResolverRegistry {
 	 * Register class specific name resolver.
 	 * 
 	 * @param className
-	 *            class name for which the class specific name resolver should
-	 *            be used
+	 *            class name for which the class specific name resolver should be used
 	 * @param resolver
 	 *            class specific name resolver
-	 * @deprecated Use default extension mechanism: just implement interface and
-	 *             register location via UI
+	 * @deprecated Use default extension mechanism: just implement interface and register location via UI
 	 */
 	@Deprecated
 	public static void registerResolver(String className, IClassSpecificNameResolver resolver) {
@@ -115,8 +112,7 @@ public final class ClassSpecificNameResolverRegistry {
 	}
 
 	/**
-	 * Resolve name of the given snapshot object or return null if it can't be
-	 * resolved.
+	 * Resolve name of the given snapshot object or return null if it can't be resolved.
 	 * 
 	 * @param object
 	 *            snapshot object for which the name should be resolved

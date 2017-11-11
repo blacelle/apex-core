@@ -75,8 +75,7 @@ public class TestInstanceSizes {
 	}
 
 	/**
-	 * Convert jmap histogram class name to MAT name See
-	 * {@link org.eclipse.mat.hprof.Pass1Parser}.
+	 * Convert jmap histogram class name to MAT name See {@link org.eclipse.mat.hprof.Pass1Parser}.
 	 * 
 	 * @param className
 	 * @return
@@ -132,7 +131,7 @@ public class TestInstanceSizes {
 				long shallowSize = Long.parseLong(tokenizer.nextToken());
 				long instanceSize = shallowSize / numObjects;
 				String className = tokenizer.nextToken();
-				//				System.out.println(className + " " + instanceSize);
+				// System.out.println(className + " " + instanceSize);
 				className = fixArrayName(className);
 
 				if (className.startsWith("<") || className.equals("java.lang.Class"))

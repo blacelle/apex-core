@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /**
- * Interfaces for handling indexes.
- * Only needed by parser implementations.
+ * Interfaces for handling indexes. Only needed by parser implementations.
  */
 package org.eclipse.mat.parser;

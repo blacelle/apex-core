@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /**
- * Utilities for the parser component (not API).
- * Integer stacks and the registry for snapshot parsers. 
+ * Utilities for the parser component (not API). Integer stacks and the registry for snapshot parsers.
  */
 package org.eclipse.mat.parser.io;

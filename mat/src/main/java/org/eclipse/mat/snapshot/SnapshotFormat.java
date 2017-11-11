@@ -12,6 +12,7 @@ package org.eclipse.mat.snapshot;
 
 /**
  * Summary of a parser for the snapshot
+ * 
  * @noinstantiate
  */
 public class SnapshotFormat {
@@ -20,8 +21,11 @@ public class SnapshotFormat {
 
 	/**
 	 * Create summary information about a parser
-	 * @param name name of the parser type
-	 * @param fileExtensions file extensions it handles
+	 * 
+	 * @param name
+	 *            name of the parser type
+	 * @param fileExtensions
+	 *            file extensions it handles
 	 */
 	public SnapshotFormat(String name, String[] fileExtensions) {
 		this.fileExtensions = fileExtensions;
@@ -30,6 +34,7 @@ public class SnapshotFormat {
 
 	/**
 	 * Get the parser name
+	 * 
 	 * @return the parser name
 	 */
 	public String getName() {
@@ -37,8 +42,8 @@ public class SnapshotFormat {
 	}
 
 	/**
-	 * Get the file extensions.
-	 * Used for filtering files in a file dialog when choosing a snapshot to open
+	 * Get the file extensions. Used for filtering files in a file dialog when choosing a snapshot to open
+	 * 
 	 * @return an array of file extensions
 	 */
 	public String[] getFileExtensions() {

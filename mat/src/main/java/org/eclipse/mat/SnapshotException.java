@@ -11,15 +11,14 @@
 package org.eclipse.mat;
 
 /**
- * Exception used to indicate a problem different from the standard Java
- * exceptions while performing an operation on an snapshot.
+ * Exception used to indicate a problem different from the standard Java exceptions while performing an operation on an
+ * snapshot.
  */
 public class SnapshotException extends Exception {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Create snapshot exception - should not be used except during
-	 * deserialization.
+	 * Create snapshot exception - should not be used except during deserialization.
 	 */
 	public SnapshotException() {
 	}

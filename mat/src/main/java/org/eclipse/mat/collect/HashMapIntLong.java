@@ -15,8 +15,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * A map from int to long.
- * More efficient than a general map
+ * A map from int to long. More efficient than a general map
  */
 public final class HashMapIntLong implements Serializable {
 	/**
@@ -25,12 +24,14 @@ public final class HashMapIntLong implements Serializable {
 	public interface Entry {
 		/**
 		 * Get the key.
+		 * 
 		 * @return the key
 		 */
 		int getKey();
 
 		/**
 		 * Get the corresponding value.
+		 * 
 		 * @return the value
 		 */
 		long getValue();
@@ -42,11 +43,9 @@ public final class HashMapIntLong implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Largest requested size that can be allocated on many VMs.
-	 * Size will be rounded up to the next prime, so choose prime - 1.
-	 * Biggest primes less than 2^31 are 0x7fffffff and 0x7fffffed,
-	 * but JVM limit can be less than Integer.MAX_VALUE.
-	 * E.g. ArrayList has a limit of Integer.MAX_VALUE - 8
+	 * Largest requested size that can be allocated on many VMs. Size will be rounded up to the next prime, so choose
+	 * prime - 1. Biggest primes less than 2^31 are 0x7fffffff and 0x7fffffed, but JVM limit can be less than
+	 * Integer.MAX_VALUE. E.g. ArrayList has a limit of Integer.MAX_VALUE - 8
 	 */
 	private static final int BIG_CAPACITY = PrimeFinder.findPrevPrime(Integer.MAX_VALUE - 8 + 1) - 1;
 
@@ -67,6 +66,7 @@ public final class HashMapIntLong implements Serializable {
 
 	/**
 	 * Create a map of given size
+	 * 
 	 * @param initialCapacity
 	 */
 	public HashMapIntLong(int initialCapacity) {
@@ -75,8 +75,11 @@ public final class HashMapIntLong implements Serializable {
 
 	/**
 	 * Add a mapping
-	 * @param key the key
-	 * @param value the corresponding value
+	 * 
+	 * @param key
+	 *            the key
+	 * @param value
+	 *            the corresponding value
 	 * @return true if an entry with the key already exists
 	 */
 	public boolean put(int key, long value) {
@@ -104,7 +107,9 @@ public final class HashMapIntLong implements Serializable {
 
 	/**
 	 * Remove an mapping from the map
-	 * @param key the key to remove
+	 * 
+	 * @param key
+	 *            the key to remove
 	 * @return true if entry was found
 	 */
 	public boolean remove(int key) {
@@ -138,7 +143,9 @@ public final class HashMapIntLong implements Serializable {
 
 	/**
 	 * find if key is present in map
-	 * @param key the key
+	 * 
+	 * @param key
+	 *            the key
 	 * @return true if the key was found
 	 */
 	public boolean containsKey(int key) {
@@ -154,9 +161,12 @@ public final class HashMapIntLong implements Serializable {
 
 	/**
 	 * Retrieve the value corresponding to the key
-	 * @param key the key
+	 * 
+	 * @param key
+	 *            the key
 	 * @return the value
-	 * @throws NosuchElementException if the key is not found
+	 * @throws NosuchElementException
+	 *             if the key is not found
 	 */
 	public long get(int key) {
 		int hash = (key & Integer.MAX_VALUE) % capacity;
@@ -172,6 +182,7 @@ public final class HashMapIntLong implements Serializable {
 
 	/**
 	 * Get all the used keys
+	 * 
 	 * @return an array of the used keys
 	 */
 	public int[] getAllKeys() {
@@ -187,6 +198,7 @@ public final class HashMapIntLong implements Serializable {
 
 	/**
 	 * The number of mappings
+	 * 
 	 * @return the size of the map
 	 */
 	public int size() {
@@ -194,7 +206,8 @@ public final class HashMapIntLong implements Serializable {
 	}
 
 	/**
-	 * Is the map empty 
+	 * Is the map empty
+	 * 
 	 * @return true if no current mappings
 	 */
 	public boolean isEmpty() {
@@ -202,8 +215,7 @@ public final class HashMapIntLong implements Serializable {
 	}
 
 	/**
-	 * Remove all the existing mappings,
-	 * leaving the capacity unchanged.
+	 * Remove all the existing mappings, leaving the capacity unchanged.
 	 */
 	public void clear() {
 		size = 0;
@@ -212,6 +224,7 @@ public final class HashMapIntLong implements Serializable {
 
 	/**
 	 * Get a way of iterating over the keys
+	 * 
 	 * @return an iterator over the keys
 	 */
 	public IteratorInt keys() {
@@ -239,6 +252,7 @@ public final class HashMapIntLong implements Serializable {
 
 	/**
 	 * Get a way of iterating over the values.
+	 * 
 	 * @return an iterator over the values
 	 */
 	public IteratorLong values() {
@@ -266,6 +280,7 @@ public final class HashMapIntLong implements Serializable {
 
 	/**
 	 * Iterate over all the map entries
+	 * 
 	 * @return the iterator over the entries
 	 */
 	public Iterator<Entry> entries() {
@@ -307,8 +322,9 @@ public final class HashMapIntLong implements Serializable {
 	}
 
 	/**
-	 * Get all the values corresponding to the used keys.
-	 * Duplicate values are possible if they correspond to different keys.
+	 * Get all the values corresponding to the used keys. Duplicate values are possible if they correspond to different
+	 * keys.
+	 * 
 	 * @return an array of the used values
 	 */
 	public long[] getAllValues() {

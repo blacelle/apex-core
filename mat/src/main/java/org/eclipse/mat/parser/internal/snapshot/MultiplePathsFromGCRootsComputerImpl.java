@@ -81,8 +81,7 @@ public class MultiplePathsFromGCRootsComputerImpl implements IMultiplePathsFromG
 			int[] path = getPathFromBFS(objectIds[i], parent);
 
 			/*
-			 * if there is an exclude filter, for some objects there could be no
-			 * path, i.e. null is expected then
+			 * if there is an exclude filter, for some objects there could be no path, i.e. null is expected then
 			 */
 			if (path != null) {
 				pathsList.add(path);
@@ -223,16 +222,15 @@ public class MultiplePathsFromGCRootsComputerImpl implements IMultiplePathsFromG
 	}
 
 	/*
-	 * Returns the shortest path to an object, using the stored parent of every
-	 * needed object calculated during a BFS
+	 * Returns the shortest path to an object, using the stored parent of every needed object calculated during a BFS
 	 * 
 	 * @param int objectId the object to which a path should be calculated
 	 * 
-	 * @param int[] parent an array, result of a BSF, which keeps a parent[i] is
-	 * the parent of the object with index i, as calculated during the BFS
+	 * @param int[] parent an array, result of a BSF, which keeps a parent[i] is the parent of the object with index i,
+	 * as calculated during the BFS
 	 * 
-	 * @return int[] the shortest path from a GC root. The object of interest is
-	 * at index 0, the GC root at index length-1
+	 * @return int[] the shortest path from a GC root. The object of interest is at index 0, the GC root at index
+	 * length-1
 	 */
 	private int[] getPathFromBFS(int objectId, int[] parent) {
 		// check if the object wasn't reached at all. This may happen if some

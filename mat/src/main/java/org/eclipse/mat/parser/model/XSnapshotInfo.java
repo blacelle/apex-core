@@ -15,8 +15,7 @@ import java.util.Date;
 import org.eclipse.mat.snapshot.SnapshotInfo;
 
 /**
- * Basic information about the snapshot which can be updated as 
- * data is read from the dump.
+ * Basic information about the snapshot which can be updated as data is read from the dump.
  */
 public final class XSnapshotInfo extends SnapshotInfo {
 	private static final long serialVersionUID = 3L;

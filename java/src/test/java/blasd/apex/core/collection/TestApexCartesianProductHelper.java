@@ -171,10 +171,8 @@ public class TestApexCartesianProductHelper {
 		}
 		// four entry
 		{
-			Collection<? extends Map<?, ?>> input = Arrays.asList(ImmutableMap.of(A, M),
-					ImmutableMap.of(A, N),
-					ImmutableMap.of(B, M),
-					ImmutableMap.of(B, N));
+			Collection<? extends Map<?, ?>> input = Arrays
+					.asList(ImmutableMap.of(A, M), ImmutableMap.of(A, N), ImmutableMap.of(B, M), ImmutableMap.of(B, N));
 			Set<? extends Map<?, ? extends Set<?>>> result = ApexCartesianProductHelper.groupByKeyAndInValues(input);
 
 			Assert.assertEquals(2, result.size());

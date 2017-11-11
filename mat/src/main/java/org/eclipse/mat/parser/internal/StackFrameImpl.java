@@ -14,8 +14,7 @@ import org.eclipse.mat.snapshot.model.IStackFrame;
 
 /**
  * 
- * @noextend This class is not intended to be subclassed by clients. May still
- *           be subject of change
+ * @noextend This class is not intended to be subclassed by clients. May still be subject of change
  * 
  */
 class StackFrameImpl implements IStackFrame {

@@ -398,8 +398,9 @@ public class TestApplication {
 
 				});
 				if (matchingFiles.length == 1) {
-					String fileExtention = testResultFile.getName().substring(
-							testResultFile.getName().lastIndexOf('.') + 1, testResultFile.getName().length());
+					String fileExtention =
+							testResultFile.getName().substring(testResultFile.getName().lastIndexOf('.') + 1,
+									testResultFile.getName().length());
 					IComparator comparator = comparators.get(fileExtention);
 					List<Difference> differences = comparator.compare(matchingFiles[0], testResultFile);
 					if (differences == null || differences.isEmpty())

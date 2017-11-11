@@ -20,8 +20,7 @@ import org.eclipse.mat.collect.ArrayUtils;
 import org.junit.Test;
 
 /**
- * Test the sorting routines.
- * Tests have timeouts in case performance of quicksort goes quadradic in performance.
+ * Test the sorting routines. Tests have timeouts in case performance of quicksort goes quadradic in performance.
  */
 public class SortTest {
 
@@ -79,9 +78,8 @@ public class SortTest {
 	}
 
 	/**
-	 * Test whether the sort function works with worst case data for median of 3
-	 * E.g. 8 6 4 2 1 3 5 7 9 Median 8,1,9 = 8 Partition 6 4 2 1 3 5 7 8 9
-	 * Median 6,1,7 = 6 repeat
+	 * Test whether the sort function works with worst case data for median of 3 E.g. 8 6 4 2 1 3 5 7 9 Median 8,1,9 = 8
+	 * Partition 6 4 2 1 3 5 7 8 9 Median 6,1,7 = 6 repeat
 	 */
 	@Test(timeout = TIMEOUT2)
 	public void testSort2() {
@@ -110,11 +108,8 @@ public class SortTest {
 	}
 
 	/**
-	 * Test whether the sort function works with worst case data for median of 3
-	 * swapping median with first
-	 * E.g. 9 1 2 3 4 5 6 7 8 Median 9,4,8 = 8 Partition 8 1 2 3 4 5 6 7 9 
-	 * swap Partition 7 1 2 3 4 5 6 8 9
-	 * Median 7,4,9 = 6 repeat
+	 * Test whether the sort function works with worst case data for median of 3 swapping median with first E.g. 9 1 2 3
+	 * 4 5 6 7 8 Median 9,4,8 = 8 Partition 8 1 2 3 4 5 6 7 9 swap Partition 7 1 2 3 4 5 6 8 9 Median 7,4,9 = 6 repeat
 	 */
 	@Test(timeout = TIMEOUT2)
 	public void testSort3() {
@@ -141,11 +136,9 @@ public class SortTest {
 	}
 
 	/**
-	 * Test whether the sort function works with worst case data for median of 3
-	 * when swapping median with last
-	 * E.g. 2 3 4 5 6 7 8 9 1 Median 2,6,1 = 2 Partition 1 3 4 5 6 7 8 9 2 
-	 * swap Partition 1 2 4 5 6 7 8 9 3
-	 * Median 4,7,3 = 4 repeat
+	 * Test whether the sort function works with worst case data for median of 3 when swapping median with last E.g. 2 3
+	 * 4 5 6 7 8 9 1 Median 2,6,1 = 2 Partition 1 3 4 5 6 7 8 9 2 swap Partition 1 2 4 5 6 7 8 9 3 Median 4,7,3 = 4
+	 * repeat
 	 */
 	@Test(timeout = TIMEOUT2)
 	public void testSort4() {
@@ -231,9 +224,8 @@ public class SortTest {
 	}
 
 	/**
-	 * Test whether the sort function works with worst case data for median of 3
-	 * E.g. 1 3 5 7 9 8 6 4 2 Median 1,9,2 = 2 Partition 3 5 7 9 8 6 4 2 1
-	 * Median 3,9,4 = 4 repeat
+	 * Test whether the sort function works with worst case data for median of 3 E.g. 1 3 5 7 9 8 6 4 2 Median 1,9,2 = 2
+	 * Partition 3 5 7 9 8 6 4 2 1 Median 3,9,4 = 4 repeat
 	 */
 	@Test(timeout = TIMEOUT2)
 	public void testSortDesc2() {
@@ -262,11 +254,9 @@ public class SortTest {
 	}
 
 	/**
-	 * Test whether the sort function works with worst case data for median of 3
-	 * when swapping median with first
-	 * E.g. 1 9 8 7 6 5 4 3 2 Median 1,6,2 = 2 Partition 2 9 8 7 6 5 4 3 1 
-	 * swap Partition 3 9 8 7 6 5 4 2 1
-	 * Median 3,7,4 = 4 repeat
+	 * Test whether the sort function works with worst case data for median of 3 when swapping median with first E.g. 1
+	 * 9 8 7 6 5 4 3 2 Median 1,6,2 = 2 Partition 2 9 8 7 6 5 4 3 1 swap Partition 3 9 8 7 6 5 4 2 1 Median 3,7,4 = 4
+	 * repeat
 	 */
 	@Test(timeout = TIMEOUT2)
 	public void testSortDesc3() {
@@ -292,11 +282,9 @@ public class SortTest {
 	}
 
 	/**
-	 * Test whether the sort function works with worst case data for median of 3
-	 * when swapping median with last
-	 * E.g. 8 7 6 5 4 3 2 1 9 Median 8,4,9 = 8 Partition 9 7 6 5 4 3 2 1 8 
-	 * swap Partition 9 8 6 5 4 3 2 1 7
-	 * Median 6,3,7 = 6 repeat
+	 * Test whether the sort function works with worst case data for median of 3 when swapping median with last E.g. 8 7
+	 * 6 5 4 3 2 1 9 Median 8,4,9 = 8 Partition 9 7 6 5 4 3 2 1 8 swap Partition 9 8 6 5 4 3 2 1 7 Median 6,3,7 = 6
+	 * repeat
 	 */
 	@Test(timeout = TIMEOUT2)
 	public void testSortDesc4() {

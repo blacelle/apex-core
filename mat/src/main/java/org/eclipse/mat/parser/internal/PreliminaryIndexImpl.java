@@ -40,8 +40,7 @@ import org.eclipse.mat.parser.model.XSnapshotInfo;
 	HashMapIntObject<HashMapIntObject<List<XGCRootInfo>>> thread2objects2roots;
 
 	/**
-	 * Outbound references.
-	 * id -> id*
+	 * Outbound references. id -> id*
 	 */
 	IIndexReader.IOne2ManyIndex outbound = null;
 
@@ -51,14 +50,12 @@ import org.eclipse.mat.parser.model.XSnapshotInfo;
 	IIndexReader.IOne2LongIndex identifiers = null;
 
 	/**
-	 * Object to type.
-	 * id -> id
+	 * Object to type. id -> id
 	 */
 	IIndexReader.IOne2OneIndex object2classId = null;
 
 	/**
-	 * Array and other non-fixed size objects
-	 * id -> int (size compressed to an int)
+	 * Array and other non-fixed size objects id -> int (size compressed to an int)
 	 */
 	IIndexReader.IOne2SizeIndex array2size = null;
 

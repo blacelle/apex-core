@@ -13,9 +13,8 @@ package org.eclipse.mat.snapshot.model;
 import org.eclipse.mat.snapshot.ISnapshot;
 
 /**
- * The class represents a references from a running thread object to objects
- * which are local for this thread. Such objects could be for example java local
- * variables, objects used for synchronization in this thread, etc...
+ * The class represents a references from a running thread object to objects which are local for this thread. Such
+ * objects could be for example java local variables, objects used for synchronization in this thread, etc...
  */
 public class ThreadToLocalReference extends PseudoReference {
 	private static final long serialVersionUID = 1L;
@@ -24,11 +23,17 @@ public class ThreadToLocalReference extends PseudoReference {
 
 	/**
 	 * Create a thread to local reference
-	 * @param snapshot the snapshot
-	 * @param address the address of the object
-	 * @param name the description of the reference e.g. the root types surrounded by '&lt;' '&gt;'
-	 * @param localObjectId the local reference object id
-	 * @param gcRootInfo a description of the root type e.g. Java local etc.
+	 * 
+	 * @param snapshot
+	 *            the snapshot
+	 * @param address
+	 *            the address of the object
+	 * @param name
+	 *            the description of the reference e.g. the root types surrounded by '&lt;' '&gt;'
+	 * @param localObjectId
+	 *            the local reference object id
+	 * @param gcRootInfo
+	 *            a description of the root type e.g. Java local etc.
 	 */
 	public ThreadToLocalReference(ISnapshot snapshot,
 			long address,
@@ -42,6 +47,7 @@ public class ThreadToLocalReference extends PseudoReference {
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.mat.snapshot.model.ObjectReference#getObjectId()
 	 */
 	@Override
@@ -50,8 +56,8 @@ public class ThreadToLocalReference extends PseudoReference {
 	}
 
 	/**
-	 * The description of the thread root information
-	 * Not currently used, so might be removed.
+	 * The description of the thread root information Not currently used, so might be removed.
+	 * 
 	 * @return an array of GC information for the local reference
 	 */
 	public GCRootInfo[] getGcRootInfo() {

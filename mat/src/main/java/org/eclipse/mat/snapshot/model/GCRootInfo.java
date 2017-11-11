@@ -22,6 +22,7 @@ abstract public class GCRootInfo implements Serializable {
 
 	/**
 	 * Reasons why an heap object is a garbage collection root.
+	 * 
 	 * @noimplement
 	 */
 	public interface Type {
@@ -43,24 +44,22 @@ abstract public class GCRootInfo implements Serializable {
 		int NATIVE_STATIC = 8;
 		/**
 		 * Started but not stopped threads
+		 * 
 		 * @see #THREAD_OBJ
 		 */
 		int THREAD_BLOCK = 16;
 		/**
-		 * Everything you have called wait() or notify() on or you have
-		 * synchronized on
+		 * Everything you have called wait() or notify() on or you have synchronized on
 		 */
 		int BUSY_MONITOR = 32;
 		/**
-		 * Local variable, i.e. method input parameters or locally created
-		 * objects of methods still on the stack of a thread
+		 * Local variable, i.e. method input parameters or locally created objects of methods still on the stack of a
+		 * thread
 		 */
 		int JAVA_LOCAL = 64;
 		/**
-		 * In or out parameters in native code; frequently seen as some methods
-		 * have native parts and the objects handled as method parameters become
-		 * GC roots, e.g. parameters used for file/network I/O methods or
-		 * reflection
+		 * In or out parameters in native code; frequently seen as some methods have native parts and the objects
+		 * handled as method parameters become GC roots, e.g. parameters used for file/network I/O methods or reflection
 		 */
 		int NATIVE_STACK = 128;
 		/**
@@ -69,23 +68,24 @@ abstract public class GCRootInfo implements Serializable {
 		int THREAD_OBJ = 256;
 		/**
 		 * An object which is a queue awaiting its finalizer to be run
+		 * 
 		 * @see #THREAD_BLOCK
 		 */
 		int FINALIZABLE = 512;
 		/**
-		 * An object which has a finalize method, but has not been finalized and
-		 * is not yet on the finalizer queue
+		 * An object which has a finalize method, but has not been finalized and is not yet on the finalizer queue
 		 */
 		int UNFINALIZED = 1024;
 		/**
-		 * An object which is unreachable from any other root, but has been 
-		 * marked as a root by MAT to retain objects which otherwise would not
-		 * be included in the analysis
+		 * An object which is unreachable from any other root, but has been marked as a root by MAT to retain objects
+		 * which otherwise would not be included in the analysis
+		 * 
 		 * @since 1.0
 		 */
 		int UNREACHABLE = 2048;
 		/**
 		 * A Java stack frame containing references to Java locals
+		 * 
 		 * @since 1.0
 		 */
 		int JAVA_STACK_FRAME = 4096;
@@ -113,9 +113,13 @@ abstract public class GCRootInfo implements Serializable {
 
 	/**
 	 * Create a description of a Garbage Collection root
-	 * @param objectAddress the object which is retained
-	 * @param contextAddress the source of the retention - e.g. a thread address, or 0 for none
-	 * @param type the reason the object is retained {@link Type}
+	 * 
+	 * @param objectAddress
+	 *            the object which is retained
+	 * @param contextAddress
+	 *            the source of the retention - e.g. a thread address, or 0 for none
+	 * @param type
+	 *            the reason the object is retained {@link Type}
 	 */
 	public GCRootInfo(long objectAddress, long contextAddress, int type) {
 		this.objectAddress = objectAddress;
@@ -125,6 +129,7 @@ abstract public class GCRootInfo implements Serializable {
 
 	/**
 	 * The object id of the retained object
+	 * 
 	 * @return the target object
 	 */
 	public int getObjectId() {
@@ -133,6 +138,7 @@ abstract public class GCRootInfo implements Serializable {
 
 	/**
 	 * The object address of the retained object
+	 * 
 	 * @return the target object address
 	 */
 	public long getObjectAddress() {
@@ -141,6 +147,7 @@ abstract public class GCRootInfo implements Serializable {
 
 	/**
 	 * The object address of the source of the root
+	 * 
 	 * @return the source object address, or 0 if none
 	 */
 	public long getContextAddress() {
@@ -149,6 +156,7 @@ abstract public class GCRootInfo implements Serializable {
 
 	/**
 	 * The object id of the source of the root, if there is a source
+	 * 
 	 * @return the source object id
 	 */
 	public int getContextId() {
@@ -157,6 +165,7 @@ abstract public class GCRootInfo implements Serializable {
 
 	/**
 	 * The reason for the root
+	 * 
 	 * @return A number representing the type as {@link Type}
 	 */
 	public int getType() {
@@ -165,7 +174,9 @@ abstract public class GCRootInfo implements Serializable {
 
 	/**
 	 * A printable version of the type
-	 * @param type as {@link Type}
+	 * 
+	 * @param type
+	 *            as {@link Type}
 	 * @return the printable version of the type
 	 * @see Type
 	 */
@@ -178,10 +189,11 @@ abstract public class GCRootInfo implements Serializable {
 	}
 
 	/**
-	 * A combined representation of the types of several roots.
-	 * The types are currently separated by commas, but this could change
-	 * e.g. for NLS reasons?
-	 * @param roots an array of roots to get the combined type from
+	 * A combined representation of the types of several roots. The types are currently separated by commas, but this
+	 * could change e.g. for NLS reasons?
+	 * 
+	 * @param roots
+	 *            an array of roots to get the combined type from
 	 * @return A combined type
 	 * @see Type
 	 */

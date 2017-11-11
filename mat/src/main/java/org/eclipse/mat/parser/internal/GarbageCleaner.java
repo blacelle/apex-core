@@ -66,8 +66,8 @@ import org.eclipse.mat.util.SilentProgressListener;
 			HashMapIntObject<ClassImpl> classesById = idx.classesById;
 
 			/*
-			 * START - marking objects use ObjectMarker to mark the reachable
-			 * objects if more than 1 CPUs are available - use multithreading
+			 * START - marking objects use ObjectMarker to mark the reachable objects if more than 1 CPUs are available
+			 * - use multithreading
 			 */
 			ObjectMarker marker =
 					new ObjectMarker(newRoots, reachable, preOutbound, new SilentProgressListener(listener));
@@ -501,15 +501,16 @@ import org.eclipse.mat.util.SilentProgressListener;
 			}
 		}
 
-		//        List<UnreachableObjectsHistogram.Record> records = new ArrayList<UnreachableObjectsHistogram.Record>();
-		//        for (Iterator<Record> iter = histogram.values(); iter.hasNext();)
-		//        {
-		//            Record r = iter.next();
-		//            records.add(new UnreachableObjectsHistogram.Record(r.clazz.getName(), r.clazz.getObjectAddress(), r.objectCount, r.size));
-		//        }
+		// List<UnreachableObjectsHistogram.Record> records = new ArrayList<UnreachableObjectsHistogram.Record>();
+		// for (Iterator<Record> iter = histogram.values(); iter.hasNext();)
+		// {
+		// Record r = iter.next();
+		// records.add(new UnreachableObjectsHistogram.Record(r.clazz.getName(), r.clazz.getObjectAddress(),
+		// r.objectCount, r.size));
+		// }
 		//
-		//        UnreachableObjectsHistogram deadObjectHistogram = new UnreachableObjectsHistogram(records);
-		//        idx.getSnapshotInfo().setProperty(UnreachableObjectsHistogram.class.getName(), deadObjectHistogram);
+		// UnreachableObjectsHistogram deadObjectHistogram = new UnreachableObjectsHistogram(records);
+		// idx.getSnapshotInfo().setProperty(UnreachableObjectsHistogram.class.getName(), deadObjectHistogram);
 	}
 
 	// //////////////////////////////////////////////////////////////
@@ -652,18 +653,24 @@ import org.eclipse.mat.util.SilentProgressListener;
 	}
 
 	/**
-	 * Decide on next root to choose.
-	 * A sophisticated version would convert the object graph to a DAG
-	 * of strongly connected components and choose an example member from
-	 * each (currently unreached) source strongly connected component.
-	 * This version is not minimal but covers the object graph.
-	 * @param ii candidate root
-	 * @param pass from 0 to passes -1
-	 * @param passes number of passes
-	 * @param reachable which object have already been marked
-	 * @param preOutbound the outbound refs for each object
-	 * @param outbounds count of outbounds (as 0..255)
-	 * @param inbounds count of inbounds (as 0..255)
+	 * Decide on next root to choose. A sophisticated version would convert the object graph to a DAG of strongly
+	 * connected components and choose an example member from each (currently unreached) source strongly connected
+	 * component. This version is not minimal but covers the object graph.
+	 * 
+	 * @param ii
+	 *            candidate root
+	 * @param pass
+	 *            from 0 to passes -1
+	 * @param passes
+	 *            number of passes
+	 * @param reachable
+	 *            which object have already been marked
+	 * @param preOutbound
+	 *            the outbound refs for each object
+	 * @param outbounds
+	 *            count of outbounds (as 0..255)
+	 * @param inbounds
+	 *            count of inbounds (as 0..255)
 	 * @return candidate root or -1
 	 */
 	private static int selectRoot(int ii,
@@ -676,7 +683,7 @@ import org.eclipse.mat.util.SilentProgressListener;
 		if (reachable[ii])
 			return -1;
 
-		// Check for objects with 1 inbound, pointing to another object 
+		// Check for objects with 1 inbound, pointing to another object
 		// with 1 inbound, pointing back to this.
 		// The cycle has no entry, so must be a root.
 		if (pass == 0) {

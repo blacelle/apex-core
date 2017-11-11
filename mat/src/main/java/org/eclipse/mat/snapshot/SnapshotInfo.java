@@ -18,10 +18,9 @@ import java.util.Map;
 import org.eclipse.mat.snapshot.model.GCRootInfo.Type;
 
 /**
- * Class describing an {@link ISnapshot}. Each snapshot has some core data, like
- * the date when it was acquired/parsed, the number of objects inside... This
- * data is available with the snapshot info which is usually serialized along
- * with the snapshot.
+ * Class describing an {@link ISnapshot}. Each snapshot has some core data, like the date when it was acquired/parsed,
+ * the number of objects inside... This data is available with the snapshot info which is usually serialized along with
+ * the snapshot.
  */
 public class SnapshotInfo implements Serializable {
 	private static final long serialVersionUID = 4L;
@@ -46,8 +45,7 @@ public class SnapshotInfo implements Serializable {
 	 * @param jvmInfo
 	 *            version of the JVM from which it was acquired
 	 * @param identifierSize
-	 *            size of the internal identifiers in the heap dump, i.e. 32 or
-	 *            64 bit
+	 *            size of the internal identifiers in the heap dump, i.e. 32 or 64 bit
 	 * @param creationDate
 	 *            date when the snapshot was acquired/parsed
 	 * @param numberOfObjects
@@ -59,8 +57,7 @@ public class SnapshotInfo implements Serializable {
 	 * @param numberOfClassLoaders
 	 *            number of ClassLoaders found in the snapshot
 	 * @param usedHeapSize
-	 *            number of bytes used in the heap (the allocated memory may be
-	 *            higher)
+	 *            number of bytes used in the heap (the allocated memory may be higher)
 	 */
 	public SnapshotInfo(String path,
 			String prefix,
@@ -114,11 +111,10 @@ public class SnapshotInfo implements Serializable {
 
 	/**
 	 * Get extra information about the snapshot
+	 * 
 	 * @param name
-	 * keep_unreachable_objects - {@link Type}
-	 * hprof.version
-	 * org.eclipse.mat.snapshot.UnreachableObjectsHistogram
-	 * $heapFormat
+	 *            keep_unreachable_objects - {@link Type} hprof.version
+	 *            org.eclipse.mat.snapshot.UnreachableObjectsHistogram $heapFormat
 	 * @return the extra (serializable) information
 	 */
 	public Serializable getProperty(String name) {
@@ -127,12 +123,11 @@ public class SnapshotInfo implements Serializable {
 
 	/**
 	 * Store extra information about the snapshot
+	 * 
 	 * @param name
 	 * @param value
-	 * keep_unreachable_objects - mark as {@link Type}
-	 * hprof.version
-	 * org.eclipse.mat.snapshot.UnreachableObjectsHistogram
-	 * $heapFormat
+	 *            keep_unreachable_objects - mark as {@link Type} hprof.version
+	 *            org.eclipse.mat.snapshot.UnreachableObjectsHistogram $heapFormat
 	 * @return the previous extra (serializable) information, or null
 	 */
 	public Serializable setProperty(String name, Serializable value) {
@@ -149,8 +144,7 @@ public class SnapshotInfo implements Serializable {
 	}
 
 	/**
-	 * Get the common prefix used to name all additional (e.g. index) files. The
-	 * prefix includes the directory path.
+	 * Get the common prefix used to name all additional (e.g. index) files. The prefix includes the directory path.
 	 * 
 	 * @return common prefix used to name additional files
 	 */
@@ -170,8 +164,7 @@ public class SnapshotInfo implements Serializable {
 	/**
 	 * Get size of the internal identifiers in the heap dump, i.e. 32 or 64 bit, in bytes.
 	 * 
-	 * @return size of the internal identifiers in the heap dump, i.e. 32 or 64
-	 *         bit
+	 * @return size of the internal identifiers in the heap dump, i.e. 32 or 64 bit
 	 */
 	public int getIdentifierSize() {
 		return identifierSize;
@@ -180,8 +173,7 @@ public class SnapshotInfo implements Serializable {
 	/**
 	 * Get date when the snapshot was acquired/parsed.
 	 * 
-	 * @return creation date, or <code>null</code> if the creation date is not
-	 *         known
+	 * @return creation date, or <code>null</code> if the creation date is not known
 	 */
 	public Date getCreationDate() {
 		return creationDate != null ? new Date(creationDate.getTime()) : null;
@@ -226,8 +218,7 @@ public class SnapshotInfo implements Serializable {
 	/**
 	 * Get number of bytes used in the heap (the allocated memory may be higher)
 	 * 
-	 * @return number of bytes used in the heap (the allocated memory may be
-	 *         higher)
+	 * @return number of bytes used in the heap (the allocated memory may be higher)
 	 */
 	public long getUsedHeapSize() {
 		return usedHeapSize;

@@ -16,8 +16,7 @@ import org.eclipse.mat.report.internal.Messages;
 import org.eclipse.mat.util.MessageUtil;
 
 /**
- * Utility class to hold a list of ints
- * Similar to a list, but efficient for ints
+ * Utility class to hold a list of ints Similar to a list, but efficient for ints
  */
 public final class ArrayInt {
 	int elements[];
@@ -32,6 +31,7 @@ public final class ArrayInt {
 
 	/**
 	 * Create a list of given size
+	 * 
 	 * @param initialCapacity
 	 */
 	public ArrayInt(int initialCapacity) {
@@ -41,7 +41,9 @@ public final class ArrayInt {
 
 	/**
 	 * Create a list based on a supplied array
-	 * @param initialValues a copy is taken of this array
+	 * 
+	 * @param initialValues
+	 *            a copy is taken of this array
 	 */
 	public ArrayInt(int[] initialValues) {
 		this(initialValues.length);
@@ -51,7 +53,9 @@ public final class ArrayInt {
 
 	/**
 	 * Create a list based on an existing ArrayInt, of size of the template
-	 * @param template a copy is taken of these values
+	 * 
+	 * @param template
+	 *            a copy is taken of these values
 	 */
 	public ArrayInt(ArrayInt template) {
 		this(template.size);
@@ -61,7 +65,9 @@ public final class ArrayInt {
 
 	/**
 	 * append one more entry
-	 * @param element the int to add to the end
+	 * 
+	 * @param element
+	 *            the int to add to the end
 	 */
 	public void add(int element) {
 		ensureCapacity(size + 1);
@@ -70,6 +76,7 @@ public final class ArrayInt {
 
 	/**
 	 * append a group of entries
+	 * 
 	 * @param elements
 	 */
 	public void addAll(int[] elements) {
@@ -79,7 +86,8 @@ public final class ArrayInt {
 	}
 
 	/**
-	 * append all of another 
+	 * append all of another
+	 * 
 	 * @param template
 	 */
 	public void addAll(ArrayInt template) {
@@ -90,6 +98,7 @@ public final class ArrayInt {
 
 	/**
 	 * modify one particular entry
+	 * 
 	 * @param index
 	 * @param element
 	 * @return the previous value
@@ -105,6 +114,7 @@ public final class ArrayInt {
 
 	/**
 	 * retrieve one entry
+	 * 
 	 * @param index
 	 * @return the entry
 	 */
@@ -116,14 +126,16 @@ public final class ArrayInt {
 
 	/**
 	 * get the number of used entries
+	 * 
 	 * @return the number of entries
 	 */
 	public int size() {
 		return size;
 	}
 
-	/** 
+	/**
 	 * convert to an array
+	 * 
 	 * @return a copy of the entries
 	 */
 	public int[] toArray() {
@@ -134,6 +146,7 @@ public final class ArrayInt {
 
 	/**
 	 * is the list empty
+	 * 
 	 * @return true if empty
 	 */
 	public boolean isEmpty() {
@@ -142,6 +155,7 @@ public final class ArrayInt {
 
 	/**
 	 * get an iterator to go through the list
+	 * 
 	 * @return the iterator
 	 */
 	public IteratorInt iterator() {
@@ -160,7 +174,7 @@ public final class ArrayInt {
 		};
 	}
 
-	/** 
+	/**
 	 * clear all the entries
 	 */
 	public void clear() {
@@ -168,8 +182,8 @@ public final class ArrayInt {
 	}
 
 	/**
-	 * get the last entry to be written.
-	 * Must be at least one entry.
+	 * get the last entry to be written. Must be at least one entry.
+	 * 
 	 * @return the last element
 	 * @since 1.0
 	 */
@@ -178,8 +192,8 @@ public final class ArrayInt {
 	}
 
 	/**
-	 * get the first entry to be written.
-	 * Must be at least one entry.
+	 * get the first entry to be written. Must be at least one entry.
+	 * 
 	 * @return the first element
 	 * @since 1.0
 	 */
@@ -191,8 +205,8 @@ public final class ArrayInt {
 	}
 
 	/**
-	  * arrange the entries in ascending order
-	  */
+	 * arrange the entries in ascending order
+	 */
 	public void sort() {
 		Arrays.sort(elements, 0, size);
 	}

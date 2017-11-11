@@ -17,22 +17,18 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Used to tag resolvers with the names of classes that they handle.
- * Can be used as follows:
- * <code>
+ * Used to tag resolvers with the names of classes that they handle. Can be used as follows: <code>
  * <pre>
- * @Subjects({"com.example.class1", "com.example.Class2"})
+ * &#64;Subjects({"com.example.class1", "com.example.Class2"})
  * </pre>
- * </code>
- * or
- * <code>
+ * </code> or <code>
  * <pre>
- * @Subjects("com.example.class1")
+ * &#64;Subjects("com.example.class1")
  * </pre>
- * </code>
- * See {@link Subject} for a single class name, though this annotation can also be used for a single class name.
- * <p>Experimental: can also be used to tag queries which only make sense when at least one the classes
- * is present in the snapshot.
+ * </code> See {@link Subject} for a single class name, though this annotation can also be used for a single class name.
+ * <p>
+ * Experimental: can also be used to tag queries which only make sense when at least one the classes is present in the
+ * snapshot.
  */
 @Target({ TYPE })
 @Retention(RUNTIME)

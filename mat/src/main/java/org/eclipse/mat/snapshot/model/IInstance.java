@@ -21,18 +21,17 @@ public interface IInstance extends IObject {
 	/**
 	 * Returns all fields of the object.
 	 * <p>
-	 * Fields are ordered in such a way, that first fields defined in the
-	 * current class and then fields of the super class and its super classes
-	 * are returned. This order is important to know, if a class declares a
-	 * field by the same name as the class it inherits from.
+	 * Fields are ordered in such a way, that first fields defined in the current class and then fields of the super
+	 * class and its super classes are returned. This order is important to know, if a class declares a field by the
+	 * same name as the class it inherits from.
 	 */
 	List<Field> getFields();
 
 	/**
 	 * Returns the field identified by the name.
 	 * <p>
-	 * If declares a member variable by the same name as the parent class does,
-	 * then the result of this method is undefined.
+	 * If declares a member variable by the same name as the parent class does, then the result of this method is
+	 * undefined.
 	 */
 	Field getField(String name);
 }

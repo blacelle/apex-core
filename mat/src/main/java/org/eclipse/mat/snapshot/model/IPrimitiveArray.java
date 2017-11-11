@@ -17,8 +17,8 @@ package org.eclipse.mat.snapshot.model;
  */
 public interface IPrimitiveArray extends IArray {
 	/**
-	 * Primitive signatures.
-	 * Indexes match the values of {@link IObject.Type}
+	 * Primitive signatures. Indexes match the values of {@link IObject.Type}
+	 * 
 	 * @see IObject.Type
 	 */
 	byte[] SIGNATURES = { -1,
@@ -35,15 +35,15 @@ public interface IPrimitiveArray extends IArray {
 			(byte) 'J' };
 
 	/**
-	 * Element sizes inside the array.
-	 * Indexes match the values of {@link IObject.Type}
+	 * Element sizes inside the array. Indexes match the values of {@link IObject.Type}
+	 * 
 	 * @see IObject.Type
 	 */
 	int[] ELEMENT_SIZE = { -1, -1, -1, -1, 1, 2, 4, 8, 1, 2, 4, 8 };
 
 	/**
-	 * Display string of the type.
-	 * Indexes match the values of {@link IObject.Type}
+	 * Display string of the type. Indexes match the values of {@link IObject.Type}
+	 * 
 	 * @see IObject.Type
 	 */
 	String[] TYPE = { null,
@@ -60,8 +60,8 @@ public interface IPrimitiveArray extends IArray {
 			"long[]" };
 
 	/**
-	 * Java component type of the primitive array.
-	 * Indexes match the values of {link IObject.Type}
+	 * Java component type of the primitive array. Indexes match the values of {link IObject.Type}
+	 * 
 	 * @see IObject.Type
 	 */
 	Class<?>[] COMPONENT_TYPE = { null,
@@ -89,44 +89,35 @@ public interface IPrimitiveArray extends IArray {
 
 	/**
 	 * Returns the value of the array at the specified index
-	 * @param index from 0 to length-1
-	 * @return
-	 * Byte - for a byte array
-	 * Short - for a short array
-	 * Integer - for an int array
-	 * Long - for a long array
-	 * Boolean - for a boolean array
-	 * Char - for a char array
-	 * Float - for a float array
-	 * Double - for a double array
+	 * 
+	 * @param index
+	 *            from 0 to length-1
+	 * @return Byte - for a byte array Short - for a short array Integer - for an int array Long - for a long array
+	 *         Boolean - for a boolean array Char - for a char array Float - for a float array Double - for a double
+	 *         array
 	 */
 	Object getValueAt(int index);
 
 	/**
-	 * Get the primitive Java array. The return value can be cast into the
-	 * correct component type, e.g.
+	 * Get the primitive Java array. The return value can be cast into the correct component type, e.g.
 	 * 
 	 * <pre>
-	 * if (char.class == array.getComponentType())
-	 * {
-	 *     char[] content = (char[]) array.getValueArray();
-	 *     System.out.println(content.length);
+	 * if (char.class == array.getComponentType()) {
+	 * 	char[] content = (char[]) array.getValueArray();
+	 * 	System.out.println(content.length);
 	 * }
 	 * </pre>
 	 * 
-	 * The return value must not be modified because it is cached by the heap
-	 * dump adapter. This method does not return a copy of the array for
-	 * performance reasons.
+	 * The return value must not be modified because it is cached by the heap dump adapter. This method does not return
+	 * a copy of the array for performance reasons.
 	 */
 	Object getValueArray();
 
 	/**
-	 * Get the primitive Java array, beginning at <code>offset</code> and
-	 * <code>length</code> number of elements.
+	 * Get the primitive Java array, beginning at <code>offset</code> and <code>length</code> number of elements.
 	 * <p>
-	 * The return value must not be modified because it is cached by the heap
-	 * dump adapter. This method does not return a copy of the array for
-	 * performance reasons.
+	 * The return value must not be modified because it is cached by the heap dump adapter. This method does not return
+	 * a copy of the array for performance reasons.
 	 */
 	Object getValueArray(int offset, int length);
 }

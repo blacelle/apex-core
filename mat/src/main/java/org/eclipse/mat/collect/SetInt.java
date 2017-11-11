@@ -14,18 +14,15 @@ import java.io.Serializable;
 import java.util.NoSuchElementException;
 
 /**
- * Utility class to hold a set of ints
- * Similar to a Set, but efficient for ints
+ * Utility class to hold a set of ints Similar to a Set, but efficient for ints
  */
 public final class SetInt implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Largest requested size that can be allocated on many VMs.
-	 * Size will be rounded up to the next prime, so choose prime - 1.
-	 * Biggest primes less than 2^31 are 0x7fffffff and 0x7fffffed,
-	 * but JVM limit can be less than Integer.MAX_VALUE.
-	 * E.g. ArrayList has a limit of Integer.MAX_VALUE - 8
+	 * Largest requested size that can be allocated on many VMs. Size will be rounded up to the next prime, so choose
+	 * prime - 1. Biggest primes less than 2^31 are 0x7fffffff and 0x7fffffed, but JVM limit can be less than
+	 * Integer.MAX_VALUE. E.g. ArrayList has a limit of Integer.MAX_VALUE - 8
 	 */
 	private static final int BIG_CAPACITY = PrimeFinder.findPrevPrime(Integer.MAX_VALUE - 8 + 1) - 1;
 
@@ -45,6 +42,7 @@ public final class SetInt implements Serializable {
 
 	/**
 	 * Create a set of given size
+	 * 
 	 * @param initialCapacity
 	 */
 	public SetInt(int initialCapacity) {
@@ -52,9 +50,11 @@ public final class SetInt implements Serializable {
 	}
 
 	/**
-	 * Add a value to the set 
-	 * @param key the value to add
-	 * @return return true if added 
+	 * Add a value to the set
+	 * 
+	 * @param key
+	 *            the value to add
+	 * @return return true if added
 	 */
 	public boolean add(int key) {
 		if (size == limit) {
@@ -77,7 +77,9 @@ public final class SetInt implements Serializable {
 
 	/**
 	 * Remove a value from the set
-	 * @param key the value to add
+	 * 
+	 * @param key
+	 *            the value to add
 	 * @return return true if removed
 	 */
 	public boolean remove(int key) {
@@ -109,7 +111,9 @@ public final class SetInt implements Serializable {
 
 	/**
 	 * Find a value from the set
-	 * @param key the value to find
+	 * 
+	 * @param key
+	 *            the value to find
 	 * @return return true if found
 	 */
 	public boolean contains(int key) {
@@ -125,6 +129,7 @@ public final class SetInt implements Serializable {
 
 	/**
 	 * get the number of used entries
+	 * 
 	 * @return the number of entries
 	 */
 	public int size() {
@@ -133,13 +138,14 @@ public final class SetInt implements Serializable {
 
 	/**
 	 * is the set empty
+	 * 
 	 * @return true if empty
 	 */
 	public boolean isEmpty() {
 		return size() == 0;
 	}
 
-	/** 
+	/**
 	 * clear all the entries
 	 */
 	public void clear() {
@@ -149,6 +155,7 @@ public final class SetInt implements Serializable {
 
 	/**
 	 * get an iterator to go through the set
+	 * 
 	 * @return the iterator
 	 */
 	public IteratorInt iterator() {
@@ -174,8 +181,9 @@ public final class SetInt implements Serializable {
 		};
 	}
 
-	/** 
+	/**
 	 * convert to an array
+	 * 
 	 * @return a copy of the entries
 	 */
 	public int[] toArray() {

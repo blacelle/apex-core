@@ -89,8 +89,8 @@ public class DominatorTree {
 			semi = new int[n + 1];
 
 			/*
-			 * Allocate these up front, to check for early OOM, but then free
-			 * so that dfs() can use the space for outbound index caching.  
+			 * Allocate these up front, to check for early OOM, but then free so that dfs() can use the space for
+			 * outbound index caching.
 			 */
 			dom = new int[n + 1];
 			bucket = new int[n + 1];
@@ -119,7 +119,7 @@ public class DominatorTree {
 			progressListener.beginTask(Messages.DominatorTree_ComputingDominators, n / 1000);
 
 			/*
-			 * Reallocate just before use. 
+			 * Reallocate just before use.
 			 */
 			dom = new int[snapshot.getSnapshotInfo().getNumberOfObjects() + 2];
 			bucket = new int[snapshot.getSnapshotInfo().getNumberOfObjects() + 2];

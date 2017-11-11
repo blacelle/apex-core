@@ -14,14 +14,11 @@ import org.eclipse.mat.SnapshotException;
 import org.eclipse.mat.snapshot.model.IObject;
 
 /**
- * Interface describing a name resolver for objects of specific classes (found
- * in an snapshot), e.g. String (where the char[] is evaluated) or as specific
- * class loader (where the appropriate field holding its name and thereby
- * deployment unit is evaluated). Objects of this interface need to be
- * registered using the <code>org.eclipse.mat.api.nameResolver</code> extension point.
- * Implementations of this interface should be tagged with the {@link Subject} or 
- * {@link Subjects} annotation to specify the types of objects 
- * in the dump they describe.
+ * Interface describing a name resolver for objects of specific classes (found in an snapshot), e.g. String (where the
+ * char[] is evaluated) or as specific class loader (where the appropriate field holding its name and thereby deployment
+ * unit is evaluated). Objects of this interface need to be registered using the
+ * <code>org.eclipse.mat.api.nameResolver</code> extension point. Implementations of this interface should be tagged
+ * with the {@link Subject} or {@link Subjects} annotation to specify the types of objects in the dump they describe.
  */
 public interface IClassSpecificNameResolver {
 	/**

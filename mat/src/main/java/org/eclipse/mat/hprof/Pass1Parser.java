@@ -119,10 +119,8 @@ public class Pass1Parser extends AbstractParser {
 				length = updateLengthIfNecessary(fileSize, curPos, record, length, monitor);
 
 				if (length < 0)
-					throw new SnapshotException(MessageUtil.format(Messages.Pass1Parser_Error_IllegalRecordLength,
-							length,
-							in.position(),
-							record));
+					throw new SnapshotException(MessageUtil
+							.format(Messages.Pass1Parser_Error_IllegalRecordLength, length, in.position(), record));
 
 				if (curPos + length - 9 > fileSize) {
 					switch (strictnessPreference) {
@@ -147,10 +145,8 @@ public class Pass1Parser extends AbstractParser {
 				switch (record) {
 				case Constants.Record.STRING_IN_UTF8:
 					if (((int) (length - idSize) < 0))
-						throw new SnapshotException(MessageUtil.format(Messages.Pass1Parser_Error_IllegalRecordLength,
-								length,
-								in.position(),
-								record));
+						throw new SnapshotException(MessageUtil
+								.format(Messages.Pass1Parser_Error_IllegalRecordLength, length, in.position(), record));
 					readString(length);
 					break;
 				case Constants.Record.LOAD_CLASS:
@@ -365,9 +361,8 @@ public class Pass1Parser extends AbstractParser {
 				readPrimitiveArrayDump(segmentStartPos);
 				break;
 			default:
-				throw new SnapshotException(MessageUtil.format(Messages.Pass1Parser_Error_InvalidHeapDumpFile,
-						segmentType,
-						segmentStartPos));
+				throw new SnapshotException(MessageUtil
+						.format(Messages.Pass1Parser_Error_InvalidHeapDumpFile, segmentType, segmentStartPos));
 			}
 
 			segmentStartPos = in.position();
