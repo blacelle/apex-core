@@ -38,6 +38,7 @@ import org.eclipse.mat.util.SimpleMonitor;
 
 public class Pass2Parser extends AbstractParser {
 	private static final String DIRECT_BYTE_BUFFER_CLASS_NAME = "java.nio.DirectByteBuffer";
+	private static final boolean MANAGE_OFF_HEAP = Boolean.getBoolean("mat.offheap");
 
 	private IHprofParserHandler handler;
 	private SimpleMonitor.Listener monitor;
@@ -183,6 +184,10 @@ public class Pass2Parser extends AbstractParser {
 	}
 
 	private boolean hasAllocatedDirectMemory(ClassImpl thisClazz) {
+		if (!MANAGE_OFF_HEAP) {
+			return false;
+		}
+
 		try {
 			// If thisClazz.getName equals java.nio.DirectByteBuffer, then this returns true
 			if (thisClazz.getSnapshot() != null) {
