@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -21,8 +20,7 @@
 	<!-- mvn com.mycila:license-maven-plugin:format -->
 
 	<!-- EXPERIMENTAL: evosuite -->
-	<!-- mvn -DmemoryInMB=2000 -Dcores=2 org.evosuite.plugins:evosuite-maven-plugin:generate org.evosuite.plugins:evosuite-maven-plugin:export 
-		test -->
+	<!-- mvn -DmemoryInMB=2000 -Dcores=2 org.evosuite.plugins:evosuite-maven-plugin:generate org.evosuite.plugins:evosuite-maven-plugin:export test -->
 
 	<!-- Make a release -->
 	<!-- Do not -DskipTests, else it will skip javadoc which is mandatory for sonatype -->
@@ -76,6 +74,9 @@
 				<pmd.skip>true</pmd.skip>
 				<cpd.skip>true</cpd.skip>
 				<maven.javadoc.skip>true</maven.javadoc.skip>
+
+				<!-- Skip formatting by revelc -->
+				<formatter.skip>true</formatter.skip>
 			</properties>
 		</profile>
 		<profile>

@@ -40,7 +40,12 @@ public class TestApexMemoryHelper {
 
 	@Test
 	public void testIntArrayWeight() {
-		Assert.assertEquals(44, ApexMemoryHelper.getObjectArrayMemory(new int[9]));
+		Assert.assertEquals(56, ApexMemoryHelper.getObjectArrayMemory(new int[9]));
+	}
+
+	@Test
+	public void testDouble() {
+		Assert.assertEquals(24, ApexMemoryHelper.getDoubleMemory());
 	}
 
 	@Test

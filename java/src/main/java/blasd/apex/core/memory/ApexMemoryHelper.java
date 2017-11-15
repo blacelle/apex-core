@@ -30,6 +30,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.IntPredicate;
 
+import org.ehcache.sizeof.impl.ReflectionSizeOf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
@@ -199,11 +200,12 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 		}
 	}
 
-	public static long getDoubleMemory() {
-		// Double are essentially a double in an Object
-		long charArrayWeight = DOUBLE + OBJECT;
+	private static final ReflectionSizeOf reflectionSizeOf = new ReflectionSizeOf();
+	private static final Double autoboxedZero = new Double(0);
 
-		return charArrayWeight;
+	@Deprecated
+	public static long getDoubleMemory() {
+		return reflectionSizeOf.deepSizeOf(autoboxedZero);
 	}
 
 	public static long getObjectArrayMemory(Object[] asArray) {
@@ -222,29 +224,8 @@ public class ApexMemoryHelper implements IApexMemoryConstants {
 		if (asArray == null) {
 			return 0L;
 		}
-		Class<?> arrayClass = asArray.getClass();
-		if (!arrayClass.isArray()) {
-			return 0L;
-		}
 
-		Class<?> elementClass = arrayClass.getComponentType();
-
-		// Object header
-		long footprint = OBJECT;
-		final long componentWeight;
-		if (elementClass == int.class) {
-			componentWeight = INT;
-		} else if (elementClass == float.class) {
-			componentWeight = FLOAT;
-		} else {
-			// Long, Double, Object
-			componentWeight = OBJECT;
-		}
-
-		// The weight of the array
-		footprint += componentWeight * Array.getLength(asArray);
-
-		return footprint;
+		return reflectionSizeOf.deepSizeOf(asArray);
 	}
 
 	private static final long MASK = 0xFFFFFFFFL;

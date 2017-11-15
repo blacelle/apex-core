@@ -32,6 +32,7 @@ import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -132,45 +133,84 @@ public class ApexStreamHelper {
 
 		AtomicLong nbConsumed = new AtomicLong();
 
-		Collection<T> leftOvers = stream.collect(queueSupplier, (queue, tuple) -> {
-			queue.add(tuple);
-			if (queue.size() >= partitionSize) {
-				consumer.accept(queue);
-				nbConsumed.addAndGet(queue.size());
-				queue.clear();
-			}
-		}, (l, r) -> {
-			Iterator<T> toDrain = r.iterator();
+		if (false) {
+			// We do not rely on unorderedBatches as it has a bigger transient memory impact as it make a new Collection
+			// per batch
+			return stream.collect(unorderedBatches(partitionSize,
+					Collectors.reducing(0L, e -> Long.valueOf(e.size()), Long::sum),
+					queueSupplier));
+		} else {
 
-			// r has to be drained to l
-			int nbDrained = 0;
-			while (toDrain.hasNext()) {
-				nbDrained++;
-				l.add(toDrain.next());
-
-				if (l.size() >= partitionSize) {
-					// We need to submit a batch
-					consumer.accept(l);
-					nbConsumed.addAndGet(l.size());
-					l.clear();
+			Collection<T> leftOvers = stream.collect(queueSupplier, (queue, tuple) -> {
+				queue.add(tuple);
+				if (queue.size() >= partitionSize) {
+					consumer.accept(queue);
+					nbConsumed.addAndGet(queue.size());
+					queue.clear();
 				}
+			}, (l, r) -> {
+				Iterator<T> toDrain = r.iterator();
+
+				// r has to be drained to l
+				int nbDrained = 0;
+				while (toDrain.hasNext()) {
+					nbDrained++;
+					l.add(toDrain.next());
+
+					if (l.size() >= partitionSize) {
+						// We need to submit a batch
+						consumer.accept(l);
+						nbConsumed.addAndGet(l.size());
+						l.clear();
+					}
+				}
+
+				// Just for the sake of helping GC. Might be counter-productive
+				r.clear();
+
+				if (nbDrained < 0) {
+					// Just for the sake of sonar warning about .drainTo result not used
+					// TODO: is there something to do with this information?
+					LOGGER.trace("nbDrained: {}", nbDrained);
+				}
+			});
+
+			// The last transaction
+			consumer.accept(leftOvers);
+			nbConsumed.addAndGet(leftOvers.size());
+
+			return nbConsumed.get();
+		}
+	}
+
+	// https://stackoverflow.com/questions/34158634/how-to-transform-a-java-stream-into-a-sliding-window
+	// https://stackoverflow.com/questions/32434592/partition-a-java-8-stream
+	@Beta
+	public static <T, A, R, C extends Collection<T>> Collector<T, ?, R> unorderedBatches(int batchSize,
+			Collector<C, A, R> downstream,
+			Supplier<? extends C> queueSupplier) {
+		class Acc {
+			C cur = queueSupplier.get();
+			A acc = downstream.supplier().get();
+		}
+		BiConsumer<Acc, T> accumulator = (acc, t) -> {
+			acc.cur.add(t);
+			if (acc.cur.size() == batchSize) {
+				downstream.accumulator().accept(acc.acc, acc.cur);
+				acc.cur = queueSupplier.get();
 			}
+		};
+		return Collector.of(Acc::new, accumulator, (acc1, acc2) -> {
+			acc1.acc = downstream.combiner().apply(acc1.acc, acc2.acc);
+			acc2.cur.forEach(t -> accumulator.accept(acc1, t));
 
-			// Just for the sake of helping GC. Might be counter-productive
-			r.clear();
-
-			if (nbDrained < 0) {
-				// Just for the sake of sonar warning about .drainTo result not used
-				// TODO: is there something to do with this information?
-				LOGGER.trace("nbDrained: {}", nbDrained);
+			return acc1;
+		}, acc -> {
+			if (!acc.cur.isEmpty()) {
+				downstream.accumulator().accept(acc.acc, acc.cur);
 			}
-		});
-
-		// The last transaction
-		consumer.accept(leftOvers);
-		nbConsumed.addAndGet(leftOvers.size());
-
-		return nbConsumed.get();
+			return downstream.finisher().apply(acc.acc);
+		}, Collector.Characteristics.UNORDERED);
 	}
 
 	@Beta
