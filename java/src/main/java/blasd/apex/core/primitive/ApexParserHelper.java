@@ -111,7 +111,7 @@ public class ApexParserHelper {
 				throw new RuntimeException("Not a number");
 		}
 
-		final int n;
+		int n;
 		{
 			int p = DOT_MATCHER.indexIn(s);
 
@@ -126,15 +126,22 @@ public class ApexParserHelper {
 					last--;
 				}
 
-				// Adjust with first to handle the optional initial '+'
-				exp += p - 1 - first;
-				n = last - first - 1;
-
-				if (first == p) {
-					first = p + 1;
+				if (last == p + 1) {
+					last = p;
+					n = last - first;
+					exp += n - 1;
 				} else {
-					s = new ConcatCharSequence(s.subSequence(first, p), s.subSequence(p + 1, last));
-					first = 0;
+
+					// Adjust with first to handle the optional initial '+'
+					exp += p - 1 - first;
+					n = last - first - 1;
+
+					if (first == p) {
+						first = p + 1;
+					} else {
+						s = new ConcatCharSequence(s.subSequence(first, p), s.subSequence(p + 1, last));
+						first = 0;
+					}
 				}
 			} else {
 				n = last - first;
