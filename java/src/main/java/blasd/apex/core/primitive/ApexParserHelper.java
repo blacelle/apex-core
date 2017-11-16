@@ -24,7 +24,7 @@ package blasd.apex.core.primitive;
 
 import com.google.common.base.CharMatcher;
 
-import javolution.text.TypeFormat;
+import blasd.apex.server.loading.csv.Jdk9CharSequenceParsers;
 
 /**
  * Try to provide faster primitive faster than FLoat.parseFLoat and Double.parseDouble, even if these method are
@@ -45,7 +45,7 @@ public class ApexParserHelper {
 	/**
 	 * Initializes the cache for sin and cos and the rest.
 	 */
-	public static void initialize() {
+	public static synchronized void initialize() {
 		pow10 = new double[634];
 		for (int i = 0; i < pow10.length; i++) {
 			pow10[i] = Double.parseDouble("1.0e" + (i - 325)); // Math.pow(10.0, i-308);
@@ -65,47 +65,67 @@ public class ApexParserHelper {
 			initialize();
 		if (s.charAt(0) == 'N' && s.charAt(1) == 'a' && s.charAt(2) == 'N')
 			return Double.NaN;
-		if (s.charAt(0) == '+') {
-			s = s.subSequence(1, s.length());
+
+		int first = 0;
+		int last = s.length();
+
+		if (PLUS_MATCHER.matches(s.charAt(0))) {
+			// s = s.subSequence(1, s.length());
+			first = 1;
 		}
+
 		int exp = 0;
 		int e = E_UPPER_MATCHER.indexIn(s);
 		if (e < 0) {
 			e = E_LOWER_MATCHER.indexIn(s);
 		}
 		if (e >= 0) {
-			CharSequence ss = s.subSequence(e + 1, s.length());
-			if (ss.charAt(0) == '+')
-				ss = ss.subSequence(1, ss.length());
-			exp = TypeFormat.parseShort(ss);
-			s = s.subSequence(0, e);
+			// CharSequence ss = "0";// s.subSequence(e + 1, s.length());
+			if (PLUS_MATCHER.matches(s.charAt(e + 1))) {
+				// ss = "0";// ss.subSequence(1, ss.length());
+				exp = Jdk9CharSequenceParsers.parseShort(s, e + 2, s.length(), 10);
+			} else {
+				exp = Jdk9CharSequenceParsers.parseShort(s, e + 1, s.length(), 10);
+			}
+			last = e;
+			// s = "0";// s.subSequence(0, e);
 		} else {
 			if (PLUS_MATCHER.lastIndexIn(s) > 0 || MINUS_MATCHER.lastIndexIn(s) > 0)
 				throw new RuntimeException("Not a number");
 		}
 
-		int p = DOT_MATCHER.indexIn(s);
-		int n = s.length();
-		if (p >= 0) {
-			s = new ConcatCharSequence(s.subSequence(0, p), s.subSequence(p + 1, s.length()));
-			exp += p - 1;
-			n--;
-		} else {
-			exp += n - 1;
+		final int n;
+		{
+			int p = DOT_MATCHER.indexIn(s);
+
+			if (p >= 0) {
+				while (first < p && s.charAt(first) == '0') {
+					// Skip the initial 0
+					first++;
+				}
+
+				if (first == p) {
+					s = s.subSequence(p + 1, last);
+				} else {
+					s = new ConcatCharSequence(s.subSequence(first, p), s.subSequence(p + 1, last));
+				}
+				// Adjust with first to handle the optional initial '+'
+				exp += p - 1 - first;
+
+				n = last - first - 1;
+			} else {
+				n = last - first;
+				exp += n - 1;
+			}
 		}
 
 		final double pow10Exp = pow10[exp + 325];
 		if (n > 17)
-			return (TypeFormat.parseLong(s.subSequence(0, 17)) * pow10[309]) * pow10Exp;
+			return (Jdk9CharSequenceParsers.parseLong(s, 0, 17, 10) * pow10[309]) * pow10Exp;
 		if (n < 9)
-			return (TypeFormat.parseInt(s) * pow10[326 - n]) * pow10Exp;
+			return (Jdk9CharSequenceParsers.parseInt(s, 0, s.length(), 10) * pow10[326 - n]) * pow10Exp;
 
-		long asLong;
-		if (s instanceof String) {
-			asLong = Long.parseLong((String) s);
-		} else {
-			asLong = TypeFormat.parseLong(s);
-		}
+		final long asLong = Jdk9CharSequenceParsers.parseLong(s, 0, s.length(), 10);
 
 		return (asLong * pow10[326 - n]) * pow10Exp;
 	}

@@ -54,8 +54,7 @@ public class ApexParserHelperTest {
 		assertEquals("1.0 Parsed", 1.0, ApexParserHelper.parseDouble("1.0"), 0);
 	}
 
-	// @Test(expected = IllegalArgumentException.class)
-	@Test(expected = StringIndexOutOfBoundsException.class)
+	@Test(expected = NumberFormatException.class)
 	public void parseDoubleThrowsExceptionIfStringDoesNotRepresentADouble() {
 		ApexParserHelper.parseDouble("aaaa");
 	}
@@ -77,23 +76,32 @@ public class ApexParserHelperTest {
 		assertEquals("-15 Parsed", -15.0, ApexParserHelper.parseDouble("-15.0"), 0);
 	}
 
+	// * TypeFormat.format(0.2, a) = "0.2" // 17 or 16 digits (as long as lossless conversion), remove trailing zeros.
+	// * TypeFormat.format(0.2, 17, false, false, a) = "0.20000000000000001" // Closest 17 digits number.
+	// * TypeFormat.format(0.2, 19, false, false, a) = "0.2000000000000000111" // Closest 19 digits.
+	// * TypeFormat.format(0.2, 4, false, false, a) = "0.2" // Fixed-point notation, remove trailing zeros.
+	// * TypeFormat.format(0.2, 4, false, true, a) = "0.2000" // Fixed-point notation, fixed number of digits.
+	// * TypeFormat.format(0.2, 4, true, false, a) = "2.0E-1" // Scientific notation, remove trailing zeros.
+	// * TypeFormat.format(0.2, 4, true, true, a) = "2.000E-1" // Scientific notation, fixed number of digits.
+	@Test
+	public void parseDouble_JavolutionTypeFormatExamples() {
+		assertEquals(0.2D, ApexParserHelper.parseDouble("0.20000000000000001"), 0);
+		assertEquals(0.2D, ApexParserHelper.parseDouble("0.2000000000000000111"), 0);
+		assertEquals(0.2D, ApexParserHelper.parseDouble("0.2"), 0);
+		assertEquals(0.2D, ApexParserHelper.parseDouble("0.2000"), 0);
+		assertEquals(0.2D, ApexParserHelper.parseDouble("2.0E-1"), 0);
+		assertEquals(0.2D, ApexParserHelper.parseDouble("2.000E-1"), 0);
+	}
+
 	@Test
 	public void parseFloat() {
 		assertEquals("1.0 Parsed", 1.0f, ApexParserHelper.parseFloat("1.0"), 0);
 	}
 
-	// @Test(expected = IllegalArgumentException.class)
-	@Test(expected = StringIndexOutOfBoundsException.class)
+	@Test(expected = NumberFormatException.class)
 	public void parseFloatThrowsExceptionIfStringDoesNotRepresentAFloat() {
 		ApexParserHelper.parseFloat("aaaa");
 	}
-
-	// @Test
-	// public void parseFloatWithCursor() {
-	// Cursor cursor = new Cursor();
-	// cursor.setIndex(4);
-	// assertEquals("1.0 Parsed", 1.0f, ApexParserHelper.parseFloat("aaaa1.0", cursor), 0);
-	// }
 
 	@Test
 	public void parseFloatWithExplicitPositiveNumber() {

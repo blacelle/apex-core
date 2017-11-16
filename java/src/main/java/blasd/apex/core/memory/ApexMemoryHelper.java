@@ -23,7 +23,6 @@
 package blasd.apex.core.memory;
 
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Objects;
