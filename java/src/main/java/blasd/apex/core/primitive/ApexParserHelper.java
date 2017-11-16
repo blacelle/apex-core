@@ -65,6 +65,24 @@ public class ApexParserHelper {
 			initialize();
 		if (s.charAt(0) == 'N' && s.charAt(1) == 'a' && s.charAt(2) == 'N')
 			return Double.NaN;
+		if (s.charAt(0) == 'I' && s.charAt(1) == 'n'
+				&& s.charAt(2) == 'f'
+				&& s.charAt(3) == 'i'
+				&& s.charAt(4) == 'n'
+				&& s.charAt(5) == 'i'
+				&& s.charAt(6) == 't'
+				&& s.charAt(7) == 'y')
+			return Double.POSITIVE_INFINITY;
+
+		if (s.charAt(0) == '-' && s.charAt(1) == 'I'
+				&& s.charAt(2) == 'n'
+				&& s.charAt(3) == 'f'
+				&& s.charAt(4) == 'i'
+				&& s.charAt(5) == 'n'
+				&& s.charAt(6) == 'i'
+				&& s.charAt(7) == 't'
+				&& s.charAt(8) == 'y')
+			return Double.POSITIVE_INFINITY;
 
 		int first = 0;
 		int last = s.length();
@@ -80,15 +98,14 @@ public class ApexParserHelper {
 			e = E_LOWER_MATCHER.indexIn(s);
 		}
 		if (e >= 0) {
-			// CharSequence ss = "0";// s.subSequence(e + 1, s.length());
+			int expStart;
 			if (PLUS_MATCHER.matches(s.charAt(e + 1))) {
-				// ss = "0";// ss.subSequence(1, ss.length());
-				exp = Jdk9CharSequenceParsers.parseShort(s, e + 2, s.length(), 10);
+				expStart = e + 2;
 			} else {
-				exp = Jdk9CharSequenceParsers.parseShort(s, e + 1, s.length(), 10);
+				expStart = e + 1;
 			}
+			exp = Jdk9CharSequenceParsers.parseShort(s, expStart, last, 10);
 			last = e;
-			// s = "0";// s.subSequence(0, e);
 		} else {
 			if (PLUS_MATCHER.lastIndexIn(s) > 0 || MINUS_MATCHER.lastIndexIn(s) > 0)
 				throw new RuntimeException("Not a number");
@@ -104,30 +121,39 @@ public class ApexParserHelper {
 					first++;
 				}
 
-				if (first == p) {
-					s = s.subSequence(p + 1, last);
-				} else {
-					s = new ConcatCharSequence(s.subSequence(first, p), s.subSequence(p + 1, last));
+				while (last > p + 1 && s.charAt(last - 1) == '0') {
+					// Skip the trailing 0
+					last--;
 				}
+
 				// Adjust with first to handle the optional initial '+'
 				exp += p - 1 - first;
-
 				n = last - first - 1;
+
+				if (first == p) {
+					first = p + 1;
+				} else {
+					s = new ConcatCharSequence(s.subSequence(first, p), s.subSequence(p + 1, last));
+					first = 0;
+				}
 			} else {
 				n = last - first;
 				exp += n - 1;
 			}
 		}
 
-		final double pow10Exp = pow10[exp + 325];
-		if (n > 17)
-			return (Jdk9CharSequenceParsers.parseLong(s, 0, 17, 10) * pow10[309]) * pow10Exp;
-		if (n < 9)
-			return (Jdk9CharSequenceParsers.parseInt(s, 0, s.length(), 10) * pow10[326 - n]) * pow10Exp;
+		final double intermediate;
+		if (n == 0) {
+			return 0D;
+		} else if (n > 17) {
+			intermediate = Jdk9CharSequenceParsers.parseLong(s, first, 17 + first, 10) * pow10[326 - 17];
+		} else if (n < 9) {
+			intermediate = Jdk9CharSequenceParsers.parseInt(s, first, first + n, 10) * pow10[326 - n];
+		} else {
+			intermediate = Jdk9CharSequenceParsers.parseLong(s, first, first + n, 10) * pow10[326 - n];
+		}
 
-		final long asLong = Jdk9CharSequenceParsers.parseLong(s, 0, s.length(), 10);
-
-		return (asLong * pow10[326 - n]) * pow10Exp;
+		return intermediate * pow10[exp + 325];
 	}
 
 	public static float parseFloat(CharSequence floatAsCharSequence) {
