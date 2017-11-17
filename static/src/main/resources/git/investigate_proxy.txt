@@ -30,3 +30,7 @@ Some additional config:
     
 # Manual CURL query:
 curl -v http://github.com --proxy-user userName:password --proxy host:port
+
+# What is the proxy host:port?
+chrome://net-internals/#proxy
+reg query "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings" | find /i "proxyserver"
