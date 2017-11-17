@@ -22,8 +22,8 @@ import blasd.apex.core.logging.ApexLogHelper;
 import blasd.apex.core.memory.ApexMemoryHelper;
 import blasd.apex.core.memory.IApexMemoryConstants;
 import blasd.apex.core.primitive.ApexParserHelper;
-import blasd.apex.server.loading.csv.ZeroCopyCSVParser;
-import blasd.apex.server.loading.csv.ZeroCopyConsumer;
+import blasd.apex.csv.ZeroCopyCSVParser;
+import blasd.apex.csv.ZeroCopyConsumer;
 
 public class TestZeroCopyCSVParserMemory {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(TestZeroCopyCSVParserMemory.class);

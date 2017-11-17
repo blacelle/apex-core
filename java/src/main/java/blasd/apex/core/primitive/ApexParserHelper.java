@@ -24,8 +24,6 @@ package blasd.apex.core.primitive;
 
 import com.google.common.base.CharMatcher;
 
-import blasd.apex.server.loading.csv.Jdk9CharSequenceParsers;
-
 /**
  * Try to provide faster primitive faster than FLoat.parseFLoat and Double.parseDouble, even if these method are
  * intrisic methods.

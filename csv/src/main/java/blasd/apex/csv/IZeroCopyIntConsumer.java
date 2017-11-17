@@ -1,4 +1,4 @@
-package blasd.apex.server.loading.csv;
+package blasd.apex.csv;
 
 import java.util.function.IntConsumer;
 

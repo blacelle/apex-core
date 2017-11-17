@@ -1,4 +1,4 @@
-package blasd.apex.server.loading.csv;
+package blasd.apex.csv;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import blasd.apex.core.jvm.ApexForOracleJVM;
 import blasd.apex.core.logging.ApexLogHelper;
 import blasd.apex.core.primitive.ApexParserHelper;
+import blasd.apex.core.primitive.Jdk9CharSequenceParsers;
 
 public class ZeroCopyCSVParser implements IZeroCopyCSVParser {
 

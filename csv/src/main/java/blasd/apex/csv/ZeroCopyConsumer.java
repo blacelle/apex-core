@@ -1,4 +1,4 @@
-package blasd.apex.server.loading.csv;
+package blasd.apex.csv;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoubleBinaryOperator;

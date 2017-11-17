@@ -3,8 +3,8 @@
 
 	<parent>
 		<groupId>com.github.blasd.apex</groupId>
-		<artifactId>apex-server</artifactId>
-		<version>3.26-SNAPSHOT</version>
+		<artifactId>apex-core</artifactId>
+		<version>1.9-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>apex-server-jmh</artifactId>
@@ -14,30 +14,33 @@
 		<pmd.skip>true</pmd.skip>
 		<!-- JMH produces a lot of redundancy -->
 		<cpd.skip>true</cpd.skip>
+
+		<jmh.version>1.19</jmh.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.openjdk.jmh</groupId>
 			<artifactId>jmh-core</artifactId>
-			<version>1.19</version>
+			<version>${jmh.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openjdk.jmh</groupId>
 			<artifactId>jmh-generator-annprocess</artifactId>
-			<version>1.19</version>
+			<version>${jmh.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
-			<!-- Check performance of primitive parsers -->
 			<groupId>com.github.blasd.apex</groupId>
-			<artifactId>apex-server-loading</artifactId>
+			<artifactId>apex-java</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.javolution</groupId>
 			<artifactId>javolution-core-java</artifactId>
+			<version>6.0.0</version>
 		</dependency>
 	</dependencies>
 

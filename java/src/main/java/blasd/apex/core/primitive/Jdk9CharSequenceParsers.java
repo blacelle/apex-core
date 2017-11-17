@@ -1,4 +1,4 @@
-package blasd.apex.server.loading.csv;
+package blasd.apex.core.primitive;
 
 import java.util.Objects;
 

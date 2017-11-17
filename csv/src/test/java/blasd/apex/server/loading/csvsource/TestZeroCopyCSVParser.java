@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.primitives.Ints;
 
-import blasd.apex.server.loading.csv.IZeroCopyIntConsumer;
-import blasd.apex.server.loading.csv.ZeroCopyCSVParser;
+import blasd.apex.csv.IZeroCopyIntConsumer;
+import blasd.apex.csv.ZeroCopyCSVParser;
 
 public class TestZeroCopyCSVParser {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(TestZeroCopyCSVParser.class);
