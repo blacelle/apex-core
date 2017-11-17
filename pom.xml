@@ -136,6 +136,9 @@
 		<!-- Not official module as it does not comply with quality standards yet -->
 		<module>mat</module>
 
+		<!-- Some JMH benchmarks, especially for Double parsing -->
+		<module>jmh</module>
+
 		<!-- a JConsole plugin to facilitate tracking of off-heap -->
 		<!-- Excluded as it is an experimental project -->
 		<!-- <module>buffermonitor</module> -->
