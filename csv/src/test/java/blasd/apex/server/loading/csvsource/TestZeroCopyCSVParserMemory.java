@@ -23,7 +23,7 @@ import blasd.apex.core.memory.ApexMemoryHelper;
 import blasd.apex.core.memory.IApexMemoryConstants;
 import blasd.apex.core.primitive.ApexParserHelper;
 import blasd.apex.csv.ZeroCopyCSVParser;
-import blasd.apex.csv.ZeroCopyConsumer;
+import blasd.apex.csv.ZeroCopyConsumers;
 
 public class TestZeroCopyCSVParserMemory {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(TestZeroCopyCSVParserMemory.class);
@@ -66,18 +66,18 @@ public class TestZeroCopyCSVParserMemory {
 		// Initialize any static buffer
 		parser.parse(new StringReader(smallProblem),
 				',',
-				ZeroCopyConsumer.intBinaryOperator((rowIndex, rowValue) -> smallArray[rowIndex] = rowValue));
+				ZeroCopyConsumers.intBinaryOperator((rowIndex, rowValue) -> smallArray[rowIndex] = rowValue));
 
 		long threadAllocatedBytes = snapshotMemory();
 
 		parser.parse(new StringReader(smallProblem),
 				',',
-				ZeroCopyConsumer.intBinaryOperator((rowIndex, rowValue) -> smallArray[rowIndex] = rowValue));
+				ZeroCopyConsumers.intBinaryOperator((rowIndex, rowValue) -> smallArray[rowIndex] = rowValue));
 		long memoryAfterSmall = snapshotMemory();
 
 		parser.parse(new StringReader(bigProblem),
 				',',
-				ZeroCopyConsumer.intBinaryOperator((rowIndex, rowValue) -> bigArray[rowIndex] = rowValue));
+				ZeroCopyConsumers.intBinaryOperator((rowIndex, rowValue) -> bigArray[rowIndex] = rowValue));
 		long memoryAfterBig = snapshotMemory();
 
 		long bigAllocation = memoryAfterBig - memoryAfterSmall;
@@ -99,7 +99,7 @@ public class TestZeroCopyCSVParserMemory {
 
 		parser.parse(new StringReader(oneColumnOfInts),
 				',',
-				ZeroCopyConsumer.intBinaryOperator((rowIndex, rowValue) -> array[rowIndex] = rowValue));
+				ZeroCopyConsumers.intBinaryOperator((rowIndex, rowValue) -> array[rowIndex] = rowValue));
 		long memoryAfter = snapshotMemory();
 
 		Assert.assertArrayEquals(streamOfValues(largeProblem).mapToInt(i -> (int) i).toArray(), array);
@@ -127,7 +127,7 @@ public class TestZeroCopyCSVParserMemory {
 
 		parser.parse(new StringReader(oneColumnOfLongs),
 				',',
-				ZeroCopyConsumer.longBinaryOperator((rowIndex, rowValue) -> array[(int) rowIndex] = rowValue));
+				ZeroCopyConsumers.longBinaryOperator((rowIndex, rowValue) -> array[(int) rowIndex] = rowValue));
 		long memoryAfter = snapshotMemory();
 
 		Assert.assertArrayEquals(streamOfValues(largeProblem).mapToLong(i -> (long) i).toArray(), array);
@@ -157,7 +157,7 @@ public class TestZeroCopyCSVParserMemory {
 
 		parser.parse(new StringReader(oneColumnOfDoubles),
 				',',
-				ZeroCopyConsumer.doubleBinaryOperator((rowIndex, rowValue) -> array[(int) rowIndex] = rowValue));
+				ZeroCopyConsumers.doubleBinaryOperator((rowIndex, rowValue) -> array[(int) rowIndex] = rowValue));
 		long memoryAfter = snapshotMemory();
 
 //		Assert.assertArrayEquals(streamOfValues(largeProblem).toArray(), array, 0.01D);
@@ -184,7 +184,7 @@ public class TestZeroCopyCSVParserMemory {
 			try {
 				parser.parse(new StringReader(oneColumnOfInts),
 						',',
-						ZeroCopyConsumer.intBinaryOperator((rowIndex, rowValue) -> array[rowIndex] = rowValue));
+						ZeroCopyConsumers.intBinaryOperator((rowIndex, rowValue) -> array[rowIndex] = rowValue));
 			} catch (IOException e) {
 				throw new UncheckedIOException(e);
 			}

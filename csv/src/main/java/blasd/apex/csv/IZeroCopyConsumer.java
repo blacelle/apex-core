@@ -1,5 +1,11 @@
 package blasd.apex.csv;
 
+/**
+ * Interface for column consumer for {@link ZeroCopyCSVParser}
+ * 
+ * @author Benoit Lacelle
+ *
+ */
 public interface IZeroCopyConsumer {
 	/**
 	 * Called-back by the parser when the column does not appear in the CSV (e.g. there is only 3 columns while this

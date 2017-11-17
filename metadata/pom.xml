@@ -336,13 +336,4 @@
 		<url>${scm.url}</url>
 		<tag>HEAD</tag>
 	</scm>
-
-	<!-- <pluginRepositories> -->
-	<!-- http://www.evosuite.org/documentation/maven-plugin/ -->
-	<!-- <pluginRepository> -->
-	<!-- <id>EvoSuite</id> -->
-	<!-- <name>EvoSuite Repository</name> -->
-	<!-- <url>http://www.evosuite.org/m2</url> -->
-	<!-- </pluginRepository> -->
-	<!-- </pluginRepositories> -->
 </project>

@@ -5,6 +5,12 @@ import java.io.Reader;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * The interface for any ZeroCopyCSVParser
+ * 
+ * @author Benoit Lacelle
+ *
+ */
 public interface IZeroCopyCSVParser {
 
 	void parse(Reader reader, char separator, List<IZeroCopyConsumer> consumers) throws IOException;

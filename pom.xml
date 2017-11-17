@@ -19,9 +19,6 @@
 	<!-- Add missing licenses -->
 	<!-- mvn com.mycila:license-maven-plugin:format -->
 
-	<!-- EXPERIMENTAL: evosuite -->
-	<!-- mvn -DmemoryInMB=2000 -Dcores=2 org.evosuite.plugins:evosuite-maven-plugin:generate org.evosuite.plugins:evosuite-maven-plugin:export test -->
-
 	<!-- Make a release -->
 	<!-- Do not -DskipTests, else it will skip javadoc which is mandatory for sonatype -->
 	<!-- mvn release:clean release:prepare -Darguments="-Dmaven.test.skip" -->
@@ -51,8 +48,6 @@
 		<!-- http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html -->
 		<!-- We choose to fork to prevent AP License to complain -->
 		<forkCount>1C</forkCount>
-
-		<!-- <evosuiteVersion>1.0.5</evosuiteVersion> -->
 
 		<!-- TODO Exclude a few Sonar rules -->
 		<!-- https://docs.sonarqube.org/display/SONAR/Analysis+Parameters#AnalysisParameters-Exclusions/Inclusions -->
@@ -219,14 +214,6 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 		</dependency>
-
-		<!-- EXPERIMENTAL -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.evosuite</groupId> -->
-		<!-- <artifactId>evosuite-standalone-runtime</artifactId> -->
-		<!-- <version>${evosuiteVersion}</version> -->
-		<!-- <scope>test</scope> -->
-		<!-- </dependency> -->
 	</dependencies>
 
 	<build>
@@ -286,14 +273,6 @@
 
 						<!-- default is filesystem -->
 						<runOrder>alphabetical</runOrder>
-
-						<!-- <properties> -->
-						<!-- <property> -->
-						<!-- http://www.evosuite.org/documentation/maven-plugin/ -->
-						<!-- <name>listener</name> -->
-						<!-- <value>org.evosuite.runtime.InitializingListener</value> -->
-						<!-- </property> -->
-						<!-- </properties> -->
 					</configuration>
 				</plugin>
 
@@ -435,28 +414,6 @@
 						<localCheckout>true</localCheckout>
 						<pushChanges>false</pushChanges>
 					</configuration>
-				</plugin>
-
-				<plugin>
-					<!-- http://www.evosuite.org/documentation/maven-plugin/ -->
-					<groupId>org.evosuite.plugins</groupId>
-					<artifactId>evosuite-maven-plugin</artifactId>
-					<version>${evosuiteVersion}</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>prepare</goal>
-							</goals>
-							<phase>process-test-classes</phase>
-							<configuration>
-								<project>
-									<properties>
-										<targetFolder>src/test/java</targetFolder>
-									</properties>
-								</project>
-							</configuration>
-						</execution>
-					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>

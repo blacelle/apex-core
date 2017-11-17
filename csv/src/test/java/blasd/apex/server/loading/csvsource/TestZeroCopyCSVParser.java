@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.primitives.Ints;
 
 import blasd.apex.csv.IZeroCopyIntConsumer;
+import blasd.apex.csv.IZeroCopyLongConsumer;
 import blasd.apex.csv.ZeroCopyCSVParser;
 
 public class TestZeroCopyCSVParser {

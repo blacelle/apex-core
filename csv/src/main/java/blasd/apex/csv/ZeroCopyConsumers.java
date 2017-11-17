@@ -11,8 +11,14 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.primitives.Ints;
 
-public class ZeroCopyConsumer {
-	protected static final Logger LOGGER = LoggerFactory.getLogger(ZeroCopyConsumer.class);
+/**
+ * Helps to build {@link IZeroCopyConsumer} instances
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+public class ZeroCopyConsumers {
+	protected static final Logger LOGGER = LoggerFactory.getLogger(ZeroCopyConsumers.class);
 
 	public static IZeroCopyConsumer intConsumer(IntConsumer intConsumer) {
 		AtomicLong rowIndex = new AtomicLong();

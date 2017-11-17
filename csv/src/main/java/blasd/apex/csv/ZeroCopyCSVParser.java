@@ -2,8 +2,6 @@ package blasd.apex.csv;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
 import java.nio.CharBuffer;
 import java.util.List;
 import java.util.Objects;
@@ -15,16 +13,19 @@ import java.util.function.LongConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import blasd.apex.core.jvm.ApexForOracleJVM;
-import blasd.apex.core.logging.ApexLogHelper;
 import blasd.apex.core.primitive.ApexParserHelper;
 import blasd.apex.core.primitive.Jdk9CharSequenceParsers;
 
+/**
+ * Default implementation for {@link IZeroCopyCSVParser}
+ * 
+ * @author Benoit Lacelle
+ *
+ */
 public class ZeroCopyCSVParser implements IZeroCopyCSVParser {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ZeroCopyCSVParser.class);
 
-	private static final ThreadMXBean THREAD_MBEAN = ManagementFactory.getThreadMXBean();
 	private static final int DEFAULT_BUFFER_SIZE = 1024;
 
 	protected final int bufferSize;
