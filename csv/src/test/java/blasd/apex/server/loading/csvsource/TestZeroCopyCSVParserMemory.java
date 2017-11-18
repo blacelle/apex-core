@@ -70,7 +70,7 @@ public class TestZeroCopyCSVParserMemory {
 		return ApexForOracleJVM.getThreadAllocatedBytes(THREAD_MBEAN, Thread.currentThread().getId());
 	}
 
-	protected DoubleStream streamOfValues(int problemSize) {
+	public static DoubleStream streamOfValues(int problemSize) {
 		return IntStream.range(0, problemSize).mapToDouble(i -> 1D * i * Math.sqrt(i));
 	}
 
@@ -182,7 +182,7 @@ public class TestZeroCopyCSVParserMemory {
 				ZeroCopyConsumers.doubleBinaryOperator((rowIndex, rowValue) -> array[(int) rowIndex] = rowValue));
 		long memoryAfter = snapshotMemory();
 
-//		Assert.assertArrayEquals(streamOfValues(largeProblem).toArray(), array, 0.01D);
+		// Assert.assertArrayEquals(streamOfValues(largeProblem).toArray(), array, 0.01D);
 
 		long memoryDiff = memoryAfter - threadAllocatedBytes;
 		LOGGER.info("Memory usage for {} doubles: {} (String is {})",
