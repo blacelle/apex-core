@@ -133,54 +133,51 @@ public class ApexStreamHelper {
 
 		AtomicLong nbConsumed = new AtomicLong();
 
-		if (false) {
-			// We do not rely on unorderedBatches as it has a bigger transient memory impact as it make a new Collection
-			// per batch
-			return stream.collect(unorderedBatches(partitionSize,
-					Collectors.reducing(0L, e -> Long.valueOf(e.size()), Long::sum),
-					queueSupplier));
-		} else {
+		// We do not rely on unorderedBatches as it has a bigger transient memory impact as it make a new Collection
+		// per batch
+		// return stream.collect(unorderedBatches(partitionSize,
+		// Collectors.reducing(0L, e -> Long.valueOf(e.size()), Long::sum),
+		// queueSupplier));
 
-			Collection<T> leftOvers = stream.collect(queueSupplier, (queue, tuple) -> {
-				queue.add(tuple);
-				if (queue.size() >= partitionSize) {
-					consumer.accept(queue);
-					nbConsumed.addAndGet(queue.size());
-					queue.clear();
+		Collection<T> leftOvers = stream.collect(queueSupplier, (queue, tuple) -> {
+			queue.add(tuple);
+			if (queue.size() >= partitionSize) {
+				consumer.accept(queue);
+				nbConsumed.addAndGet(queue.size());
+				queue.clear();
+			}
+		}, (l, r) -> {
+			Iterator<T> toDrain = r.iterator();
+
+			// r has to be drained to l
+			int nbDrained = 0;
+			while (toDrain.hasNext()) {
+				nbDrained++;
+				l.add(toDrain.next());
+
+				if (l.size() >= partitionSize) {
+					// We need to submit a batch
+					consumer.accept(l);
+					nbConsumed.addAndGet(l.size());
+					l.clear();
 				}
-			}, (l, r) -> {
-				Iterator<T> toDrain = r.iterator();
+			}
 
-				// r has to be drained to l
-				int nbDrained = 0;
-				while (toDrain.hasNext()) {
-					nbDrained++;
-					l.add(toDrain.next());
+			// Just for the sake of helping GC. Might be counter-productive
+			r.clear();
 
-					if (l.size() >= partitionSize) {
-						// We need to submit a batch
-						consumer.accept(l);
-						nbConsumed.addAndGet(l.size());
-						l.clear();
-					}
-				}
+			if (nbDrained < 0) {
+				// Just for the sake of sonar warning about .drainTo result not used
+				// TODO: is there something to do with this information?
+				LOGGER.trace("nbDrained: {}", nbDrained);
+			}
+		});
 
-				// Just for the sake of helping GC. Might be counter-productive
-				r.clear();
+		// The last transaction
+		consumer.accept(leftOvers);
+		nbConsumed.addAndGet(leftOvers.size());
 
-				if (nbDrained < 0) {
-					// Just for the sake of sonar warning about .drainTo result not used
-					// TODO: is there something to do with this information?
-					LOGGER.trace("nbDrained: {}", nbDrained);
-				}
-			});
-
-			// The last transaction
-			consumer.accept(leftOvers);
-			nbConsumed.addAndGet(leftOvers.size());
-
-			return nbConsumed.get();
-		}
+		return nbConsumed.get();
 	}
 
 	// https://stackoverflow.com/questions/34158634/how-to-transform-a-java-stream-into-a-sliding-window
