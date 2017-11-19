@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.CharBuffer;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Spliterators;
@@ -117,6 +117,7 @@ public class ZeroCopyCSVParser implements IZeroCopyCSVParser {
 		};
 
 		CharBuffer charBuffer = CharBuffer.allocate(bufferSize);
+		CharBuffer nextValue = CharBuffer.allocate(bufferSize);
 
 		// Do like we were at the end of the buffer
 		charBuffer.position(charBuffer.limit());
@@ -124,21 +125,21 @@ public class ZeroCopyCSVParser implements IZeroCopyCSVParser {
 		// We need to read at least once
 		boolean moreToRead = true;
 
-		int columnIndex = 0;
-		int firstValueCharIndex = -1;
+		int columnIndex = -1;
+		// int firstValueCharIndex = -1;
 
 		char[] buffer = new char[charBuffer.capacity()];
 
 		while (moreToRead) {
-			if (firstValueCharIndex >= 0) {
-				// Keep as active these interesting characters
-				charBuffer.position(firstValueCharIndex);
-			}
+			// if (firstValueCharIndex >= 0) {
+			// // Keep as active these interesting characters
+			// charBuffer.position(firstValueCharIndex);
+			// }
 
 			charBuffer.compact();
-			if (firstValueCharIndex >= 0) {
-				firstValueCharIndex = 0;
-			}
+			// if (firstValueCharIndex >= 0) {
+			// firstValueCharIndex = 0;
+			// }
 
 			// We do not use Reader.read(CharBuffer) as it would allocate a transient char[]
 			int nbRead = reader.read(buffer, 0, Math.min(buffer.length, charBuffer.remaining()));
@@ -162,63 +163,196 @@ public class ZeroCopyCSVParser implements IZeroCopyCSVParser {
 				// for (int charIndex = leftover; charIndex < charBuffer.limit(); charIndex++) {
 				// Next char is the one not yet processed
 				// int nextChar = charBuffer.get(charIndex);
-				int nextChar = charBuffer.get();
+				char nextChar = charBuffer.get();
 
 				if (nextChar == separator) {
 					// We are closing a column: publish the column content
-					int oldLimit = charBuffer.limit();
-					int oldPosition = charBuffer.position();
-					charBuffer.limit(oldPosition - 1);
-					flushColumn(indexToConsumer, charBuffer, firstValueCharIndex, columnIndex);
+					// int oldLimit = charBuffer.limit();
+					// int oldPosition = charBuffer.position();
+					// charBuffer.limit(oldPosition - 1);
+					columnIndex = flushColumn(indexToConsumer, nextValue, columnIndex, true);
 					// Move to the leftover: set a wide limit, and then fix a corrected new position
-					charBuffer.limit(oldLimit);
-					charBuffer.position(oldPosition);
-					firstValueCharIndex = -1;
+					// charBuffer.limit(oldLimit);
+					// charBuffer.position(oldPosition);
+					// firstValueCharIndex = -1;
 
 					// Indicate we have spot a new column
-					columnIndex++;
+					// columnIndex++;
 				} else if (nextChar == '\r' || nextChar == '\n') {
-					if (firstValueCharIndex >= 0) {
-						int oldLimit = charBuffer.limit();
-						int oldPosition = charBuffer.position();
-						charBuffer.limit(oldPosition - 1);
-						flushColumn(indexToConsumer, charBuffer, firstValueCharIndex, columnIndex);
-						// Move to the leftover: set a wide limit, and then fix a corrected new position
-						charBuffer.limit(oldLimit);
-						charBuffer.position(oldPosition);
-						firstValueCharIndex = -1;
-					} else {
-						// empty row (or \r\n)
-					}
+					// if (firstValueCharIndex >= 0) {
+					// int oldLimit = charBuffer.limit();
+					// int oldPosition = charBuffer.position();
+					// charBuffer.limit(oldPosition - 1);
+
+					columnIndex = flushColumn(indexToConsumer, nextValue, columnIndex, false);
+					// MoC
 
 					warnConsumersWithoutColumn(indexToConsumer, columnIndex, consumers.size());
 
 					// Reset the columnIndex
-					columnIndex = 0;
+					columnIndex = -1;
 				} else {
 					// We have an interesting character
-					// doFlush = false;
-					if (firstValueCharIndex < 0) {
-						// Remember the start of the interesting characters
-						firstValueCharIndex = charBuffer.position() - 1;
+					if (columnIndex < 0 && nextValue.position() == 0) {
+						// First character of current row
+						columnIndex++;
 					}
+
+					nextValue.put(nextChar);
 				}
 			}
 
 			if (!moreToRead) {
 				// We are at the end of the file
 				// We have detected the beginning of an input and then encounter EOF: we have to flush the column
-				if (firstValueCharIndex >= 0) {
-					flushColumn(indexToConsumer, charBuffer, firstValueCharIndex, columnIndex);
-				} else {
-					// empty row (or \r\n)
-				}
+				// if (firstValueCharIndex >= 0) {
+				columnIndex = flushColumn(indexToConsumer, nextValue, columnIndex, false);
+				// } else {
+				// // empty row (or \r\n)
+				// }
 				warnConsumersWithoutColumn(indexToConsumer, columnIndex, consumers.size());
 			}
 		}
 	}
 
+	public Stream<String[]> parseAsStringArrays(Reader reader, char separator) {
+		CharBuffer charBuffer = CharBuffer.allocate(bufferSize);
+
+		// Do like we were at the end of the buffer
+		charBuffer.position(charBuffer.limit());
+
+		// We need to read at least once
+		AtomicBoolean moreToRead = new AtomicBoolean(true);
+
+		AtomicInteger columnIndex = new AtomicInteger(0);
+
+		final char[] buffer = new char[charBuffer.capacity()];
+
+		CharBuffer nextValue = CharBuffer.allocate(bufferSize);
+
+		// We have a single ArrayList: its capacity will increase each time we encounter a longest row (which is nice,
+		// at will typically be nearly fully prepared on first row)
+		List<String> pendingStrings = new LinkedList<>();
+
+		IZeroCopyConsumer consumer = new Youpi(pendingStrings);
+
+		IntFunction<IZeroCopyConsumer> indexToConsumer = index -> consumer;
+
+		return StreamSupport.stream(new Spliterators.AbstractSpliterator<String[]>(Long.MAX_VALUE, 0) {
+
+			@Override
+			public boolean tryAdvance(Consumer<? super String[]> action) {
+				boolean actionHasBeenTriggered = false;
+
+				// Continue until there is bytes to process
+				// Stop if no more bytes, or else if a row have been processed
+				while ((moreToRead.get() || charBuffer.hasRemaining()) && !actionHasBeenTriggered) {
+					fillBuffer(reader, charBuffer, moreToRead, buffer);
+
+					while (charBuffer.hasRemaining() && !actionHasBeenTriggered) {
+						actionHasBeenTriggered = processBuffer(separator,
+								charBuffer,
+								columnIndex,
+								nextValue,
+								pendingStrings,
+								indexToConsumer,
+								action);
+					}
+
+					if (!moreToRead.get() && !charBuffer.hasRemaining() && !actionHasBeenTriggered) {
+						// We are at the end of the file
+						// We have detected the beginning of an input and then encounter EOF: we have to flush the
+						// column
+
+						columnIndex.set(flushColumn(indexToConsumer, nextValue, columnIndex.get(), false));
+						warnConsumersWithoutColumn(indexToConsumer, columnIndex.get(), -1);
+					}
+				}
+
+				return actionHasBeenTriggered;
+			}
+
+			protected void fillBuffer(Reader reader,
+					CharBuffer charBuffer,
+					AtomicBoolean moreToRead,
+					final char[] buffer) {
+				if (moreToRead.get() && !charBuffer.hasRemaining()) {
+					charBuffer.compact();
+
+					// We do not use Reader.read(CharBuffer) as it would allocate a transient char[]
+					int nbRead;
+					try {
+						nbRead = reader.read(buffer, 0, Math.min(buffer.length, charBuffer.remaining()));
+					} catch (IOException e) {
+						throw new UncheckedIOException(e);
+					}
+					if (nbRead > 0) {
+						charBuffer.put(buffer, 0, nbRead);
+					}
+
+					if (nbRead == 0) {
+						// Is it legal ? We may have 0 bytes if it is buffered but the buffer is not filled yet
+						// Or is it a bug in our code? Or is it the buffer is too small?
+						throw new IllegalStateException("Unable to read data");
+					}
+					charBuffer.flip();
+
+					if (nbRead > 0) {
+					} else if (nbRead < 0) {
+						moreToRead.set(false);
+					}
+				}
+			}
+
+			protected boolean processBuffer(char separator,
+					CharBuffer charBuffer,
+					AtomicInteger columnIndex,
+					CharBuffer nextValue,
+					List<String> pendingStrings,
+					IntFunction<IZeroCopyConsumer> indexToConsumer,
+					Consumer<? super String[]> action) {
+				boolean actionHasBeenTriggered = false;
+
+				// Next char is the one not yet processed
+				char nextChar = charBuffer.get();
+
+				if (nextChar == separator) {
+					// We are closing a column: publish the column content
+					columnIndex.set(flushColumn(indexToConsumer, nextValue, columnIndex.get(), true));
+				} else if (nextChar == '\r' || nextChar == '\n') {
+					columnIndex.set(flushColumn(indexToConsumer, nextValue, columnIndex.get(), false));
+
+					warnConsumersWithoutColumn(indexToConsumer, columnIndex.get(), -1);
+
+					if (!pendingStrings.isEmpty()) {
+						if (action != null) {
+							action.accept(pendingStrings.toArray(new String[pendingStrings.size()]));
+						}
+						pendingStrings.clear();
+						actionHasBeenTriggered = true;
+					}
+
+					// Reset the columnIndex
+					columnIndex.set(-1);
+				} else {
+					// We have an interesting character
+					if (columnIndex.get() < 0 && nextValue.position() == 0) {
+						// First character of current row
+						columnIndex.incrementAndGet();
+					}
+					nextValue.put(nextChar);
+				}
+				return actionHasBeenTriggered;
+			}
+		}, false);
+	}
+
 	protected void warnConsumersWithoutColumn(IntFunction<IZeroCopyConsumer> consumers, int columnIndex, int maxIndex) {
+		if (columnIndex < 0) {
+			// empty row
+			return;
+		}
+
 		for (int i = columnIndex; i < maxIndex; i++) {
 			// Warn the consumers that will not receive any data
 			// We have no constrain about the order in which consumers are notified for a given row
@@ -229,31 +363,53 @@ public class ZeroCopyCSVParser implements IZeroCopyCSVParser {
 		}
 	}
 
-	protected void flushColumn(IntFunction<IZeroCopyConsumer> consumers,
-			CharBuffer charBuffer,
-			int firstValueCharIndex,
-			int flushedColumnIndex) {
-		IZeroCopyConsumer consumer = consumers.apply(flushedColumnIndex);
-		if (consumer != null) {
-			if (firstValueCharIndex >= 0) {
-				// We do have data to flush
-				charBuffer.position(firstValueCharIndex);
+	protected int flushColumn(IntFunction<IZeroCopyConsumer> consumers,
+			CharBuffer nextValue,
+			final int flushedColumnIndex,
+			boolean hasMoreSameRow) {
+		if (flushedColumnIndex <= -1) {
+			assert nextValue.position() == 0;
 
-				flushContent(consumer, charBuffer, flushedColumnIndex);
+			if (hasMoreSameRow) {
+				IZeroCopyConsumer consumer = consumers.apply(0);
+				if (consumer != null) {
+					// No data to flush
+					consumer.nextRowIsMissing();
+				}
+
+				// We are on an empty first column
+				return 1;
 			} else {
-				// No data to flush
-				consumer.nextRowIsMissing();
+				// This is an empty row: fully skip
+				return -1;
 			}
+
+		} else {
+			nextValue.flip();
+
+			IZeroCopyConsumer consumer = consumers.apply(flushedColumnIndex);
+			if (consumer != null) {
+				if (nextValue.hasRemaining()) {
+					flushContent(consumer, nextValue, flushedColumnIndex);
+				} else {
+					// No data to flush
+					consumer.nextRowIsMissing();
+				}
+			}
+
+			nextValue.limit(nextValue.position());
+			nextValue.compact();
+
+			return flushedColumnIndex + 1;
 		}
 	}
 
-	protected void flushContent(IZeroCopyConsumer consumer, CharBuffer charBuffer, int columnIndex) {
+	protected void flushContent(IZeroCopyConsumer consumer, CharSequence charBuffer, int columnIndex) {
 		if (consumer == null) {
 			return;
 		}
 		// We have a consumer: let's process the column
 		CharSequence subSequence = charBuffer;
-		// .subSequence(charBuffer.position(), charBuffer.limit());
 
 		try {
 			if (consumer instanceof IntConsumer) {
@@ -289,138 +445,5 @@ public class ZeroCopyCSVParser implements IZeroCopyCSVParser {
 			}
 			consumer.nextRowIsInvalid(subSequence);
 		}
-	}
-
-	public Stream<String[]> parseAsStringArrays(Reader reader, char separator) {
-		CharBuffer charBuffer = CharBuffer.allocate(bufferSize);
-
-		// Do like we were at the end of the buffer
-		charBuffer.position(charBuffer.limit());
-
-		// We need to read at least once
-		AtomicBoolean moreToRead = new AtomicBoolean(true);
-
-		AtomicInteger columnIndex = new AtomicInteger(0);
-		AtomicInteger firstValueCharIndex = new AtomicInteger(-1);
-
-		final char[] buffer = new char[charBuffer.capacity()];
-
-		List<String> pendingStrings = new ArrayList<>();
-
-		IZeroCopyConsumer consumer = new Youpi(pendingStrings);
-
-		IntFunction<IZeroCopyConsumer> indexToConsumer = index -> consumer;
-
-		return StreamSupport.stream(new Spliterators.AbstractSpliterator<String[]>(Long.MAX_VALUE, 0) {
-
-			@Override
-			public boolean tryAdvance(Consumer<? super String[]> action) {
-				boolean actionHasBeenTriggered = false;
-
-				// Continue until there is bytes to process
-				// Stop if no more bytes, or else if a row have been processed
-				while (moreToRead.get() && !actionHasBeenTriggered) {
-					if (firstValueCharIndex.get() >= 0) {
-						// Keep as active these interesting characters
-						charBuffer.position(firstValueCharIndex.get());
-					}
-
-					charBuffer.compact();
-					if (firstValueCharIndex.get() >= 0) {
-						firstValueCharIndex.set(0);
-					}
-
-					// We do not use Reader.read(CharBuffer) as it would allocate a transient char[]
-					int nbRead;
-					try {
-						nbRead = reader.read(buffer, 0, Math.min(buffer.length, charBuffer.remaining()));
-					} catch (IOException e) {
-						throw new UncheckedIOException(e);
-					}
-					if (nbRead > 0) {
-						charBuffer.put(buffer, 0, nbRead);
-					}
-
-					if (nbRead == 0) {
-						// Is it legal ? We may have 0 bytes if it is buffered but the buffer is not filled yet
-						// Or is it a bug in our code? Or is it the buffer is too small?
-						throw new IllegalStateException("Unable to read data");
-					}
-					charBuffer.flip();
-
-					if (nbRead > 0) {
-					} else if (nbRead < 0) {
-						moreToRead.set(false);
-					}
-
-					while (charBuffer.hasRemaining()) {
-						// for (int charIndex = leftover; charIndex < charBuffer.limit(); charIndex++) {
-						// Next char is the one not yet processed
-						// int nextChar = charBuffer.get(charIndex);
-						int nextChar = charBuffer.get();
-
-						if (nextChar == separator) {
-							// We are closing a column: publish the column content
-							int oldLimit = charBuffer.limit();
-							int oldPosition = charBuffer.position();
-							charBuffer.limit(oldPosition - 1);
-							flushColumn(indexToConsumer, charBuffer, firstValueCharIndex.get(), columnIndex.get());
-							// Move to the leftover: set a wide limit, and then fix a corrected new position
-							charBuffer.limit(oldLimit);
-							charBuffer.position(oldPosition);
-							firstValueCharIndex.set(-1);
-
-							// Indicate we have spot a new column
-							columnIndex.incrementAndGet();
-						} else if (nextChar == '\r' || nextChar == '\n') {
-							if (firstValueCharIndex.get() >= 0) {
-								int oldLimit = charBuffer.limit();
-								int oldPosition = charBuffer.position();
-								charBuffer.limit(oldPosition - 1);
-								flushColumn(indexToConsumer, charBuffer, firstValueCharIndex.get(), columnIndex.get());
-								// Move to the leftover: set a wide limit, and then fix a corrected new position
-								charBuffer.limit(oldLimit);
-								charBuffer.position(oldPosition);
-								firstValueCharIndex.set(-1);
-							} else {
-								// empty row (or \r\n)
-							}
-
-							warnConsumersWithoutColumn(indexToConsumer, columnIndex.get(), -1);
-
-							if (!pendingStrings.isEmpty()) {
-								action.accept(pendingStrings.toArray(new String[pendingStrings.size()]));
-								pendingStrings.clear();
-								actionHasBeenTriggered = true;
-							}
-
-							// Reset the columnIndex
-							columnIndex.set(0);
-						} else {
-							// We have an interesting character
-							// doFlush = false;
-							if (firstValueCharIndex.get() < 0) {
-								// Remember the start of the interesting characters
-								firstValueCharIndex.set(charBuffer.position() - 1);
-							}
-						}
-					}
-
-					if (!moreToRead.get()) {
-						// We are at the end of the file
-						// We have detected the beginning of an input and then encounter EOF: we have to flush the
-						// column
-						if (firstValueCharIndex.get() >= 0) {
-							flushColumn(indexToConsumer, charBuffer, firstValueCharIndex.get(), columnIndex.get());
-						} else {
-							// empty row (or \r\n)
-						}
-						warnConsumersWithoutColumn(indexToConsumer, columnIndex.get(), -1);
-					}
-				}
-
-				return actionHasBeenTriggered;
-			}
-		}, false);
 	}
 }

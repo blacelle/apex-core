@@ -370,6 +370,7 @@ public class TestZeroCopyCSVParser {
 			@Override
 			public void nextRowIsInvalid(CharSequence charSequence) {
 				LOGGER.error("Invalid: '{}'", charSequence);
+				rowIndex.getAndIncrement();
 				nbInvalid.incrementAndGet();
 			}
 
@@ -395,6 +396,7 @@ public class TestZeroCopyCSVParser {
 			@Override
 			public void nextRowIsInvalid(CharSequence charSequence) {
 				LOGGER.error("Invalid: '{}'", charSequence);
+				rowIndex.getAndIncrement();
 				nbInvalid.incrementAndGet();
 			}
 
