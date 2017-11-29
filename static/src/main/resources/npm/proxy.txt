@@ -1,0 +1,5 @@
+https://stackoverflow.com/questions/25660936/using-npm-behind-corporate-proxy-pac
+
+    npm config set proxy http://EUR%5Cusername:password@proxy.company.com:8080
+    npm config set https-proxy http://EUR%5Cusername:password@proxy.company.com:8080
+    npm config get proxy
