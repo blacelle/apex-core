@@ -20,14 +20,11 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericRecordBuilder;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
@@ -41,8 +38,8 @@ import blasd.apex.core.logging.ApexLogHelper;
  * @author Benoit Lacelle
  *
  */
-public class ApexAvroSchemaHelper {
-	protected ApexAvroSchemaHelper() {
+public class AvroSchemaHelper {
+	protected AvroSchemaHelper() {
 		// hidden
 	}
 
@@ -53,7 +50,7 @@ public class ApexAvroSchemaHelper {
 	 * @param value
 	 * @return
 	 */
-	public static Object converToParquetValue(Field schema, Object value) {
+	public static Object converToAvroValue(Field schema, Object value) {
 		if (value instanceof Number || value instanceof String) {
 			return value;
 			// } else if (value instanceof double[]) {
@@ -181,17 +178,5 @@ public class ApexAvroSchemaHelper {
 
 		}).collect(Collectors.toList());
 		return Schema.createRecord("myrecord", null, "space", false, fields);
-	}
-
-	public static Function<Map<String, ?>, GenericRecord> genericRecords(Schema schema) {
-		return map -> {
-			GenericRecordBuilder record = new GenericRecordBuilder(schema);
-
-			map.forEach((key, value) -> record.set(key,
-					ApexAvroSchemaHelper.converToParquetValue(schema.getField(key), value)));
-
-			return record.build();
-		};
-
 	}
 }

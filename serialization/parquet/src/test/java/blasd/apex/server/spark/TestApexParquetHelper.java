@@ -35,12 +35,11 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 
-import blasd.apex.core.avro.ApexAvroToActivePivotHelper;
 import blasd.apex.core.io.ApexFileHelper;
 import blasd.apex.hadoop.ApexHadoopHelper;
 import blasd.apex.parquet.ParquetStreamFactory;
-import blasd.apex.serialization.avro.ApexAvroSchemaHelper;
-import blasd.apex.serialization.avro.AvroBytesToStream;
+import blasd.apex.serialization.avro.AvroSchemaHelper;
+import blasd.apex.serialization.avro.AvroStreamHelper;
 
 public class TestApexParquetHelper {
 	@BeforeClass
@@ -63,7 +62,7 @@ public class TestApexParquetHelper {
 				.put("floatArrayField", new float[2])
 				.put("doubleList", Collections.singletonList(1D))
 				.build();
-		Schema schema = ApexAvroSchemaHelper.proposeSimpleSchema(asMap);
+		Schema schema = AvroSchemaHelper.proposeSimpleSchema(asMap);
 
 		// We use an union to allow the field to hold null
 		// Assert.assertEquals("array", schema.getField("doubleList").schema().getType().getName());
@@ -74,7 +73,7 @@ public class TestApexParquetHelper {
 	public void testSchemaForDoubleArray() throws IOException {
 		double[] doubles = new double[] { 123D };
 		Map<String, ?> asMap = ImmutableMap.of("k", doubles);
-		Schema schema = ApexAvroSchemaHelper.proposeSimpleSchema(asMap);
+		Schema schema = AvroSchemaHelper.proposeSimpleSchema(asMap);
 
 		// We use an union to allow the field to hold null
 		// Assert.assertEquals("array", schema.getField("doubleList").schema().getType().getName());
@@ -83,10 +82,10 @@ public class TestApexParquetHelper {
 		{
 			Path path = ApexFileHelper.createTempPath("apex", "parquet", true);
 			factory.writeToPath(path,
-					Stream.of(ImmutableMap.of("k", doubles)).map(ApexAvroSchemaHelper.genericRecords(schema)));
+					Stream.of(ImmutableMap.of("k", doubles)).map(AvroStreamHelper.toGenericRecord(schema)));
 
 			Map<String, ?> asMapAgain = factory.toStream(path)
-					.map(AvroBytesToStream.toStandardJava(Collections.emptyMap()))
+					.map(AvroStreamHelper.toStandardJava(Collections.emptyMap()))
 					.iterator()
 					.next();
 			Assert.assertArrayEquals(doubles, (double[]) asMapAgain.get("k"), 0.0001D);
@@ -97,7 +96,7 @@ public class TestApexParquetHelper {
 	public void testSchemaForFloatArray() throws IOException {
 		float[] doubles = new float[] { 123F };
 		Map<String, ?> asMap = ImmutableMap.of("k", doubles);
-		Schema schema = ApexAvroSchemaHelper.proposeSimpleSchema(asMap);
+		Schema schema = AvroSchemaHelper.proposeSimpleSchema(asMap);
 
 		// We use an union to allow the field to hold null
 		// Assert.assertEquals("array", schema.getField("doubleList").schema().getType().getName());
@@ -106,7 +105,7 @@ public class TestApexParquetHelper {
 		{
 			Path path = ApexFileHelper.createTempPath("apex", "parquet", true);
 			factory.writeToPath(path,
-					Stream.of(ImmutableMap.of("k", doubles)).map(ApexAvroSchemaHelper.genericRecords(schema)));
+					Stream.of(ImmutableMap.of("k", doubles)).map(AvroStreamHelper.toGenericRecord(schema)));
 
 			Map<String, ?> asMapAgain =
 					ParquetStreamFactory.readParquetAsStream(path, ImmutableMap.of()).iterator().next();
@@ -116,7 +115,7 @@ public class TestApexParquetHelper {
 
 	@Test
 	public void testWriteFloatArray() {
-		Object floatArray = ApexAvroSchemaHelper.converToParquetValue(null, new float[] { 1F });
+		Object floatArray = AvroSchemaHelper.converToAvroValue(null, new float[] { 1F });
 
 		Assert.assertTrue(floatArray instanceof byte[]);
 	}
@@ -124,7 +123,7 @@ public class TestApexParquetHelper {
 	@Test
 	public void testSchemaForNullLong() {
 		Map<String, ?> asMap = ImmutableMap.of("LongField", 0L);
-		Schema schema = ApexAvroSchemaHelper.proposeSimpleSchema(asMap);
+		Schema schema = AvroSchemaHelper.proposeSimpleSchema(asMap);
 		GenericData.Record record = new GenericRecordBuilder(schema).set("LongField", null).build();
 
 		Assert.assertNull(record.get(0));
@@ -134,7 +133,7 @@ public class TestApexParquetHelper {
 	public void testSchemaForLocalDate() throws IOException {
 		Map<String, ?> asMap = ImmutableMap.of("DateField", LocalDate.now());
 
-		Schema schema = ApexAvroSchemaHelper.proposeSimpleSchema(asMap);
+		Schema schema = AvroSchemaHelper.proposeSimpleSchema(asMap);
 
 		LocalDate date = new LocalDate();
 		{
@@ -149,7 +148,7 @@ public class TestApexParquetHelper {
 			Path path = ApexFileHelper.createTempPath("apex", "parquet", true);
 
 			factory.writeToPath(path,
-					Stream.of(ImmutableMap.of("DateField", date)).map(ApexAvroSchemaHelper.genericRecords(schema)));
+					Stream.of(ImmutableMap.of("DateField", date)).map(AvroStreamHelper.toGenericRecord(schema)));
 
 			Map<String, ?> asMapAgain =
 					ParquetStreamFactory.readParquetAsStream(path, ImmutableMap.of()).iterator().next();
@@ -180,32 +179,28 @@ public class TestApexParquetHelper {
 
 		// Read as float[]
 		{
-			Map<String, ?> asMap =
-					ApexAvroToActivePivotHelper.toMap(ImmutableMap.of("arrayField", new float[0]), topRecord);
+			Map<String, ?> asMap = AvroStreamHelper.toMap(ImmutableMap.of("arrayField", new float[0]), topRecord);
 
 			Assert.assertTrue(asMap.get("arrayField") instanceof float[]);
 		}
 
 		// Read as double[]
 		{
-			Map<String, ?> asMap =
-					ApexAvroToActivePivotHelper.toMap(ImmutableMap.of("arrayField", new double[0]), topRecord);
+			Map<String, ?> asMap = AvroStreamHelper.toMap(ImmutableMap.of("arrayField", new double[0]), topRecord);
 
 			Assert.assertTrue(asMap.get("arrayField") instanceof double[]);
 		}
 
 		// Read as List<Float>
 		{
-			Map<String, ?> asMap =
-					ApexAvroToActivePivotHelper.toMap(ImmutableMap.of("arrayField", Arrays.asList(1F)), topRecord);
+			Map<String, ?> asMap = AvroStreamHelper.toMap(ImmutableMap.of("arrayField", Arrays.asList(1F)), topRecord);
 
 			Assert.assertTrue(asMap.get("arrayField") instanceof List);
 		}
 
 		// Read as List<Double>
 		{
-			Map<String, ?> asMap =
-					ApexAvroToActivePivotHelper.toMap(ImmutableMap.of("arrayField", Arrays.asList(1D)), topRecord);
+			Map<String, ?> asMap = AvroStreamHelper.toMap(ImmutableMap.of("arrayField", Arrays.asList(1D)), topRecord);
 
 			Assert.assertTrue(asMap.get("arrayField") instanceof List);
 		}

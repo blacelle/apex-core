@@ -24,8 +24,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.util.ReflectionUtils;
 
-import blasd.apex.core.avro.ApexAvroToActivePivotHelper;
 import blasd.apex.parquet.ParquetStreamFactory;
+import blasd.apex.serialization.avro.AvroFieldHelper;
 
 public class TestApexParquetToStream {
 	@Test
@@ -44,15 +44,14 @@ public class TestApexParquetToStream {
 
 	@Test
 	public void testEmptyListNoTarget() {
-		Assert.assertFalse(ApexAvroToActivePivotHelper.toPrimitiveArray(null, Arrays.asList()).isPresent());
+		Assert.assertFalse(AvroFieldHelper.toPrimitiveArray(null, Arrays.asList()).isPresent());
 	}
 
 	@Test
 	public void testListDoubleToFloat() {
 		float listElement = 1F;
 		Assert.assertArrayEquals(new double[] { 1D },
-				(double[]) ApexAvroToActivePivotHelper.toPrimitiveArray(new double[0], Arrays.asList(listElement))
-						.get(),
+				(double[]) AvroFieldHelper.toPrimitiveArray(new double[0], Arrays.asList(listElement)).get(),
 				0.001D);
 	}
 
@@ -60,7 +59,7 @@ public class TestApexParquetToStream {
 	public void testListFloatToDouble() {
 		Double listElement = 1D;
 		Assert.assertArrayEquals(new float[] { 1F },
-				(float[]) ApexAvroToActivePivotHelper.toPrimitiveArray(new float[0], Arrays.asList(listElement)).get(),
+				(float[]) AvroFieldHelper.toPrimitiveArray(new float[0], Arrays.asList(listElement)).get(),
 				0.001F);
 	}
 }

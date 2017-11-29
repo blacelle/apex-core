@@ -40,7 +40,7 @@ import org.junit.Test;
 import blasd.apex.core.io.ApexFileHelper;
 import blasd.apex.hadoop.ApexHadoopHelper;
 import blasd.apex.parquet.ParquetBytesToStream;
-import blasd.apex.serialization.avro.AvroBytesToStream;
+import blasd.apex.serialization.avro.AvroStreamHelper;
 
 // https://github.com/Parquet/parquet-mr/blob/master/parquet-avro/src/test/java/parquet/avro/TestAvroSchemaConverter.java
 public class TestReadWrite {
@@ -98,7 +98,7 @@ public class TestReadWrite {
 
 		Stream<? extends Map<String, ?>> asMapStream =
 				new ParquetBytesToStream().toStream(new FileInputStream(new File(file.toString())))
-						.map(AvroBytesToStream.toStandardJava(Collections.emptyMap()));
+						.map(AvroStreamHelper.toStandardJava(Collections.emptyMap()));
 		Iterator<? extends Map<String, ?>> asMapIterator = asMapStream.iterator();
 
 		Map<String, ?> nextRecord = asMapIterator.next();

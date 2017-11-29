@@ -40,7 +40,7 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Streams;
 
-import blasd.apex.serialization.avro.AvroBytesToStream;
+import blasd.apex.serialization.avro.AvroStreamHelper;
 import blasd.apex.serialization.avro.IAvroStreamFactory;
 
 /**
@@ -84,7 +84,6 @@ public class ParquetStreamFactory implements IAvroStreamFactory {
 		return toStream(hadoopPath);
 	}
 
-	@Override
 	public Stream<? extends GenericRecord> toStream(org.apache.hadoop.fs.Path hadoopPath) throws IOException {
 		Filter filter = makeFilter();
 
@@ -97,13 +96,13 @@ public class ParquetStreamFactory implements IAvroStreamFactory {
 	}
 
 	public Stream<? extends Map<String, ?>> toStream(Path path, Map<String, ?> exampleTypes) throws IOException {
-		return toStream(path).map(AvroBytesToStream.toStandardJava(exampleTypes));
+		return toStream(path).map(AvroStreamHelper.toStandardJava(exampleTypes));
 	}
 
 	protected Filter makeFilter() {
-		// According to javadoc, numbering starts at 1
+		// According to javadoc, numbering starts at 1. However, it seems to be 0 not to skip any row
 		// This default should apply no filter, but demonstrate how to filter a page
-		return FilterCompat.get(PagedRecordFilter.page(1, Long.MAX_VALUE));
+		return FilterCompat.get(PagedRecordFilter.page(0, Long.MAX_VALUE));
 	}
 
 	protected Stream<GenericRecord> toStream(ParquetReader<GenericRecord> reader) {
@@ -111,7 +110,7 @@ public class ParquetStreamFactory implements IAvroStreamFactory {
 
 			@Override
 			protected GenericRecord computeNext() {
-				GenericRecord next;
+				final GenericRecord next;
 				try {
 					next = reader.read();
 				} catch (IOException e) {
@@ -131,7 +130,7 @@ public class ParquetStreamFactory implements IAvroStreamFactory {
 	public static Stream<? extends Map<String, ?>> readParquetAsStream(Path pathOnDisk, Map<String, ?> exampleTypes)
 			throws FileNotFoundException, IOException {
 		return new ParquetBytesToStream().toStream(new FileInputStream(pathOnDisk.toFile()))
-				.map(AvroBytesToStream.toStandardJava(exampleTypes));
+				.map(AvroStreamHelper.toStandardJava(exampleTypes));
 	}
 
 	@Override
@@ -148,7 +147,7 @@ public class ParquetStreamFactory implements IAvroStreamFactory {
 							.withSchema(m.getSchema())
 							.build());
 				} catch (NullPointerException e) {
-					throw new RuntimeException("Are you missing Hadoop binaries?", e);
+					throw new IllegalStateException("Are you missing Hadoop binaries?", e);
 				} catch (IOException e) {
 					throw new UncheckedIOException(e);
 				}
@@ -170,7 +169,7 @@ public class ParquetStreamFactory implements IAvroStreamFactory {
 		return nbRows.get();
 	}
 
-	private org.apache.hadoop.fs.Path toHadoopPath(Path javaPathOnDisk) {
+	protected org.apache.hadoop.fs.Path toHadoopPath(Path javaPathOnDisk) {
 		return new org.apache.hadoop.fs.Path(javaPathOnDisk.toUri());
 	}
 }

@@ -31,8 +31,8 @@ import com.google.common.collect.ImmutableMap;
 
 import blasd.apex.core.io.ApexFileHelper;
 import blasd.apex.parquet.ParquetStreamFactory;
-import blasd.apex.serialization.avro.ApexAvroSchemaHelper;
-import blasd.apex.serialization.avro.AvroBytesToStream;
+import blasd.apex.serialization.avro.AvroSchemaHelper;
+import blasd.apex.serialization.avro.AvroStreamHelper;
 import blasd.apex.serialization.avro.IAvroStreamFactory;
 
 public class TestParquetBytesToStream {
@@ -44,7 +44,7 @@ public class TestParquetBytesToStream {
 		String doubleField = "doubleField";
 		String doubleArrayField = "doubleArrayField";
 
-		Schema schema = ApexAvroSchemaHelper.proposeSimpleSchema(
+		Schema schema = AvroSchemaHelper.proposeSimpleSchema(
 				ImmutableMap.of(stringField, "anyString", doubleField, 0D, doubleArrayField, new double[2]));
 
 		List<Map<String, Object>> list = Arrays.asList(ImmutableMap
@@ -52,10 +52,10 @@ public class TestParquetBytesToStream {
 
 		java.nio.file.Path pathOnDisk = ApexFileHelper.createTempPath(getClass().getSimpleName(), ".tmp", true);
 		IAvroStreamFactory factory = new ParquetStreamFactory();
-		factory.writeToPath(pathOnDisk, list.stream().map(ApexAvroSchemaHelper.genericRecords(schema)));
+		factory.writeToPath(pathOnDisk, list.stream().map(AvroStreamHelper.toGenericRecord(schema)));
 
 		Stream<? extends Map<String, ?>> asMapStream =
-				factory.toStream(pathOnDisk).map(AvroBytesToStream.toStandardJava(Collections.emptyMap()));
+				factory.toStream(pathOnDisk).map(AvroStreamHelper.toStandardJava(Collections.emptyMap()));
 
 		List<Map<String, ?>> asMapList = asMapStream.collect(Collectors.toList());
 

@@ -131,15 +131,7 @@ public class ZeroCopyCSVParser implements IZeroCopyCSVParser {
 		char[] buffer = new char[charBuffer.capacity()];
 
 		while (moreToRead) {
-			// if (firstValueCharIndex >= 0) {
-			// // Keep as active these interesting characters
-			// charBuffer.position(firstValueCharIndex);
-			// }
-
 			charBuffer.compact();
-			// if (firstValueCharIndex >= 0) {
-			// firstValueCharIndex = 0;
-			// }
 
 			// We do not use Reader.read(CharBuffer) as it would allocate a transient char[]
 			int nbRead = reader.read(buffer, 0, Math.min(buffer.length, charBuffer.remaining()));
@@ -154,8 +146,7 @@ public class ZeroCopyCSVParser implements IZeroCopyCSVParser {
 			}
 			charBuffer.flip();
 
-			if (nbRead > 0) {
-			} else if (nbRead < 0) {
+			if (nbRead < 0) {
 				moreToRead = false;
 			}
 
@@ -167,26 +158,9 @@ public class ZeroCopyCSVParser implements IZeroCopyCSVParser {
 
 				if (nextChar == separator) {
 					// We are closing a column: publish the column content
-					// int oldLimit = charBuffer.limit();
-					// int oldPosition = charBuffer.position();
-					// charBuffer.limit(oldPosition - 1);
 					columnIndex = flushColumn(indexToConsumer, nextValue, columnIndex, true);
-					// Move to the leftover: set a wide limit, and then fix a corrected new position
-					// charBuffer.limit(oldLimit);
-					// charBuffer.position(oldPosition);
-					// firstValueCharIndex = -1;
-
-					// Indicate we have spot a new column
-					// columnIndex++;
 				} else if (nextChar == '\r' || nextChar == '\n') {
-					// if (firstValueCharIndex >= 0) {
-					// int oldLimit = charBuffer.limit();
-					// int oldPosition = charBuffer.position();
-					// charBuffer.limit(oldPosition - 1);
-
 					columnIndex = flushColumn(indexToConsumer, nextValue, columnIndex, false);
-					// MoC
-
 					warnConsumersWithoutColumn(indexToConsumer, columnIndex, consumers.size());
 
 					// Reset the columnIndex
@@ -204,12 +178,7 @@ public class ZeroCopyCSVParser implements IZeroCopyCSVParser {
 
 			if (!moreToRead) {
 				// We are at the end of the file
-				// We have detected the beginning of an input and then encounter EOF: we have to flush the column
-				// if (firstValueCharIndex >= 0) {
 				columnIndex = flushColumn(indexToConsumer, nextValue, columnIndex, false);
-				// } else {
-				// // empty row (or \r\n)
-				// }
 				warnConsumersWithoutColumn(indexToConsumer, columnIndex, consumers.size());
 			}
 		}
@@ -297,8 +266,7 @@ public class ZeroCopyCSVParser implements IZeroCopyCSVParser {
 					}
 					charBuffer.flip();
 
-					if (nbRead > 0) {
-					} else if (nbRead < 0) {
+					if (nbRead < 0) {
 						moreToRead.set(false);
 					}
 				}

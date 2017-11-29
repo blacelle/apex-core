@@ -50,7 +50,7 @@ import com.google.common.primitives.Ints;
 import blasd.apex.core.io.ApexFileHelper;
 import blasd.apex.core.logging.ApexLogHelper;
 import blasd.apex.core.memory.IApexMemoryConstants;
-import blasd.apex.serialization.avro.ApexAvroSchemaHelper;
+import blasd.apex.serialization.avro.AvroSchemaHelper;
 import blasd.apex.server.spark.TestReadWrite;
 
 /**
@@ -169,7 +169,7 @@ public class ITParquetDoubleFormat {
 							null,
 							Schema.NULL_VALUE)));
 		} else {
-			schema = ApexAvroSchemaHelper.proposeSimpleSchema(schemaAsMap);
+			schema = AvroSchemaHelper.proposeSimpleSchema(schemaAsMap);
 		}
 
 		ParquetWriter<GenericRecord> writer;

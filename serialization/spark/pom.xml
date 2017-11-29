@@ -1,0 +1,70 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.github.blasd.apex</groupId>
+		<artifactId>apex-serialization</artifactId>
+		<version>1.9-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>apex-spark</artifactId>
+	<packaging>jar</packaging>
+
+	<properties>
+		<jacoco.instruction.ratio>0.0</jacoco.instruction.ratio>
+		<jacoco.branch.ratio>0.0</jacoco.branch.ratio>
+	</properties>
+
+	<dependencies>
+		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11 -->
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-core_${scala.version}</artifactId>
+			<version>${spark.version}</version>
+			<exclusions>
+				<exclusion>
+					<!-- Do not force the logging framework -->
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-sql_2.10 -->
+		<dependency>
+			<!-- Holds SparkSession -->
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-sql_${scala.version}</artifactId>
+			<version>${spark.version}</version>
+			<!-- Used for main classes -->
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.scala-lang.modules</groupId>
+			<artifactId>scala-java8-compat_${scala.version}</artifactId>
+			<version>0.8.0</version>
+			<!-- Used for main classes -->
+			<scope>test</scope>
+		</dependency>
+
+
+
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-avro</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.blasd.apex</groupId>
+			<artifactId>apex-avro</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

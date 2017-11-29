@@ -49,8 +49,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.common.primitives.Doubles;
 
-import blasd.apex.core.avro.ApexAvroToActivePivotHelper;
+import blasd.apex.serialization.avro.AvroStreamHelper;
 import blasd.apex.serialization.avro.AvroBytesToStream;
+import blasd.apex.spark.ApexSparkHelper;
 
 public class TestAvroBytesToStream {
 	// https://github.com/FasterXML/jackson-dataformats-binary/blob/master/avro/src/test/java/com/fasterxml/jackson/dataformat/avro/MapTest.java
@@ -92,7 +93,7 @@ public class TestAvroBytesToStream {
 
 		List<? extends Map<String, ?>> avroStream =
 				new AvroBytesToStream().toStream(new ByteArrayInputStream(baos.toByteArray()))
-						.map(AvroBytesToStream.toStandardJava(Collections.emptyMap()))
+						.map(AvroStreamHelper.toStandardJava(Collections.emptyMap()))
 						.collect(Collectors.toList());
 
 		Assert.assertEquals(1, avroStream.size());
@@ -111,11 +112,10 @@ public class TestAvroBytesToStream {
 				Arrays.asList(new Field("Currency", Schema.create(Type.STRING), null, Schema.NULL_VALUE)));
 
 		BiMap<String, String> mapping = ImmutableBiMap.of("ccy", "Currency");
-		InputStream stream =
-				ApexAvroToActivePivotHelper.toAvro(outputSchema, Iterators.singletonIterator(row), mapping);
+		InputStream stream = ApexSparkHelper.toAvro(outputSchema, Iterators.singletonIterator(row), mapping);
 
 		List<?> resultAsList = new AvroBytesToStream().toStream(stream)
-				.map(AvroBytesToStream.toStandardJava(Collections.emptyMap()))
+				.map(AvroStreamHelper.toStandardJava(Collections.emptyMap()))
 				.collect(Collectors.toList());
 
 		Assert.assertEquals(1, resultAsList.size());
@@ -138,11 +138,10 @@ public class TestAvroBytesToStream {
 						Schema.NULL_VALUE)));
 
 		BiMap<String, String> mapping = ImmutableBiMap.of("doubleArray", "DoubleArray");
-		InputStream stream =
-				ApexAvroToActivePivotHelper.toAvro(outputSchema, Iterators.singletonIterator(row), mapping);
+		InputStream stream = ApexSparkHelper.toAvro(outputSchema, Iterators.singletonIterator(row), mapping);
 
 		List<?> resultAsList = new AvroBytesToStream().toStream(stream)
-				.map(AvroBytesToStream.toStandardJava(ImmutableMap.of("DoubleArray", new double[0])))
+				.map(AvroStreamHelper.toStandardJava(ImmutableMap.of("DoubleArray", new double[0])))
 				.collect(Collectors.toList());
 
 		Assert.assertEquals(1, resultAsList.size());
