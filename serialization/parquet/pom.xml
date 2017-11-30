@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.github.blasd.apex</groupId>
 		<artifactId>apex-serialization</artifactId>
-		<version>1.9-SNAPSHOT</version>
+		<version>1.9</version>
 	</parent>
 
 	<artifactId>apex-parquet</artifactId>
