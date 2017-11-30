@@ -132,6 +132,7 @@
 		<module>jmh</module>
 
 		<module>serialization</module>
+		<module>compression</module>
 
 		<!-- a JConsole plugin to facilitate tracking of off-heap -->
 		<!-- Excluded as it is an experimental project -->
@@ -250,7 +251,6 @@
 				<!-- -Dtest=TestClassToFileMapped selects a single test class -->
 				<!-- -Dmaven.surefire.debug enables debug on Surefire plugin on port 5005 -->
 				<!-- mvn -Dtest=TestClassToFileMapped -Dmaven.surefire.debug test -->
-
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
@@ -260,11 +260,9 @@
 						<!-- https://groups.google.com/forum/#!topic/jacoco/LzmCezW8VKA -->
 
 						<!-- -XX:+StartAttachListener is for http://comments.gmane.org/gmane.comp.java.openjdk.macosx-port.devel/6094 -->
-						<!-- -Xmx because of http://support.quartetfs.com/jira/browse/APS-7075 -->
-						<!-- Slab allocator does not work under MacOS -->
 						<!-- -XX:-HeapDumpOnOutOfMemoryError because TestGCInspector will force an OOM -->
 						<!-- -Djava.util.logging.config.file so that tests fallback on logback -->
-						<argLine><![CDATA[-ea -Xmx${xmx} -XX:+StartAttachListener -XX:-HeapDumpOnOutOfMemoryError -Djava.util.logging.config.file=logging.properties ${argLine}]]></argLine>
+						<argLine><![CDATA[-ea -XX:+StartAttachListener -XX:-HeapDumpOnOutOfMemoryError -Djava.util.logging.config.file=logging.properties ${argLine}]]></argLine>
 
 						<!-- Alternative safer configuration for 1JVM per test -->
 						<!-- <forkCount>1</forkCount> -->
