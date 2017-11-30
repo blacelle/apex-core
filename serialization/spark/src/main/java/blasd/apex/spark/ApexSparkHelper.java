@@ -4,11 +4,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
@@ -85,7 +88,13 @@ public class ApexSparkHelper {
 		for (Field field : r.getSchema().getFields()) {
 			Object valueToWrite = row.get(field.name());
 
-			valueToWrite = convertFromSparkValue(field, valueToWrite);
+			valueToWrite = convertFromSparkToAvro(field, valueToWrite, s -> {
+				try {
+					return ByteBuffer.wrap(ApexSerializationHelper.toBytes(s));
+				} catch (IOException e) {
+					throw new UncheckedIOException(e);
+				}
+			});
 
 			r.put(field.name(), valueToWrite);
 		}
@@ -93,7 +102,9 @@ public class ApexSparkHelper {
 		return r;
 	}
 
-	public static Object convertFromSparkValue(Field field, Object valueToWrite) {
+	public static Object convertFromSparkToAvro(Field field,
+			Object valueToWrite,
+			Function<Serializable, ByteBuffer> serializer) {
 		if (valueToWrite instanceof WrappedArray<?>) {
 			List<?> asList = ImmutableList
 					.copyOf(JavaConverters.asJavaCollectionConverter(((WrappedArray<?>) valueToWrite).toIterable())
@@ -109,11 +120,7 @@ public class ApexSparkHelper {
 
 				// Avro requires a ByteBuffer. See org.apache.avro.generic.GenericData.getSchemaName(Object)
 				// Parquet seems to handle both byte[] and ByteBuffer
-				try {
-					valueToWrite = ByteBuffer.wrap(ApexSerializationHelper.toBytes(primitiveArray));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+				valueToWrite = serializer.apply(primitiveArray);
 			}
 		}
 		return valueToWrite;

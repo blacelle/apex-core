@@ -23,8 +23,8 @@
 package blasd.apex.core.thread;
 
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
+import java.util.concurrent.ForkJoinWorkerThread;
 
 /**
  * Enable naming of ForkJoinPool threads

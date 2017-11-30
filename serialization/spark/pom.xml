@@ -16,6 +16,12 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.github.blasd.apex</groupId>
+			<artifactId>apex-java</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11 -->
 		<dependency>
 			<groupId>org.apache.spark</groupId>
@@ -37,11 +43,10 @@
 		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-sql_2.10 -->
 		<dependency>
 			<!-- Holds SparkSession -->
+			<!-- org.apache.spark.sql.Row through spark_catalyst -->
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-sql_${scala.version}</artifactId>
 			<version>${spark.version}</version>
-			<!-- Used for main classes -->
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -51,9 +56,6 @@
 			<!-- Used for main classes -->
 			<scope>test</scope>
 		</dependency>
-
-
-
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>

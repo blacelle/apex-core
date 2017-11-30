@@ -49,8 +49,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.common.primitives.Doubles;
 
-import blasd.apex.serialization.avro.AvroStreamHelper;
 import blasd.apex.serialization.avro.AvroBytesToStream;
+import blasd.apex.serialization.avro.AvroStreamHelper;
 import blasd.apex.spark.ApexSparkHelper;
 
 public class TestAvroBytesToStream {
