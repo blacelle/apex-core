@@ -18,7 +18,7 @@ public class TestCompressedIntArray {
 	public void testGrowingBy1() {
 		int size = 1024 * 1024;
 
-		IntList array = CompressedIntArray.compress(IntStream.range(0, size));
+		IntList array = CompressedIntArrays.compress(IntStream.range(0, size));
 
 		LOGGER.info("testGrowingBy1 CompressedSize: {}", ApexLogHelper.getNiceMemory(ApexMemoryHelper.deepSize(array)));
 		LOGGER.info("testGrowingBy1 RawSize: {}",
@@ -29,7 +29,7 @@ public class TestCompressedIntArray {
 	public void testManyVerySmall() {
 		int size = 1024 * 1024;
 
-		IntList array = CompressedIntArray.compress(IntStream.range(0, size).map(i -> i % 16));
+		IntList array = CompressedIntArrays.compress(IntStream.range(0, size).map(i -> i % 16));
 
 		LOGGER.info("testManyVerySmall CompressedSize: {}",
 				ApexLogHelper.getNiceMemory(ApexMemoryHelper.deepSize(array)));
@@ -41,7 +41,7 @@ public class TestCompressedIntArray {
 	public void testManySmall() {
 		int size = 1024 * 1024;
 
-		IntList array = CompressedIntArray.compress(IntStream.range(0, size).map(i -> i % 1024));
+		IntList array = CompressedIntArrays.compress(IntStream.range(0, size).map(i -> i % 1024));
 
 		LOGGER.info("testManySmall CompressedSize: {}", ApexLogHelper.getNiceMemory(ApexMemoryHelper.deepSize(array)));
 		LOGGER.info("testManySmall RawSize: {}",
@@ -53,7 +53,7 @@ public class TestCompressedIntArray {
 		int size = 1024 * 1024;
 		Random r = new Random(0);
 
-		IntList array = CompressedIntArray.compress(IntStream.range(0, size).map(i -> r.nextInt()));
+		IntList array = CompressedIntArrays.compress(IntStream.range(0, size).map(i -> r.nextInt()));
 
 		LOGGER.info("testManySmall CompressedSize: {}", ApexLogHelper.getNiceMemory(ApexMemoryHelper.deepSize(array)));
 		LOGGER.info("testManySmall RawSize: {}",

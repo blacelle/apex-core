@@ -1,6 +1,5 @@
 package blasd.apex.primitives;
 
-import java.util.RandomAccess;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -8,39 +7,26 @@ import java.util.stream.IntStream;
 
 import org.roaringbitmap.RoaringBitmap;
 
-import it.unimi.dsi.fastutil.ints.AbstractIntList;
+import com.google.common.annotations.Beta;
+
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
-public class CompressedIntArray extends AbstractIntList implements RandomAccess, Cloneable, java.io.Serializable {
-	private static final long serialVersionUID = 2801769711578854510L;
+/**
+ * Provide helps to compressed int arrays
+ * 
+ * @author Benoit Lacelle
+ *
+ */
+@Beta
+public class CompressedIntArrays {
 
-	public CompressedIntArray(int constantMask, byte[] values) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public int getInt(int index) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+	protected CompressedIntArrays() {
+		// hidden
 	}
 
 	public static IntList compress(IntStream input) {
 		AtomicBoolean firstDone = new AtomicBoolean();
-
-		// int constantBits = 0;
-		// assert 0 == Integer.bitCount(constantBits);
-
-		// AtomicInteger constantBitCandidates = new AtomicInteger(-1);
-		// assert Integer.SIZE == Integer.bitCount(constantBitCandidates.get());
-
-		// AtomicInteger constantBitsValues = new AtomicInteger(0);
 
 		AtomicInteger nbDifferentConstant = new AtomicInteger();
 		int[] nbConstant = new int[Integer.SIZE];
@@ -56,9 +42,6 @@ public class CompressedIntArray extends AbstractIntList implements RandomAccess,
 		input.forEach(i -> {
 			if (firstDone.compareAndSet(false, true)) {
 				// This is the first int
-				// constantBitCandidates.set(-1);
-				// constantBitsValues.set(i);
-
 				nbDifferentConstant.set(0);
 				nbConstant[0] = 1;
 				constantBits[0] = -1;

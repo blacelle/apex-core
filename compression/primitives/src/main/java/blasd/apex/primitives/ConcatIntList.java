@@ -7,6 +7,12 @@ import java.util.List;
 import it.unimi.dsi.fastutil.ints.AbstractIntList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
+/**
+ * Wraps multiple {@link IntList} in a single concatenated {@link IntList}
+ * 
+ * @author Benoit Lacelle
+ *
+ */
 public class ConcatIntList extends AbstractIntList {
 
 	protected final List<IntList> intLists;

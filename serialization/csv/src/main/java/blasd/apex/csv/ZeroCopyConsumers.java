@@ -43,37 +43,13 @@ public class ZeroCopyConsumers {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ZeroCopyConsumers.class);
 
 	public static IZeroCopyConsumer intConsumer(IntConsumer intConsumer) {
-		AtomicLong rowIndex = new AtomicLong();
-
-		return new IZeroCopyIntConsumer() {
-
-			@Override
-			public void nextRowIsMissing() {
-				rowIndex.incrementAndGet();
-				LOGGER.trace("No data for row #{}", rowIndex);
-			}
-
-			@Override
-			public void nextRowIsInvalid(CharSequence charSequence) {
-				rowIndex.incrementAndGet();
-				LOGGER.trace("Invalid data for row #{}: {}", rowIndex, charSequence);
-			}
-
-			@Override
-			public void accept(int value) {
-				intConsumer.accept(value);
-
-				rowIndex.incrementAndGet();
-			}
-
-			@Override
-			public long nextValueRowIndex() {
-				return rowIndex.get();
-			}
-		};
+		return intBinaryOperator((rowIndex, r) -> {
+			intConsumer.accept(r);
+			return rowIndex;
+		});
 	}
 
-	public static IZeroCopyConsumer intBinaryOperator(IntBinaryOperator intBinaryOperator) {
+	public static IZeroCopyConsumer intBinaryOperator(IntBinaryOperator rowAndValueOperator) {
 		AtomicLong rowIndex = new AtomicLong();
 
 		return new IZeroCopyIntConsumer() {
@@ -92,7 +68,7 @@ public class ZeroCopyConsumers {
 
 			@Override
 			public void accept(int value) {
-				intBinaryOperator.applyAsInt(Ints.checkedCast(rowIndex.get()), value);
+				rowAndValueOperator.applyAsInt(Ints.checkedCast(rowIndex.get()), value);
 
 				rowIndex.incrementAndGet();
 			}

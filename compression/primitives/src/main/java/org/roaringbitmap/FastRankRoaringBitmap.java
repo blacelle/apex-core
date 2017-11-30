@@ -56,18 +56,9 @@ public class FastRankRoaringBitmap extends RoaringBitmap {
 
 	@Override
 	public long rankLong(int x) {
-		if (highToCumulatedCardinality == null) {
-			highToCumulatedCardinality = new int[highLowContainer.size()];
-
-			if (highToCumulatedCardinality.length == 0) {
-				return 0;
-			}
-			highToCumulatedCardinality[0] = highLowContainer.getContainerAtIndex(0).getCardinality();
-
-			for (int i = 1; i < highToCumulatedCardinality.length; i++) {
-				highToCumulatedCardinality[i] =
-						highToCumulatedCardinality[i - 1] + highLowContainer.getContainerAtIndex(i).getCardinality();
-			}
+		ensureCardinalities();
+		if (highToCumulatedCardinality.length == 0) {
+			return 0;
 		}
 
 		short xhigh = Util.highbits(x);
@@ -97,13 +88,13 @@ public class FastRankRoaringBitmap extends RoaringBitmap {
 		return rank;
 	}
 
-	@Override
-	public int select(int j) {
+	private void ensureCardinalities() {
 		if (highToCumulatedCardinality == null) {
 			highToCumulatedCardinality = new int[highLowContainer.size()];
 
 			if (highToCumulatedCardinality.length == 0) {
-				return 0;
+				// This bitmap is empty
+				return;
 			}
 			highToCumulatedCardinality[0] = highLowContainer.getContainerAtIndex(0).getCardinality();
 
@@ -111,6 +102,14 @@ public class FastRankRoaringBitmap extends RoaringBitmap {
 				highToCumulatedCardinality[i] =
 						highToCumulatedCardinality[i - 1] + highLowContainer.getContainerAtIndex(i).getCardinality();
 			}
+		}
+	}
+
+	@Override
+	public int select(int j) {
+		ensureCardinalities();
+		if (highToCumulatedCardinality.length == 0) {
+			throw new IllegalArgumentException("select " + j + " when the cardinality is " + this.getCardinality());
 		}
 
 		int index = Arrays.binarySearch(highToCumulatedCardinality, j);

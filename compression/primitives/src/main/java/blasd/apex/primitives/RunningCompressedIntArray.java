@@ -48,7 +48,7 @@ public class RunningCompressedIntArray extends AbstractIntList implements Clonea
 		if (nbConstant[block] == 0) {
 			throw new ArrayIndexOutOfBoundsException("index=" + index + " while size=" + size());
 		}
-		
+
 		bitShift += indexInBlock * block;
 
 		// Initialize the value given input mask

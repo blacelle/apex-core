@@ -10,14 +10,14 @@ import it.unimi.dsi.fastutil.ints.IntList;
 public class TestCompressedIntArray_Memory {
 	@Test
 	public void testEmpty() {
-		IntList array = CompressedIntArray.compress(IntStream.empty());
+		IntList array = CompressedIntArrays.compress(IntStream.empty());
 
 		Assert.assertTrue(array.isEmpty());
 	}
 
 	@Test
 	public void testOnly0() {
-		IntList array = CompressedIntArray.compress(IntStream.of(0));
+		IntList array = CompressedIntArrays.compress(IntStream.of(0));
 
 		Assert.assertEquals(1, array.size());
 		Assert.assertArrayEquals(new int[] { 0 }, array.toIntArray());
@@ -25,7 +25,7 @@ public class TestCompressedIntArray_Memory {
 
 	@Test
 	public void testOnly1() {
-		IntList array = CompressedIntArray.compress(IntStream.of(1));
+		IntList array = CompressedIntArrays.compress(IntStream.of(1));
 
 		Assert.assertEquals(1, array.size());
 		Assert.assertArrayEquals(new int[] { 1 }, array.toIntArray());
@@ -33,7 +33,7 @@ public class TestCompressedIntArray_Memory {
 
 	@Test
 	public void testZeroAndZero() {
-		IntList array = CompressedIntArray.compress(IntStream.of(0, 0));
+		IntList array = CompressedIntArrays.compress(IntStream.of(0, 0));
 
 		Assert.assertEquals(2, array.size());
 		Assert.assertArrayEquals(new int[] { 0, 0 }, array.toIntArray());
@@ -41,7 +41,7 @@ public class TestCompressedIntArray_Memory {
 
 	@Test
 	public void testZeroAndOne() {
-		IntList array = CompressedIntArray.compress(IntStream.of(0, 1));
+		IntList array = CompressedIntArrays.compress(IntStream.of(0, 1));
 
 		Assert.assertEquals(2, array.size());
 		Assert.assertArrayEquals(new int[] { 0, 1 }, array.toIntArray());
@@ -49,7 +49,7 @@ public class TestCompressedIntArray_Memory {
 
 	@Test
 	public void testOneAndZero() {
-		IntList array = CompressedIntArray.compress(IntStream.of(1, 0));
+		IntList array = CompressedIntArrays.compress(IntStream.of(1, 0));
 
 		Assert.assertEquals(2, array.size());
 		Assert.assertArrayEquals(new int[] { 1, 0 }, array.toIntArray());
@@ -57,7 +57,7 @@ public class TestCompressedIntArray_Memory {
 
 	@Test
 	public void testZeroAndTwo() {
-		IntList array = CompressedIntArray.compress(IntStream.of(0, 2));
+		IntList array = CompressedIntArrays.compress(IntStream.of(0, 2));
 
 		Assert.assertEquals(2, array.size());
 		Assert.assertArrayEquals(new int[] { 0, 2 }, array.toIntArray());
@@ -65,7 +65,7 @@ public class TestCompressedIntArray_Memory {
 
 	@Test
 	public void testTwoAndZero() {
-		IntList array = CompressedIntArray.compress(IntStream.of(2, 0));
+		IntList array = CompressedIntArrays.compress(IntStream.of(2, 0));
 
 		Assert.assertEquals(2, array.size());
 		Assert.assertArrayEquals(new int[] { 2, 0 }, array.toIntArray());
@@ -73,7 +73,7 @@ public class TestCompressedIntArray_Memory {
 
 	@Test
 	public void testOneAndOne() {
-		IntList array = CompressedIntArray.compress(IntStream.of(1, 1));
+		IntList array = CompressedIntArrays.compress(IntStream.of(1, 1));
 
 		Assert.assertEquals(2, array.size());
 		Assert.assertArrayEquals(new int[] { 1, 1 }, array.toIntArray());
@@ -81,7 +81,7 @@ public class TestCompressedIntArray_Memory {
 
 	@Test
 	public void testZeroAndOneAndTwo() {
-		IntList array = CompressedIntArray.compress(IntStream.of(0, 1, 2));
+		IntList array = CompressedIntArrays.compress(IntStream.of(0, 1, 2));
 
 		Assert.assertEquals(3, array.size());
 		Assert.assertArrayEquals(new int[] { 0, 1, 2 }, array.toIntArray());
@@ -89,7 +89,7 @@ public class TestCompressedIntArray_Memory {
 
 	@Test
 	public void testTwoAndOneAndZero() {
-		IntList array = CompressedIntArray.compress(IntStream.of(2, 1, 0));
+		IntList array = CompressedIntArrays.compress(IntStream.of(2, 1, 0));
 
 		Assert.assertEquals(3, array.size());
 		Assert.assertArrayEquals(new int[] { 2, 1, 0 }, array.toIntArray());
@@ -98,7 +98,7 @@ public class TestCompressedIntArray_Memory {
 	@Test
 	public void testAllSingleBit() {
 		IntList array =
-				CompressedIntArray.compress(IntStream.range(0, Integer.SIZE).map(i -> Integer.rotateLeft(1, i)));
+				CompressedIntArrays.compress(IntStream.range(0, Integer.SIZE).map(i -> Integer.rotateLeft(1, i)));
 
 		Assert.assertEquals(32, array.size());
 		Assert.assertEquals(1, array.getInt(0));
@@ -108,7 +108,7 @@ public class TestCompressedIntArray_Memory {
 	@Test
 	public void testAllSingleBit_WithOverflow() {
 		IntList array =
-				CompressedIntArray.compress(IntStream.range(0, Integer.SIZE + 1).map(i -> Integer.rotateLeft(1, i)));
+				CompressedIntArrays.compress(IntStream.range(0, Integer.SIZE + 1).map(i -> Integer.rotateLeft(1, i)));
 
 		Assert.assertEquals(33, array.size());
 		Assert.assertEquals(1, array.getInt(0));
