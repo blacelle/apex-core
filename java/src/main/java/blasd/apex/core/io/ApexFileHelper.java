@@ -27,8 +27,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.jar.JarEntry;
 
@@ -37,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Strings;
@@ -53,7 +58,7 @@ public class ApexFileHelper {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ApexFileHelper.class);
 
 	protected ApexFileHelper() {
-		// hidden
+		// hidden	
 	}
 
 	/**
@@ -185,5 +190,84 @@ public class ApexFileHelper {
 		} else {
 			return Optional.empty();
 		}
+	}
+
+	/**
+	 * It may be unclear how a path should be provided: a relative path './folder/file', an absolute file '/root/file'
+	 * or some Spring syntax ('file:/root/file' or 'classpath:folder/file'). This method handles all these formats
+	 * 
+	 * @param resourceLoader
+	 * @param pathToFileOrFolder
+	 * @return a fully resolved Path
+	 */
+	public static Path resolveToPath(ResourceLoader resourceLoader, String pathToFileOrFolder) {
+		if (Strings.isNullOrEmpty(pathToFileOrFolder)) {
+			throw new IllegalArgumentException("We are missing an environment variable: " + pathToFileOrFolder);
+		}
+
+		Path directoryAsPath;
+		boolean forceTryAsSpringResource = false;
+		try {
+			// Try parsing as an absolute path (e.g. '/root/myFile') which is not handled by ResourceLoader
+			directoryAsPath = Paths.get(pathToFileOrFolder);
+		} catch (InvalidPathException e) {
+			// Under Windows, something like 'classpath:apeCsvLoadingHelper' throws, but under linux it is considered a
+			// valid path
+			LOGGER.trace("This seems not an absolute path", e);
+			forceTryAsSpringResource = true;
+			directoryAsPath = null;
+		}
+
+		if (forceTryAsSpringResource || !directoryAsPath.toFile().exists()) {
+			try {
+				// Handle things like 'someFolder' in class-path, 'classPath:/someFolder' or 'file:/root/myFile'.
+				// However, it will not work on directly an absolute path (e.g. '/root/myFile')
+				Resource resource = resourceLoader.getResource(pathToFileOrFolder);
+				if (resource.exists()) {
+					directoryAsPath = resource.getFile().toPath();
+				} else {
+					throw new IllegalArgumentException("Not able to find " + pathToFileOrFolder);
+				}
+			} catch (IOException e1) {
+				throw new IllegalArgumentException("Not able to parse " + pathToFileOrFolder, e1);
+			}
+		}
+
+		return directoryAsPath;
+	}
+
+	private static final String GLOB_PREFIX = "glob:";
+
+	// Match also in sub-directories
+	private static final String GLOB_MATCH_ANY_ALL = "**";
+
+	public static PathMatcher makePathMatcher(String globPathMatcher, boolean matchAnySubdirectory) {
+		// We add '**/' as we always receive absolute pathes
+		final String fullGlobPattern;
+
+		if (globPathMatcher.startsWith(GLOB_PREFIX)) {
+			fullGlobPattern = globPathMatcher;
+		} else {
+			// TODO: check we did not receive absolute path
+			// Paths.get(globPathMatcher).isAbsolute()
+
+			String relativeGLobPathMatcher;
+
+			if (matchAnySubdirectory) {
+				// Match in any sub-directory
+				// GLob accepts '/' as file separator for both windows and linux
+				relativeGLobPathMatcher = GLOB_MATCH_ANY_ALL + '/' + globPathMatcher;
+			} else {
+				relativeGLobPathMatcher = globPathMatcher;
+			}
+
+			// Simplify by using '/' for all OS
+			final String finalPathMatcher = relativeGLobPathMatcher.replaceAll("\\\\", "/");
+
+			fullGlobPattern = GLOB_PREFIX + finalPathMatcher;
+		}
+
+		final PathMatcher decorated = FileSystems.getDefault().getPathMatcher(fullGlobPattern);
+		return new ApexCachePathMatcher(decorated, fullGlobPattern);
 	}
 }

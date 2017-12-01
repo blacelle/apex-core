@@ -5,8 +5,8 @@
 		<!-- Import dependency management from Spring Boot -->
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-dependencies</artifactId>
+		<version>1.5.9.RELEASE</version>
 		<!-- http://stackoverflow.com/questions/6003831/parent-relativepath-points-at-my-com-mycompanymyproject-instead-of-org-apache -->
-		<version>1.5.8.RELEASE</version>
 		<relativePath />
 	</parent>
 
@@ -32,8 +32,8 @@
 			<!-- http://central.sonatype.org/pages/apache-maven.html#deploying-to-ossrh-with-apache-maven-introduction -->
 			<id>Sonatype</id>
 
-			<!--Requires in settings.xml: <settings> <servers> <server> <id>ossrh</id> <username>your-jira-id</username> <password>your-jira-pwd</password> 
-				</server> </servers> </settings> -->
+			<!--Requires in settings.xml: <settings> <servers> <server> <id>ossrh</id> <username>your-jira-id</username> <password>your-jira-pwd</password> </server> 
+				</servers> </settings> -->
 			<distributionManagement>
 				<snapshotRepository>
 					<id>ossrh</id>

@@ -1,6 +1,6 @@
 package blasd.apex.serialization.avro;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -24,7 +24,7 @@ public class AvroStreamHelper {
 	}
 
 	public static Map<String, ?> toMap(Map<? extends String, ?> exampleTypes, IndexedRecord indexedRecord) {
-		Map<String, Object> asMap = new HashMap<>();
+		Map<String, Object> asMap = new LinkedHashMap<>();
 
 		List<Field> fields = indexedRecord.getSchema().getFields();
 		for (int i = 0; i < fields.size(); i++) {
