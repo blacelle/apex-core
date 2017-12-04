@@ -40,7 +40,7 @@ public class TestJavaBytesToStream {
 		JavaBytesToStream streamConverter = new JavaBytesToStream();
 
 		ArrayList<? extends Object> original = Lists.newArrayList("A", 123);
-		Stream<Object> stream =
+		Stream<? extends Object> stream =
 				streamConverter.stream(new ByteArrayInputStream(ApexSerializationHelper.toBytes(original)));
 
 		List<Object> streamedAsList = stream.collect(Collectors.toList());

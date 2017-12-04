@@ -2,7 +2,7 @@ package blasd.apex.serialization.avro;
 
 import org.apache.avro.generic.GenericRecord;
 
-import blasd.apex.serialization.IBinaryToStream;
+import blasd.apex.core.io.IBinaryToStream;
 
 /**
  * Specialization of {@link IBinaryToStream} for Avro {@link GenericRecord}

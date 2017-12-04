@@ -78,13 +78,13 @@ public class ParquetStreamFactory implements IAvroStreamFactory {
 	}
 
 	@Override
-	public Stream<? extends GenericRecord> toStream(Path javaPath) throws IOException {
+	public Stream<GenericRecord> toStream(Path javaPath) throws IOException {
 		org.apache.hadoop.fs.Path hadoopPath = toHadoopPath(javaPath);
 
 		return toStream(hadoopPath);
 	}
 
-	public Stream<? extends GenericRecord> toStream(org.apache.hadoop.fs.Path hadoopPath) throws IOException {
+	public Stream<GenericRecord> toStream(org.apache.hadoop.fs.Path hadoopPath) throws IOException {
 		Filter filter = makeFilter();
 
 		ParquetReader<GenericRecord> reader = AvroParquetReader.<GenericRecord>builder(hadoopPath)
@@ -127,9 +127,9 @@ public class ParquetStreamFactory implements IAvroStreamFactory {
 		});
 	}
 
-	public static Stream<? extends Map<String, ?>> readParquetAsStream(Path pathOnDisk, Map<String, ?> exampleTypes)
+	public static Stream<Map<String, ?>> readParquetAsStream(Path pathOnDisk, Map<String, ?> exampleTypes)
 			throws FileNotFoundException, IOException {
-		return new ParquetBytesToStream().toStream(new FileInputStream(pathOnDisk.toFile()))
+		return new ParquetBytesToStream().stream(new FileInputStream(pathOnDisk.toFile()))
 				.map(AvroStreamHelper.toStandardJava(exampleTypes));
 	}
 

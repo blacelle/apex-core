@@ -58,7 +58,7 @@ public class ParquetBytesToStream implements IBinaryToAvroStream {
 	}
 
 	@Override
-	public Stream<? extends GenericRecord> toStream(InputStream inputStream) throws IOException {
+	public Stream<GenericRecord> stream(InputStream inputStream) throws IOException {
 		persist(inputStream);
 
 		return new ParquetStreamFactory().toStream(persisted.get());

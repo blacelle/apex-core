@@ -92,7 +92,7 @@ public class TestAvroBytesToStream {
 		}
 
 		List<? extends Map<String, ?>> avroStream =
-				new AvroBytesToStream().toStream(new ByteArrayInputStream(baos.toByteArray()))
+				new AvroBytesToStream().stream(new ByteArrayInputStream(baos.toByteArray()))
 						.map(AvroStreamHelper.toStandardJava(Collections.emptyMap()))
 						.collect(Collectors.toList());
 
@@ -114,7 +114,7 @@ public class TestAvroBytesToStream {
 		BiMap<String, String> mapping = ImmutableBiMap.of("ccy", "Currency");
 		InputStream stream = ApexSparkHelper.toAvro(outputSchema, Iterators.singletonIterator(row), mapping);
 
-		List<?> resultAsList = new AvroBytesToStream().toStream(stream)
+		List<?> resultAsList = new AvroBytesToStream().stream(stream)
 				.map(AvroStreamHelper.toStandardJava(Collections.emptyMap()))
 				.collect(Collectors.toList());
 
@@ -140,7 +140,7 @@ public class TestAvroBytesToStream {
 		BiMap<String, String> mapping = ImmutableBiMap.of("doubleArray", "DoubleArray");
 		InputStream stream = ApexSparkHelper.toAvro(outputSchema, Iterators.singletonIterator(row), mapping);
 
-		List<?> resultAsList = new AvroBytesToStream().toStream(stream)
+		List<?> resultAsList = new AvroBytesToStream().stream(stream)
 				.map(AvroStreamHelper.toStandardJava(ImmutableMap.of("DoubleArray", new double[0])))
 				.collect(Collectors.toList());
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package blasd.apex.serialization;
+package blasd.apex.core.io;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +33,9 @@ public interface IBinaryToStream<T> {
 	 * @return
 	 * @throws IOException
 	 */
-	Stream<? extends T> toStream(InputStream inputStream) throws IOException;
+	Stream<T> stream(InputStream inputStream) throws IOException;
 
+	default Stream<T> toStream(InputStream inputStream) throws IOException {
+		return stream(inputStream);
+	}
 }

@@ -37,7 +37,7 @@ public class AvroBytesToStream implements IBinaryToAvroStream {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AvroBytesToStream.class);
 
 	@Override
-	public Stream<? extends GenericRecord> toStream(InputStream inputStream) throws IOException {
+	public Stream<GenericRecord> stream(InputStream inputStream) throws IOException {
 		SpecificDatumReader<GenericRecord> specificDatumReader = new SpecificDatumReader<GenericRecord>();
 		DataFileStream<GenericRecord> dataFileStream = new DataFileStream<>(inputStream, specificDatumReader);
 

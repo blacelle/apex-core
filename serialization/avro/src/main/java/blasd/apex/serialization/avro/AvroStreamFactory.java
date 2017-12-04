@@ -22,8 +22,8 @@ import org.apache.avro.io.DatumWriter;
 public class AvroStreamFactory implements IAvroStreamFactory {
 
 	@Override
-	public Stream<? extends GenericRecord> toStream(Path javaPath) throws IOException {
-		return new AvroBytesToStream().toStream(javaPath.toUri().toURL().openStream());
+	public Stream<GenericRecord> toStream(Path javaPath) throws IOException {
+		return new AvroBytesToStream().stream(javaPath.toUri().toURL().openStream());
 	}
 
 	@Override

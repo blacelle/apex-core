@@ -38,12 +38,15 @@ import com.google.common.io.ByteStreams;
  * 
  * @author Benoit Lacelle
  */
-public class JavaBytesToStream implements IApexInputStreamToStream<Object> {
+public class JavaBytesToStream implements IBinaryToStream<Object> {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(JavaBytesToStream.class);
 
+	/**
+	 * This will not close the provided inputStream
+	 */
 	@Override
-	public Stream<Object> stream(InputStream inputStream) {
+	public Stream<Object> stream(InputStream inputStream) throws IOException {
 		try {
 			Collection<?> asCollection =
 					(Collection<?>) ApexSerializationHelper.fromBytes(ByteStreams.toByteArray(inputStream));

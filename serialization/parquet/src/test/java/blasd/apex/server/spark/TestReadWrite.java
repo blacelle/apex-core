@@ -97,7 +97,7 @@ public class TestReadWrite {
 		writer.close();
 
 		Stream<? extends Map<String, ?>> asMapStream =
-				new ParquetBytesToStream().toStream(new FileInputStream(new File(file.toString())))
+				new ParquetBytesToStream().stream(new FileInputStream(new File(file.toString())))
 						.map(AvroStreamHelper.toStandardJava(Collections.emptyMap()));
 		Iterator<? extends Map<String, ?>> asMapIterator = asMapStream.iterator();
 

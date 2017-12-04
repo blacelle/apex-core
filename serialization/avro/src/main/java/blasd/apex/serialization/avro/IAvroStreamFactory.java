@@ -16,7 +16,7 @@ import com.google.common.annotations.Beta;
 @Beta
 public interface IAvroStreamFactory {
 
-	Stream<? extends GenericRecord> toStream(Path javaPath) throws IOException;
+	Stream<GenericRecord> toStream(Path javaPath) throws IOException;
 
 	long writeToPath(Path javaPath, Stream<? extends GenericRecord> rowsToWrite) throws IOException;
 }
