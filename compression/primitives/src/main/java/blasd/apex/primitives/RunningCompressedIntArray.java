@@ -8,6 +8,14 @@ import com.google.common.primitives.Ints;
 
 import it.unimi.dsi.fastutil.ints.AbstractIntList;
 
+/**
+ * A compressed IntList implementation. It provides random read-access. It is compressed by bit-packing
+ * 
+ * TODO: Add append-behavior
+ * 
+ * @author Benoit Lacelle
+ *
+ */
 public class RunningCompressedIntArray extends AbstractIntList implements Cloneable, java.io.Serializable {
 	private static final long serialVersionUID = 2801769711578854510L;
 
