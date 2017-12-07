@@ -58,7 +58,7 @@ public class ApexFileHelper {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ApexFileHelper.class);
 
 	protected ApexFileHelper() {
-		// hidden	
+		// hidden
 	}
 
 	/**
