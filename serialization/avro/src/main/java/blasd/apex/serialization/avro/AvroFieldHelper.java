@@ -87,6 +87,16 @@ public class AvroFieldHelper {
 			if (opt.isPresent()) {
 				value = opt.get();
 			}
+		} else if (value instanceof byte[]) {
+			Object targetType = exampleValue.get();
+
+			if (targetType != null) {
+				try {
+					value = ApexSerializationHelper.fromBytes((byte[]) value);
+				} catch (ClassNotFoundException | IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
 		}
 
 		return value;
