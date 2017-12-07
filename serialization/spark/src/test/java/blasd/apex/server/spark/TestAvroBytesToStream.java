@@ -93,7 +93,7 @@ public class TestAvroBytesToStream {
 
 		List<? extends Map<String, ?>> avroStream =
 				new AvroBytesToStream().stream(new ByteArrayInputStream(baos.toByteArray()))
-						.map(AvroStreamHelper.toStandardJava(Collections.emptyMap()))
+						.map(AvroStreamHelper.toJavaMap())
 						.collect(Collectors.toList());
 
 		Assert.assertEquals(1, avroStream.size());
@@ -114,9 +114,8 @@ public class TestAvroBytesToStream {
 		BiMap<String, String> mapping = ImmutableBiMap.of("ccy", "Currency");
 		InputStream stream = ApexSparkHelper.toAvro(outputSchema, Iterators.singletonIterator(row), mapping);
 
-		List<?> resultAsList = new AvroBytesToStream().stream(stream)
-				.map(AvroStreamHelper.toStandardJava(Collections.emptyMap()))
-				.collect(Collectors.toList());
+		List<?> resultAsList =
+				new AvroBytesToStream().stream(stream).map(AvroStreamHelper.toJavaMap()).collect(Collectors.toList());
 
 		Assert.assertEquals(1, resultAsList.size());
 		Assert.assertEquals(ImmutableMap.of("Currency", "someValue"), resultAsList.get(0));
@@ -141,7 +140,7 @@ public class TestAvroBytesToStream {
 		InputStream stream = ApexSparkHelper.toAvro(outputSchema, Iterators.singletonIterator(row), mapping);
 
 		List<?> resultAsList = new AvroBytesToStream().stream(stream)
-				.map(AvroStreamHelper.toStandardJava(ImmutableMap.of("DoubleArray", new double[0])))
+				.map(AvroStreamHelper.toJavaMap(ImmutableMap.of("DoubleArray", new double[0])))
 				.collect(Collectors.toList());
 
 		Assert.assertEquals(1, resultAsList.size());

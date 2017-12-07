@@ -1,5 +1,6 @@
 package blasd.apex.serialization.avro;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,18 @@ public class AvroStreamHelper {
 		// hidden
 	}
 
-	public static Map<String, ?> toMap(Map<? extends String, ?> exampleTypes, IndexedRecord indexedRecord) {
+	/**
+	 * This method helps transcoding an Avro IndexedRecord to a standard java Map. It may induce a performance penalty,
+	 * typically by converting by default all Utf8 to a String
+	 * 
+	 * @param indexedRecord
+	 *            an Avro IndexedRecord
+	 * @param exampleTypes
+	 *            a Map describing the expected type of each value of the output Map
+	 * @return a {@link Map} equivalent o the input IndexedRecord but after having converted values to types as defined
+	 *         in the example Map
+	 */
+	public static Map<String, ?> toJavaMap(IndexedRecord indexedRecord, Map<? extends String, ?> exampleTypes) {
 		Map<String, Object> asMap = new LinkedHashMap<>();
 
 		List<Field> fields = indexedRecord.getSchema().getFields();
@@ -40,6 +52,23 @@ public class AvroStreamHelper {
 		return asMap;
 	}
 
+	public static Map<String, ?> toJavaMap(IndexedRecord indexedRecord) {
+		return toJavaMap(indexedRecord, Collections.emptyMap());
+	}
+
+	/**
+	 * 
+	 * @param exampleTypes
+	 * @return a {@link Function} enabling transcoding in a {@link Stream}
+	 */
+	public static Function<GenericRecord, Map<String, ?>> toJavaMap(Map<? extends String, ?> exampleTypes) {
+		return record -> toJavaMap(record, exampleTypes);
+	}
+
+	public static Function<GenericRecord, Map<String, ?>> toJavaMap() {
+		return toJavaMap(Collections.emptyMap());
+	}
+
 	public static Function<Map<String, ?>, GenericRecord> toGenericRecord(Schema schema) {
 		return map -> {
 			GenericRecordBuilder record = new GenericRecordBuilder(schema);
@@ -50,9 +79,5 @@ public class AvroStreamHelper {
 			return record.build();
 		};
 
-	}
-
-	public static Function<GenericRecord, Map<String, ?>> toStandardJava(Map<? extends String, ?> exampleTypes) {
-		return record -> toMap(exampleTypes, record);
 	}
 }

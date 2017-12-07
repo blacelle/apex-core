@@ -2,7 +2,6 @@ package blasd.apex.serialization.avro;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 
 import org.apache.avro.Schema;
@@ -23,7 +22,7 @@ public class TestAvroStreamHelper {
 		record.put(1, "v1");
 		record.put(2, "v2");
 
-		Map<String, ?> map = AvroStreamHelper.toMap(Collections.emptyMap(), record);
+		Map<String, ?> map = AvroStreamHelper.toJavaMap(record);
 
 		Assert.assertEquals(ImmutableMap.of("k1", "v0", "k2", "v1", "k3", "v2"), map);
 
