@@ -17,6 +17,8 @@ package blasd.apex.serialization.avro;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -178,5 +180,32 @@ public class AvroSchemaHelper {
 
 		}).collect(Collectors.toList());
 		return Schema.createRecord("myrecord", null, "space", false, fields);
+	}
+
+	public static Map<String, Object> convertSparkSchemaToExampleMap(Schema schema) {
+		Map<String, Object> schemaAsMap = new HashMap<>();
+		schema.getFields().forEach(f -> {
+			if (f.schema().getTypes().contains(Schema.create(Type.STRING))) {
+				schemaAsMap.put(f.name(), "someString");
+			} else if (f.schema().getTypes().contains(Schema.create(Type.INT))) {
+				schemaAsMap.put(f.name(), 1);
+			} else if (f.schema().getTypes().contains(Schema.create(Type.DOUBLE))) {
+				schemaAsMap.put(f.name(), 1D);
+			} else if (f.schema().getTypes().stream().filter(t -> t.getType() == Type.ARRAY).findAny().isPresent()) {
+				Schema arrayType =
+						f.schema().getTypes().stream().filter(t -> t.getType() == Type.ARRAY).findAny().get();
+				Schema elementType = arrayType.getElementType();
+
+				if (elementType.getFields().size() == 1
+						&& elementType.getFields().get(0).schema().getTypes().contains(Schema.create(Type.DOUBLE))) {
+					schemaAsMap.put(f.name(), Collections.singletonList(1D));
+				} else {
+					throw new RuntimeException("Not handled: " + f);
+				}
+			} else {
+				throw new RuntimeException("Not handled: " + f);
+			}
+		});
+		return schemaAsMap;
 	}
 }

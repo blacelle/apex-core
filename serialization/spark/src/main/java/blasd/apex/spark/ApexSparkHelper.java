@@ -8,6 +8,8 @@ import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,11 @@ import org.apache.avro.generic.IndexedRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.ArrayType;
+import org.apache.spark.sql.types.DataType;
+import org.apache.spark.sql.types.DoubleType;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +40,7 @@ import com.google.common.primitives.Doubles;
 import blasd.apex.core.io.ApexSerializationHelper;
 import scala.collection.JavaConverters;
 import scala.collection.mutable.WrappedArray;
+import scala.compat.java8.JFunction1;
 
 /**
  * Some basic utilities for Spark
@@ -125,4 +133,38 @@ public class ApexSparkHelper {
 		}
 		return valueToWrite;
 	}
+
+	public static Map<String, Object> convertSparkSchemaToExampleMap(StructType schema) {
+		Map<String, Object> schemaAsMap = new HashMap<>();
+		schema.foreach(new JFunction1<StructField, Object>() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Object apply(StructField arg0) {
+				if (arg0.dataType().typeName().equals("string")) {
+					schemaAsMap.put(arg0.name(), "someString");
+				} else if (arg0.dataType().typeName().equals("integer")) {
+					schemaAsMap.put(arg0.name(), 1);
+				} else if (arg0.dataType().typeName().equals("double")) {
+					schemaAsMap.put(arg0.name(), 1D);
+				} else if (arg0.dataType().typeName().equals("array")) {
+					ArrayType arrayType = (ArrayType) arg0.dataType();
+					DataType elementType = arrayType.elementType();
+
+					if (elementType instanceof DoubleType) {
+						schemaAsMap.put(arg0.name(), Collections.singletonList(1D));
+					} else {
+						throw new RuntimeException("Not handled: " + arg0);
+					}
+				} else {
+					throw new RuntimeException("Not handled: " + arg0);
+				}
+
+				return null;
+			}
+		});
+
+		return schemaAsMap;
+	}
+
 }
