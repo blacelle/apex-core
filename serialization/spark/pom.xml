@@ -54,8 +54,6 @@
 			<groupId>org.scala-lang.modules</groupId>
 			<artifactId>scala-java8-compat_${scala.version}</artifactId>
 			<version>0.8.0</version>
-			<!-- Used for main classes -->
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
