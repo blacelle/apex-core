@@ -84,10 +84,7 @@ public class TestApexParquetHelper {
 			factory.writeToPath(path,
 					Stream.of(ImmutableMap.of("k", doubles)).map(AvroStreamHelper.toGenericRecord(schema)));
 
-			Map<String, ?> asMapAgain = factory.toStream(path)
-					.map(AvroStreamHelper.toStandardJava(Collections.emptyMap()))
-					.iterator()
-					.next();
+			Map<String, ?> asMapAgain = factory.toStream(path).map(AvroStreamHelper.toJavaMap()).iterator().next();
 			Assert.assertArrayEquals(doubles, (double[]) asMapAgain.get("k"), 0.0001D);
 		}
 	}
@@ -179,28 +176,30 @@ public class TestApexParquetHelper {
 
 		// Read as float[]
 		{
-			Map<String, ?> asMap = AvroStreamHelper.toMap(ImmutableMap.of("arrayField", new float[0]), topRecord);
+			Map<String, ?> asMap = AvroStreamHelper.toJavaMap(topRecord, ImmutableMap.of("arrayField", new float[0]));
 
 			Assert.assertTrue(asMap.get("arrayField") instanceof float[]);
 		}
 
 		// Read as double[]
 		{
-			Map<String, ?> asMap = AvroStreamHelper.toMap(ImmutableMap.of("arrayField", new double[0]), topRecord);
+			Map<String, ?> asMap = AvroStreamHelper.toJavaMap(topRecord, ImmutableMap.of("arrayField", new double[0]));
 
 			Assert.assertTrue(asMap.get("arrayField") instanceof double[]);
 		}
 
 		// Read as List<Float>
 		{
-			Map<String, ?> asMap = AvroStreamHelper.toMap(ImmutableMap.of("arrayField", Arrays.asList(1F)), topRecord);
+			Map<String, ?> asMap =
+					AvroStreamHelper.toJavaMap(topRecord, ImmutableMap.of("arrayField", Arrays.asList(1F)));
 
 			Assert.assertTrue(asMap.get("arrayField") instanceof List);
 		}
 
 		// Read as List<Double>
 		{
-			Map<String, ?> asMap = AvroStreamHelper.toMap(ImmutableMap.of("arrayField", Arrays.asList(1D)), topRecord);
+			Map<String, ?> asMap =
+					AvroStreamHelper.toJavaMap(topRecord, ImmutableMap.of("arrayField", Arrays.asList(1D)));
 
 			Assert.assertTrue(asMap.get("arrayField") instanceof List);
 		}

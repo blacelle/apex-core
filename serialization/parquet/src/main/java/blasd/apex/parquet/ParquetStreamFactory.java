@@ -96,7 +96,7 @@ public class ParquetStreamFactory implements IAvroStreamFactory {
 	}
 
 	public Stream<? extends Map<String, ?>> toStream(Path path, Map<String, ?> exampleTypes) throws IOException {
-		return toStream(path).map(AvroStreamHelper.toStandardJava(exampleTypes));
+		return toStream(path).map(AvroStreamHelper.toJavaMap(exampleTypes));
 	}
 
 	protected Filter makeFilter() {
@@ -130,7 +130,7 @@ public class ParquetStreamFactory implements IAvroStreamFactory {
 	public static Stream<Map<String, ?>> readParquetAsStream(Path pathOnDisk, Map<String, ?> exampleTypes)
 			throws FileNotFoundException, IOException {
 		return new ParquetBytesToStream().stream(new FileInputStream(pathOnDisk.toFile()))
-				.map(AvroStreamHelper.toStandardJava(exampleTypes));
+				.map(AvroStreamHelper.toJavaMap(exampleTypes));
 	}
 
 	@Override

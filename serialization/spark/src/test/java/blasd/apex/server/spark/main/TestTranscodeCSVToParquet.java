@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,7 @@ import blasd.apex.spark.run.RunCsvToParquet;
  * 
  * @author Benoit Lacelle
  */
-public final class TestTranscodeCSVToParquet {
+public class TestTranscodeCSVToParquet {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(TestTranscodeCSVToParquet.class);
 
@@ -52,7 +53,13 @@ public final class TestTranscodeCSVToParquet {
 
 		// TODO: it is unclear if delete on exit will delete the folder recursively
 		csvPath.toFile().delete();
-		FileUtils.deleteDirectory(tmpParquetPath.toFile());
+
+		if (tmpParquetPath.toFile().isDirectory()) {
+			LOGGER.info("Parquet files are in {}");
+			FileUtils.deleteDirectory(tmpParquetPath.toFile());
+		} else {
+			Assert.fail("The parquet folder is empty");
+		}
 	}
 
 }

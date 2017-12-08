@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -98,7 +97,7 @@ public class TestReadWrite {
 
 		Stream<? extends Map<String, ?>> asMapStream =
 				new ParquetBytesToStream().stream(new FileInputStream(new File(file.toString())))
-						.map(AvroStreamHelper.toStandardJava(Collections.emptyMap()));
+						.map(AvroStreamHelper.toJavaMap());
 		Iterator<? extends Map<String, ?>> asMapIterator = asMapStream.iterator();
 
 		Map<String, ?> nextRecord = asMapIterator.next();

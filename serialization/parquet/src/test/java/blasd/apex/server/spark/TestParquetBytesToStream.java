@@ -54,8 +54,7 @@ public class TestParquetBytesToStream {
 		IAvroStreamFactory factory = new ParquetStreamFactory();
 		factory.writeToPath(pathOnDisk, list.stream().map(AvroStreamHelper.toGenericRecord(schema)));
 
-		Stream<? extends Map<String, ?>> asMapStream =
-				factory.toStream(pathOnDisk).map(AvroStreamHelper.toStandardJava(Collections.emptyMap()));
+		Stream<? extends Map<String, ?>> asMapStream = factory.toStream(pathOnDisk).map(AvroStreamHelper.toJavaMap());
 
 		List<Map<String, ?>> asMapList = asMapStream.collect(Collectors.toList());
 
