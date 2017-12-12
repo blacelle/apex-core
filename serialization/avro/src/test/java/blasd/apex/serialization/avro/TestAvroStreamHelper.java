@@ -43,6 +43,32 @@ public class TestAvroStreamHelper {
 	}
 
 	@Test
+	public void testToMap_MissingColumnInMap() {
+		Schema schema = AvroSchemaHelper.proposeSimpleSchema(ImmutableMap.of("k1", "v1", "k2", "v2", "k3", "v3"));
+
+		GenericRecord transcoded =
+				AvroStreamHelper.toGenericRecord(schema).apply(ImmutableMap.of("k1", "v1", "k2", "v2"));
+
+		IndexedRecord record = new GenericData.Record(schema);
+		record.put(0, "v1");
+		record.put(1, "v2");
+		Assert.assertEquals(record, transcoded);
+	}
+
+	@Test
+	public void testToMap_AdditionalColumnInMap() {
+		Schema schema = AvroSchemaHelper.proposeSimpleSchema(ImmutableMap.of("k1", "v1", "k2", "v2"));
+
+		GenericRecord transcoded =
+				AvroStreamHelper.toGenericRecord(schema).apply(ImmutableMap.of("k1", "v1", "k2", "v2", "k3", "v3"));
+
+		IndexedRecord record = new GenericData.Record(schema);
+		record.put(0, "v1");
+		record.put(1, "v2");
+		Assert.assertEquals(record, transcoded);
+	}
+
+	@Test
 	public void testToGenericRecord_SecondMapHasMissingKey() {
 		Schema schema = AvroSchemaHelper.proposeSimpleSchema(ImmutableMap.of("k1", "v1", "k2", "v2"));
 

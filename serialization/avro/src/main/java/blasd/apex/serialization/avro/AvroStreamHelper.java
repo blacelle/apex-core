@@ -22,6 +22,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.avro.io.DatumWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import avro.shaded.com.google.common.base.Supplier;
 
@@ -32,6 +34,8 @@ import avro.shaded.com.google.common.base.Supplier;
  *
  */
 public class AvroStreamHelper {
+	protected static final Logger LOGGER = LoggerFactory.getLogger(AvroStreamHelper.class);
+
 	protected AvroStreamHelper() {
 		// hidden
 	}
@@ -85,8 +89,15 @@ public class AvroStreamHelper {
 		return map -> {
 			GenericRecordBuilder record = new GenericRecordBuilder(schema);
 
-			map.forEach(
-					(key, value) -> record.set(key, AvroSchemaHelper.converToAvroValue(schema.getField(key), value)));
+			map.forEach((key, value) -> {
+				Field field = schema.getField(key);
+
+				if (field == null) {
+					LOGGER.trace("We received a Map with a key which does not exist in the schema: " + key);
+				} else {
+					record.set(key, AvroSchemaHelper.converToAvroValue(field, value));
+				}
+			});
 
 			return record.build();
 		};

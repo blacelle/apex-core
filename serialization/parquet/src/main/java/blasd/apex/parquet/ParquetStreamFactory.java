@@ -135,6 +135,10 @@ public class ParquetStreamFactory implements IAvroStreamFactory {
 
 	@Override
 	public long writeToPath(Path javaPathOnDisk, Stream<? extends GenericRecord> rowsToWrite) throws IOException {
+		if (javaPathOnDisk.toFile().exists()) {
+			throw new IllegalArgumentException("Can not write to an existing file:" + javaPathOnDisk);
+		}
+
 		// We will use the first record to prepare a writer on the correct schema
 		AtomicReference<ParquetWriter<GenericRecord>> writer = new AtomicReference<>();
 

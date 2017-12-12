@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package blasd.apex.server.loading.csvsource;
+package blasd.apex.csv;
 
 import java.io.IOException;
 import java.io.StringReader;

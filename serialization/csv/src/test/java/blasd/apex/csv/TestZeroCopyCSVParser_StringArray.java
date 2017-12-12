@@ -1,4 +1,4 @@
-package blasd.apex.server.loading.csvsource;
+package blasd.apex.csv;
 
 import java.io.StringReader;
 import java.util.Iterator;
