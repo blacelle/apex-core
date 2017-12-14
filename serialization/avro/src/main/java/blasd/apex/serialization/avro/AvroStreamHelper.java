@@ -119,8 +119,21 @@ public class AvroStreamHelper {
 		// We will use the first record to prepare a writer on the correct schema
 		AtomicReference<DataFileWriter<GenericRecord>> writer = new AtomicReference<>();
 
+		AtomicReference<Throwable> throwable = new AtomicReference<>();
+
 		// https://stackoverflow.com/questions/5778658/how-to-convert-outputstream-to-inputstream
-		PipedInputStream pis = new PipedInputStream();
+		PipedInputStream pis = new PipedInputStream() {
+			@Override
+			public void close() throws IOException {
+				super.close();
+
+				// The called is supposed to always finish by closing the InputStream, it should then be guaranteed to
+				// see this exception
+				if (throwable.get() != null) {
+					throw new IOException(throwable.get());
+				}
+			}
+		};
 		PipedOutputStream pos = new PipedOutputStream(pis);
 
 		rowsToWrite.onClose(() -> {
@@ -146,25 +159,31 @@ public class AvroStreamHelper {
 		executor.get().execute(() -> {
 			try {
 				rowsToWrite.forEach(m -> {
-					if (writer.get() == null) {
-						try {
-							Schema schema = m.getSchema();
-							DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(schema);
-							DataFileWriter<GenericRecord> dataFileWriter =
-									new DataFileWriter<GenericRecord>(datumWriter);
-							writer.set(dataFileWriter);
-							dataFileWriter.create(schema, pos);
-						} catch (NullPointerException e) {
-							throw new IllegalStateException("Are you missing Hadoop binaries?", e);
-						} catch (IOException e) {
-							throw new UncheckedIOException(e);
-						}
+					if (throwable.get() != null) {
+						return;
 					}
 
 					try {
+
+						if (writer.get() == null) {
+							try {
+								Schema schema = m.getSchema();
+								DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(schema);
+								DataFileWriter<GenericRecord> dataFileWriter =
+										new DataFileWriter<GenericRecord>(datumWriter);
+								writer.set(dataFileWriter);
+								dataFileWriter.create(schema, pos);
+							} catch (NullPointerException e) {
+								throw new IllegalStateException("Are you missing Hadoop binaries?", e);
+							} catch (IOException e) {
+								throw new UncheckedIOException(e);
+							}
+						}
 						writer.get().append(m);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+					} catch (RuntimeException | IOException e) {
+						// Register the issue so that it is re-thrown when the returned InputStream is closed
+						throwable.set(e);
+						LOGGER.warn("Issue while appending {}", m);
 					}
 				});
 			} finally {

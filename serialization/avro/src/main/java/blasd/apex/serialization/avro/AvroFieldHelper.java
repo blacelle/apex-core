@@ -53,14 +53,19 @@ public class AvroFieldHelper {
 			// ActivePivot expects String, while parquet wrap them in an Utf8
 			value = value.toString();
 		} else if (value instanceof ByteBuffer) {
-			// Typically happens on LocalDate
-			ByteBuffer byteBuffer = (ByteBuffer) value;
+			Object targetType = exampleValue.get();
 
-			try {
-				value = ApexSerializationHelper.fromBytes(byteBuffer.array());
-			} catch (ClassNotFoundException | IOException e) {
-				throw new RuntimeException(e);
+			if (targetType != null) {
+				// Typically happens on LocalDate
+				ByteBuffer byteBuffer = (ByteBuffer) value;
+
+				try {
+					value = ApexSerializationHelper.fromBytes(byteBuffer.array());
+				} catch (ClassNotFoundException | IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
+
 		} else if (value instanceof GenericData.Fixed) {
 			// We received a predefined-length array of bytes
 			GenericData.Fixed fixed = (GenericData.Fixed) value;

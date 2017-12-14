@@ -3,6 +3,8 @@ package blasd.apex.serialization.avro;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -92,11 +94,11 @@ public class TestAvroStreamHelper {
 
 		GenericRecord firstRecord = mapper.apply(ImmutableMap.of("k1", new float[] { 2F }));
 
-		Assert.assertTrue(firstRecord.get("k1") instanceof byte[]);
+		Assert.assertTrue(firstRecord.get("k1") instanceof ByteBuffer);
 
 		// No type information: keep the raw byte[]
 		Map<String, ?> backToMapNoType = AvroStreamHelper.toJavaMap(firstRecord);
-		Assert.assertTrue(backToMapNoType.get("k1") instanceof byte[]);
+		Assert.assertTrue(backToMapNoType.get("k1") instanceof ByteBuffer);
 
 		// Exact byte[] info (float[])
 		Map<String, ?> backToMapWithMap =
@@ -110,8 +112,8 @@ public class TestAvroStreamHelper {
 	}
 
 	@Test
-	public void testAvroToFile() throws IOException {
-		ImmutableMap<String, String> singleMap = ImmutableMap.of("k1", "v1");
+	public void testAvroToByteArray() throws IOException {
+		Map<String, String> singleMap = ImmutableMap.of("k1", "v1");
 		Schema schema = AvroSchemaHelper.proposeSimpleSchema(singleMap);
 
 		InputStream is =
@@ -126,6 +128,50 @@ public class TestAvroStreamHelper {
 
 		Assert.assertEquals(1, backToList.size());
 		Assert.assertEquals(singleMap, backToList.get(0));
+	}
+
+	@Test
+	public void testAvroToByteArray_LocalDate_NoInfoBackToJava() throws IOException {
+		Map<String, ?> singleMap = ImmutableMap.of("k1", LocalDate.now());
+		Schema schema = AvroSchemaHelper.proposeSimpleSchema(singleMap);
+
+		byte[] bytes;
+		try (InputStream is =
+				AvroStreamHelper.toInputStream(Stream.of(singleMap).map(AvroStreamHelper.toGenericRecord(schema)),
+						() -> ApexExecutorsHelper.newSingleThreadExecutor("testAvroToByteArray_LocalDate"))) {
+			bytes = ByteStreams.toByteArray(is);
+		}
+
+		List<Map<String, ?>> backToList = AvroStreamHelper.toGenericRecord(new ByteArrayInputStream(bytes))
+				.map(AvroStreamHelper.toJavaMap())
+				.collect(Collectors.toList());
+
+		Assert.assertEquals(1, backToList.size());
+		Assert.assertTrue(backToList.get(0).get("k1") instanceof ByteBuffer);
+	}
+
+	@Test
+	public void testAvroToByteArray_LocalDate_WithInfoBackToJava() throws IOException {
+		Map<String, ?> singleMap = ImmutableMap.of("k1", LocalDate.now());
+		Schema schema = AvroSchemaHelper.proposeSimpleSchema(singleMap);
+
+		byte[] bytes;
+		try (InputStream is =
+				AvroStreamHelper.toInputStream(Stream.of(singleMap).map(AvroStreamHelper.toGenericRecord(schema)),
+						() -> ApexExecutorsHelper.newSingleThreadExecutor("testAvroToByteArray_LocalDate"))) {
+			bytes = ByteStreams.toByteArray(is);
+		}
+
+		List<Map<String, ?>> backToList = AvroStreamHelper.toGenericRecord(new ByteArrayInputStream(bytes))
+				.map(AvroStreamHelper.toJavaMap(singleMap))
+				.collect(Collectors.toList());
+
+		Assert.assertEquals(1, backToList.size());
+		Assert.assertEquals(singleMap, backToList.get(0));
+	}
+
+	public static final class NotSerializable {
+
 	}
 
 }
