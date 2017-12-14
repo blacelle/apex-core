@@ -24,6 +24,7 @@ package blasd.apex.serialization.avro;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -78,8 +79,9 @@ public class AvroSchemaHelper {
 			// return Floats.asList(floats);
 		} else if (value instanceof Serializable) {
 			try {
-				// TODO use a buffer byte[] or ByteBuffer
-				return ApexSerializationHelper.toBytes((Serializable) value);
+				// Avro does not handle byte[], but it is OK with ByteBuffer
+				// see org.apache.avro.generic.GenericData.getSchemaName(Object)
+				return ByteBuffer.wrap(ApexSerializationHelper.toBytes((Serializable) value));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

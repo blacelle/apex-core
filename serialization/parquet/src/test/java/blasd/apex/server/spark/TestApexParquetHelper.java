@@ -47,6 +47,7 @@ import blasd.apex.hadoop.ApexHadoopHelper;
 import blasd.apex.parquet.ParquetStreamFactory;
 import blasd.apex.serialization.avro.AvroSchemaHelper;
 import blasd.apex.serialization.avro.AvroStreamHelper;
+import blasd.apex.serialization.avro.TestAvroStreamHelper.NotSerializable;
 
 public class TestApexParquetHelper {
 	@BeforeClass
@@ -158,6 +159,17 @@ public class TestApexParquetHelper {
 					ParquetStreamFactory.readParquetAsStream(path, ImmutableMap.of()).iterator().next();
 			Assert.assertEquals(date, asMapAgain.get("DateField"));
 		}
+	}
+
+	public static final class NotSerializable {
+
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testSchemaForNotSerializable() throws IOException {
+		Map<String, ?> asMap = ImmutableMap.of("NotSerializableField", new NotSerializable());
+
+		AvroSchemaHelper.proposeSimpleSchema(asMap);
 	}
 
 	@Test
