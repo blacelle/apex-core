@@ -69,18 +69,12 @@ public class ApexStreamHelper {
 		return Streams.stream(iterator);
 	}
 
-	/**
-	 * The safer way to produce a Stream: not parallel. Typically because ActivePivot re-use Object[] or IRecordReader
-	 * while traversing an ICursor
-	 * 
-	 * @param iterable
-	 * @return
-	 */
 	@Deprecated
 	public static <T> Stream<T> toStream(Iterable<T> iterable) {
 		return Streams.stream(iterable);
 	}
 
+	@Deprecated
 	public static <T> Stream<T> singleton(T item) {
 		return Stream.of(item);
 	}

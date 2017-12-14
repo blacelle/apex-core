@@ -41,7 +41,7 @@ import com.google.common.primitives.Floats;
 import blasd.apex.core.io.ApexSerializationHelper;
 
 /**
- * Helps converting avro records to ActivePivot objects
+ * Helps converting avro records to standard Java objects
  * 
  * @author Benoit Lacelle
  *
@@ -57,7 +57,7 @@ public class AvroFieldHelper {
 		}
 
 		if (value instanceof Utf8) {
-			// ActivePivot expects String, while parquet wrap them in an Utf8
+			// A String is more vanilla than Utf8, even if the performance penalty may be huge
 			value = value.toString();
 		} else if (value instanceof ByteBuffer) {
 			Object targetType = exampleValue.get();

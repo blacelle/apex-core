@@ -178,8 +178,7 @@ public class SetStaticMBean {
 	}
 
 	/**
-	 * One could write "com.quartetfs.biz.pivot.IActivePivot" One could write
-	 * "com/quartetfs/biz/pivot/IActivePivot.class"
+	 * One could write "org.joda.time.LocalDate" One could write "org/joda/time/LocalDate.class"
 	 */
 	@ManagedOperation
 	public List<String> getResourcesFor(String path) throws IOException {
@@ -187,8 +186,8 @@ public class SetStaticMBean {
 
 		Enumeration<URL> urlEnum = this.getClass().getClassLoader().getResources(path);
 		if (!urlEnum.hasMoreElements()) {
-			// Transform "com.quartetfs.biz.pivot.IActivePivot" to
-			// "com/quartetfs/biz/pivot/IActivePivot.class"
+			// Transform "org.joda.time.LocalDate" to
+			// "org/joda/time/LocalDate.class"
 			urlEnum = this.getClass().getClassLoader().getResources(path.replace('.', '/') + ".class");
 		}
 		while (urlEnum.hasMoreElements()) {

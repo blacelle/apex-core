@@ -74,8 +74,6 @@ public class ApexPropertiesHelper {
 						}
 					} else if (!(value instanceof String)) {
 						if (exceptionsKeys.contains(key)) {
-							// This bad case is introduced by ActivePivot core
-							// com.qfs.pivot.cube.provider.impl.AggregateProviderBuilder.build(IEpoch)
 							LOGGER.debug("It is unsafe to associate the key {} to !String: {}({})",
 									key,
 									value.getClass(),

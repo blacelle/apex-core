@@ -47,7 +47,9 @@ import blasd.apex.core.thread.CurrentThreadStack;
 public class StartMetricEvent extends AMetricEvent {
 
 	public static final String KEY_USERNAME = "UserName";
-	public static final String KEY_PIVOT_ID = "ActivePivot";
+	public static final String KEY_SOURCE_ID = "SourceId";
+	@Deprecated
+	public static final String KEY_PIVOT_ID = KEY_SOURCE_ID;
 	public static final String KEY_ROOT_SOURCE = "RootSource";
 
 	/**
