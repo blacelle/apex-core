@@ -30,11 +30,13 @@ import java.util.stream.Stream;
 
 import org.apache.avro.Schema;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 
 import blasd.apex.core.io.ApexFileHelper;
+import blasd.apex.hadoop.ApexHadoopHelper;
 import blasd.apex.parquet.ParquetStreamFactory;
 import blasd.apex.serialization.avro.AvroSchemaHelper;
 import blasd.apex.serialization.avro.AvroStreamHelper;
@@ -50,6 +52,8 @@ public class TestParquetWriteToFile {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testWriteParquet_FileExist() throws IOException {
+		Assume.assumeTrue(ApexHadoopHelper.isHadoopReady());
+
 		Stream<Map<String, Object>> rows = IntStream.range(0, 10)
 				.mapToObj(i -> ImmutableMap.of("longField", (long) i, "stringField", "string_" + i));
 
@@ -61,6 +65,8 @@ public class TestParquetWriteToFile {
 
 	@Test
 	public void testWriteParquet_FromJavaStream() throws IOException {
+		Assume.assumeTrue(ApexHadoopHelper.isHadoopReady());
+
 		Stream<Map<String, Object>> rows = IntStream.range(0, 10)
 				.mapToObj(i -> ImmutableMap.of("longField", (long) i, "stringField", "string_" + i));
 

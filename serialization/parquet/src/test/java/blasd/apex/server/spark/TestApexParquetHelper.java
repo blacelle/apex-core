@@ -47,7 +47,6 @@ import blasd.apex.hadoop.ApexHadoopHelper;
 import blasd.apex.parquet.ParquetStreamFactory;
 import blasd.apex.serialization.avro.AvroSchemaHelper;
 import blasd.apex.serialization.avro.AvroStreamHelper;
-import blasd.apex.serialization.avro.TestAvroStreamHelper.NotSerializable;
 
 public class TestApexParquetHelper {
 	@BeforeClass
